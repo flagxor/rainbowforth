@@ -64,7 +64,7 @@ extern void console_style(int attrib);
 // write text
 extern void console_write(const char *str);
 // write single character
-extern void console_write_char(char ch);
+extern void console_write_char(int ch);
 // draw a box
 extern void console_box(int x, int y, int w, int h);
 // read character

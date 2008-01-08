@@ -102,9 +102,9 @@ void console_write(const char *str) {
   WriteConsole(console_sbuf, str, strlen(str), &junk, NULL);
 }
 
-void console_write_char(char ch) {
+void console_write_char(int ch) {
   char str[2];
-  str[0]=ch; str[1]=0;
+  str[0]=(char)ch; str[1]=0;
   console_write(str);
 }
 
@@ -212,7 +212,7 @@ void console_write(const char *str) {
   addstr(str);
 }
 
-void console_write_char(char ch) {
+void console_write_char(int ch) {
   addch(ch);
 }
 
