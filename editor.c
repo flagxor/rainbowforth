@@ -127,6 +127,8 @@ static void redraw(void) {
 static void write_symbol(unsigned char ch) {
   // note change
   ctx.changed=1;
+  // do a redraw when covering a space
+  if(is_space(ctx.buffer[ctx.cursor_pos])) ctx.need_redraw=1;
   // set character
   ctx.buffer[ctx.cursor_pos]=ch;
   // move cursor to target
@@ -139,7 +141,7 @@ static void write_symbol(unsigned char ch) {
   ctx.cursor_pos++;
   // adjust cursor
   update_cursor();
-  // do a redraw if needed
+  // do a redraw when adding space
   if(is_space(ch)) ctx.need_redraw=1;
 }
 
