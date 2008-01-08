@@ -20,6 +20,43 @@
 */
 
 #include "console.h"
+
+#ifdef _WIN32
+
+#include <windows.h>
+
+void console_startup(void) {
+}
+
+void console_shutdown(void) {
+}
+
+void console_refresh(void) {
+}
+
+void console_move(int x, int y) {
+}
+
+void console_style(int attrib) {
+}
+
+void console_write(const char *str) {
+}
+
+void console_write_char(char ch) {
+}
+
+void console_box(int x, int y, int w, int h) {
+}
+
+int console_read(void) {
+  return 0;
+}
+
+
+#else
+
+
 #include <curses.h>
 
 void console_startup(void) {
@@ -129,5 +166,6 @@ int console_read(void) {
   }
 }
 
+#endif
 
 
