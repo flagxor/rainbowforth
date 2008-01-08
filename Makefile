@@ -16,8 +16,8 @@ clean:
 
 # handle platform specific
 ifeq ($(shell uname -o),Cygwin)
-  PLATFORM_CFLAGS=-D_WIN32 -mwindows
-  LIBS=-mwindows
+  PLATFORM_CFLAGS=-D_WIN32 -mwindows -mno-cygwin
+  LIBS=-mwindows -mno-cygwin
 else 
   LIBS=-lcurses
 endif

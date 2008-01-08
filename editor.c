@@ -558,6 +558,8 @@ static void run(void) {
 int editor_run(const char *block_filename) {
   // init context
   memset(&ctx, 0, sizeof(ctx));
+
+  // set default color
   ctx.space=SPACE_WHITE;
 
   // store pointer to filename
