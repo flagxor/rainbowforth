@@ -46,6 +46,8 @@ void console_startup(void) {
 }
 
 void console_shutdown(void) {
+  // close down screen
+  CloseHandle(console_sbuf);
   // close down input
   CloseHandle(console_ibuf);
 }

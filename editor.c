@@ -45,10 +45,12 @@ static struct {
   int block;
   int changed;
   unsigned char space;
+  int need_redraw;
 } ctx;
 
 // functions called out of sequence
 static void run(void);
+static void redraw(void);
 
 static void cursor_adjust(void) {
   console_move(OFFSET_X+ctx.cursor_pos%WIDTH,
@@ -56,8 +58,6 @@ static void cursor_adjust(void) {
 }
 
 static void update_cursor(void) {
-  char str[100];
-
   // clip it
   if(ctx.cursor_pos<0) {
     ctx.cursor_pos=(ctx.cursor_pos+WIDTH*HEIGHT)%WIDTH;
@@ -65,13 +65,20 @@ static void update_cursor(void) {
   if(ctx.cursor_pos>=BLOCK_SIZE) {
     ctx.cursor_pos=BLOCK_SIZE-WIDTH+(ctx.cursor_pos%WIDTH);
   }
+}
+
+static void update_status(void) {
+  char str[100];
+
+  // do redraw if needed
+  if(ctx.need_redraw) redraw();
   // show status line on top
   console_style(CONSOLE_WHITE);
   console_move(OFFSET_X+1, 0);
   sprintf(str, "block=%d        column=%d row=%d               ", 
           ctx.block, ctx.cursor_pos%WIDTH, ctx.cursor_pos/WIDTH);
   console_write(str);
-  // move there
+  // move to proper position
   cursor_adjust();
 }
 
@@ -105,6 +112,8 @@ static unsigned char filter_char(unsigned char ch) {
 static void redraw(void) {
   int i, j;
 
+  // note it was done
+  ctx.need_redraw=0;
   // redraw buffer
   for(i=0;i<HEIGHT;i++) {
     console_move(OFFSET_X, OFFSET_Y+i);
@@ -113,9 +122,6 @@ static void redraw(void) {
       console_write_char(filter_char(ctx.buffer[j+i*WIDTH]));
     }
   }
-
-  // put cursor back
-  update_cursor();
 }
 
 static void write_symbol(unsigned char ch) {
@@ -123,7 +129,7 @@ static void write_symbol(unsigned char ch) {
   ctx.changed=1;
   // set character
   ctx.buffer[ctx.cursor_pos]=ch;
-  // move cursor
+  // move cursor to target
   cursor_adjust();
   // pick color
   set_color(ctx.cursor_pos);
@@ -134,7 +140,7 @@ static void write_symbol(unsigned char ch) {
   // adjust cursor
   update_cursor();
   // do a redraw if needed
-  if(is_space(ch)) redraw();
+  if(is_space(ch)) ctx.need_redraw=1;
 }
 
 static void write_normal_symbol(int key) {
@@ -186,7 +192,7 @@ static void change_block(int i) {
   // load it
   load();
   // draw it
-  redraw();
+  ctx.need_redraw=1;
 }
 
 static void backspace(void) {
@@ -383,6 +389,8 @@ static void editor(void) {
 
   // main loop
   for(;;) {
+    // update status info
+    update_status();
     // get a key
     key=console_read();
     // keep track of clipboard state
