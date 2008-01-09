@@ -158,6 +158,15 @@ void console_title(const char *title) {
   SetConsoleTitle(title);
 }
 
+void console_clear(void) {
+  int i;
+
+  for(i=0;i<50;i++) {
+    console_write("\n"); 
+  }
+  console_move(0, 0);
+}
+
 // special characters
 #define CONSOLE_VLINE '\xb3'
 #define CONSOLE_HLINE '\xc4'
