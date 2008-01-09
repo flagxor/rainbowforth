@@ -90,6 +90,9 @@ typedef struct {
   int current_word_len;
   // place to record error info (including current parse position)
   COMPILER_ERROR *err;
+  // i/o operations
+  COMPILER_WRITE write;
+  COMPILER_READ read;
 } COMPILER_CONTEXT;
 
 // execute-forth function pointer type
@@ -176,6 +179,7 @@ static void word_dump(void) {
 }
 
 static int execute_built_in(const unsigned char *word, int word_len) {
+  char str[100];
   int i, j;
 
   if(counted_string_equal(word, word_len, "macro", -1)) {
@@ -203,8 +207,8 @@ static int execute_built_in(const unsigned char *word, int word_len) {
     i=dstack_pop();
     for(;i<=j;i++) load(i);
   } else if(counted_string_equal(word, word_len, ".", -1)) {
-    printf("%d\n", dstack_pop());
-    fflush(stdout);
+    sprintf(str, "%d ", dstack_pop());
+    ctx.write(str);
   } else {
     return 0;
   }
@@ -430,17 +434,19 @@ static void load(int block) {
 }
 
 static void print_number(CELL i) {
-  printf("%d ", i);
-  fflush(stdout);
+  char str[100];
+  sprintf(str, "%d ", i);
+  ctx.write(str);
 }
 
 static int key(void) {
-  return fgetc(stdin);
+  return ctx.read();
 }
 
 static void emit(int ch) {
-  fputc(ch, stdout);
-  fflush(stdout);
+  char str[2];
+  str[0]=ch; str[1]=0;
+  ctx.write(str);
 }
 
 static void *util_functions[]={
@@ -450,12 +456,17 @@ static void *util_functions[]={
   emit,
 };
 
-void compiler_run(const char *block_filename, 
-                  int extra_block, COMPILER_ERROR *err) {
+void compiler_run(const char *block_filename, int extra_block, 
+                  COMPILER_WRITE write, COMPILER_READ read,   
+		  COMPILER_ERROR *err) {
   int i;
 
   // init global context
   memset(&ctx, 0, sizeof(ctx));
+
+  // store i/o operations
+  ctx.write=write;
+  ctx.read=read;
 
   // store error info pointer
   ctx.err=err;

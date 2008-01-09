@@ -50,8 +50,6 @@ void console_shutdown(void) {
   CloseHandle(console_sbuf);
   // close down input
   CloseHandle(console_ibuf);
-  // release consol
-//  FreeConsole();
 }
 
 void console_refresh(void) {
@@ -257,6 +255,11 @@ int console_read(void) {
 
 void console_title(const char *title) {
   // not available on unix
+}
+
+void console_clear(void) {
+  erase();
+  move(0, 0);
 }
 
 // special characters

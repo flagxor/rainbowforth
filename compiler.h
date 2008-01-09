@@ -33,9 +33,14 @@ typedef struct {
   char message[COMPILE_MAX_ERROR];
 } COMPILER_ERROR;
 
+// handlers to i/o
+typedef void (*COMPILER_WRITE)(const char *str);
+typedef int (*COMPILER_READ)(void);
+
 // compiles starting at block 0
 // extra_block>=0 will run block extra_block after block 0 is done
 extern void compiler_run(const char *block_filename, int extra_block,
+                         COMPILER_WRITE write, COMPILER_READ read,
                          COMPILER_ERROR *err);
 
 #endif

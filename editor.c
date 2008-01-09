@@ -484,11 +484,9 @@ static void editor(void) {
   }
 }
 
-static void startup(void) {
-  // startup console
-  console_startup();
-  // set title
-  console_title("Rainbow Forth");
+static void startup_layout(void) {
+  // clear things
+  console_clear();
   // draw white box around edit area
   console_style(CONSOLE_WHITE);
   console_box(OFFSET_X-1, OFFSET_Y-1, WIDTH+2, HEIGHT+2); 
@@ -507,30 +505,37 @@ static void startup(void) {
   console_write("Ctrl-Q=quit   ");
 }
 
+static void startup(void) {
+  // startup console
+  console_startup();
+  // set title
+  console_title("Rainbow Forth");
+  // draw layout
+  startup_layout();
+}
+
 static void shutdown(void) {
   console_shutdown();
 }
 
 static void run(void) {
   COMPILER_ERROR err;
-  int ch;
 
   // save current block
   save();
-  // shutdown output
-  shutdown();
+  // clear things
+  console_clear();
+  // go to white text
+  console_style(CONSOLE_WHITE);
 
-  // skip a line
-  fprintf(stderr, "\n");
-
-  // compile it
-  compiler_run(ctx.block_filename, ctx.block, &err);
-
-  // flush output
-  fflush(stdout);
+  // run it
+  compiler_run(ctx.block_filename, ctx.block, 
+               console_write, console_read, &err);
 
   // goto error if any
   if(err.is_error) {
+    // restore layout
+    startup_layout();
     // goto error
     ctx.cursor_pos=err.offset;
     change_block(err.block);
@@ -552,17 +557,13 @@ static void run(void) {
     }
   } else {
     // show message
-    fprintf(stderr, "------ PRESS ENTER TO CONTINUE ------\n");;
-    // wait for enter
-    for(;;) {
-      ch=fgetc(stdin);
-      if(ch<0 || ch=='\n') break;
-    }
+    console_write("\n------ PRESS ANY KEY TO CONTINUE ------\n");
+    // wait for a key
+    console_read();
   }
 
-  // startup again
-  startup();
   // refresh
+  startup_layout();
   redraw(); 
   console_refresh();
 }

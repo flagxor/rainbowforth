@@ -24,6 +24,15 @@
 #include <stdio.h>
 #include <string.h>
 
+static void simple_write(const char *str) {
+  fputs(str, stdout);
+  fflush(stdout);
+}
+
+static int simple_read(void) {
+  return fgetc(stdin);
+}
+
 int main(int argc, char *argv[]) {
   COMPILER_ERROR err;
 
@@ -33,7 +42,7 @@ int main(int argc, char *argv[]) {
     return editor_run("rainbowforth_data");
   } else if(argc==2) {
     // compile and run
-    compiler_run(argv[1], -1, &err);
+    compiler_run(argv[1], -1, simple_write, simple_read, &err);
     if(err.is_error) {
       fprintf(stderr, "ERROR at [%d]%d,%d: %s\n", 
               err.block, err.offset%64, err.offset/64, err.message);

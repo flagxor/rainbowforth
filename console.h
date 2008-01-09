@@ -71,6 +71,8 @@ extern void console_box(int x, int y, int w, int h);
 extern int console_read(void);
 // set title
 extern void console_title(const char *title);
+// clear things
+extern void console_clear(void);
 
 
 #endif
