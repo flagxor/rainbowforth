@@ -51,7 +51,7 @@ void console_shutdown(void) {
   // close down input
   CloseHandle(console_ibuf);
   // release consol
-  FreeConsole();
+//  FreeConsole();
 }
 
 void console_refresh(void) {
