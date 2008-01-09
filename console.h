@@ -69,6 +69,9 @@ extern void console_write_char(int ch);
 extern void console_box(int x, int y, int w, int h);
 // read character
 extern int console_read(void);
+// set title
+extern void console_title(const char *title);
+
 
 #endif
 

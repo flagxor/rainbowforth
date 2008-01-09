@@ -487,6 +487,8 @@ static void editor(void) {
 static void startup(void) {
   // startup console
   console_startup();
+  // set title
+  console_title("Rainbow Forth");
   // draw white box around edit area
   console_style(CONSOLE_WHITE);
   console_box(OFFSET_X-1, OFFSET_Y-1, WIDTH+2, HEIGHT+2); 

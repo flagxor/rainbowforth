@@ -50,6 +50,8 @@ void console_shutdown(void) {
   CloseHandle(console_sbuf);
   // close down input
   CloseHandle(console_ibuf);
+  // release consol
+  FreeConsole();
 }
 
 void console_refresh(void) {
@@ -154,6 +156,10 @@ next:
   goto next;
 }
 
+void console_title(const char *title) {
+  SetConsoleTitle(title);
+}
+
 // special characters
 #define CONSOLE_VLINE '\xb3'
 #define CONSOLE_HLINE '\xc4'
@@ -247,6 +253,10 @@ int console_read(void) {
 	break;
     }
   }
+}
+
+void console_title(const char *title) {
+  // not available on unix
 }
 
 // special characters
