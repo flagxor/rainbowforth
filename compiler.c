@@ -31,8 +31,9 @@ typedef int CELL;
 
 // maximum word length
 #define MAX_WORD_SIZE 32
-// size of heap
-#define HEAP_SIZE (10*1024*1024)
+// size of heaps
+#define CODE_HEAP_SIZE (10*1024*1024)
+#define DATA_HEAP_SIZE (10*1024*1024)
 // size of dstack
 #define DSTACK_SIZE (64*1024)
 
@@ -56,29 +57,35 @@ typedef int CELL;
 
 // a dictionary cell
 typedef struct _DICTIONARY_ENTRY {
-  struct _DICTIONARY_ENTRY *next;
-  unsigned char name[MAX_WORD_SIZE];
-  int name_len;
-  void *addr;
-  int is_macro;
+  struct _DICTIONARY_ENTRY *next; // OFFSET 0
+  void *code_addr; // OFFSET 1
+  void *data_addr; // OFFSET 4
+  int is_macro; // OFFSET 8
   int smudged;
+  int name_len;
+  unsigned char name[MAX_WORD_SIZE];
 } DICTIONARY_ENTRY;
 
 // global context type
 typedef struct {
   // dstack pointer (OFFSET 0)
   CELL *dstack_ptr;
-  // code pointer (OFFSET 4)
-  unsigned char *here;
+  // code here pointer (OFFSET 4)
+  unsigned char *code_here;
   // macro/forth flag (OFFSET 8)
   int is_macro;
-  // table of c functions to call in forth
+  // table of c functions to call in forth (OFFSET 12)
   void **function_table;
+  // last dictionary word (OFFSET 16)
+  DICTIONARY_ENTRY *dictionary;
   // other random ones
   FILE *file;
-  DICTIONARY_ENTRY *dictionary;
-  // heap and here pointer
-  unsigned char *heap;
+  // code heap
+  unsigned char *code_heap;
+  // data heap
+  unsigned char *data_heap;
+  // data heap here
+  unsigned char *data_here;
   // bottom guard on stack
   int dstack_guard_bottom[GUARD_SIZE];
   // data stack
@@ -154,7 +161,7 @@ static void heap_dump(void) {
   if(!file) return;
 
   // write heap to it
-  fwrite(ctx.heap, ctx.here-ctx.heap, 1, file);
+  fwrite(ctx.code_heap, ctx.code_here-ctx.code_heap, 1, file);
 
   // close it
   fclose(file);
@@ -171,7 +178,7 @@ static void word_dump(void) {
   // write each word to it
   for(e=ctx.dictionary;e;e=e->next) {
     fwrite(e->name, 1, e->name_len, file);
-    fprintf(file, " -> %x\n", (unsigned char*)e->addr-ctx.heap);
+    fprintf(file, " -> %x\n", (unsigned char*)e->code_addr-ctx.code_heap);
   }
 
   // close it
@@ -194,12 +201,9 @@ static int execute_built_in(const unsigned char *word, int word_len) {
     heap_dump();
   } else if(counted_string_equal(word, word_len, "word-dump", -1)) {
     word_dump();
-  } else if(counted_string_equal(word, word_len, "c,", -1)) {
-    (*ctx.here)=dstack_pop();
-    ctx.here++;
-  } else if(counted_string_equal(word, word_len, ",", -1)) {
-    (*(CELL*)ctx.here)=dstack_pop();
-    ctx.here+=sizeof(CELL);
+  } else if(counted_string_equal(word, word_len, "b,", -1)) {
+    (*ctx.code_here)=dstack_pop();
+    ctx.code_here++;
   } else if(counted_string_equal(word, word_len, "load", -1)) {
     load(dstack_pop());
   } else if(counted_string_equal(word, word_len, "thru", -1)) {
@@ -268,8 +272,9 @@ static void create(void) {
   memcpy(e->name, ctx.current_word, ctx.current_word_len);
   e->name_len=ctx.current_word_len;
 
-  // set address
-  e->addr=ctx.here;
+  // set addresses
+  e->code_addr=ctx.code_here;
+  e->data_addr=ctx.data_here;
   // set is_macro
   e->is_macro=ctx.is_macro;
 
@@ -291,12 +296,12 @@ static void execute_word(void) {
       // check dstack
       dstack_check();
       // jump directly to forth word address
-      ((EXECUTE_FORTH_FUNC)e->addr)(&ctx);
+      ((EXECUTE_FORTH_FUNC)e->code_addr)(&ctx);
       // check dstack
       dstack_check();
     } else {
       // call special execute-forth word
-      dstack_push((CELL)e->addr);
+      dstack_push((CELL)e->code_addr);
       execute_cstr(WORD_EXECUTE_FORTH);
     }
   } else if(execute_built_in(ctx.current_word, ctx.current_word_len)) {
@@ -323,10 +328,10 @@ static void compile_word(int force_macros) {
   } else {
     // execute if a macro
     if(!force_macros && e->is_macro) {
-      dstack_push((CELL)e->addr);
+      dstack_push((CELL)e->code_addr);
       execute_cstr(WORD_EXECUTE_FORTH);
     } else {
-      dstack_push((CELL)e->addr);
+      dstack_push((CELL)e->code_addr);
       execute_cstr(WORD_COMPILE);
     }
   }
@@ -340,7 +345,7 @@ static void lookup_word(void) {
   if(!e) e=find(FIND_MACRO);
   // add to stack if there (or zero on fail)
   if(e) {
-    dstack_push((CELL)e->addr);
+    dstack_push((CELL)e->code_addr);
   } else {
     dstack_push(0);
   }
@@ -491,11 +496,17 @@ void compiler_run(const char *block_filename, int extra_block,
     return;
   }
 
-  // init heap
-  ctx.heap=malloc(HEAP_SIZE);
-  assert(ctx.heap);
+  // init code heap
+  ctx.code_heap=malloc(CODE_HEAP_SIZE);
+  assert(ctx.code_heap);
   // point here at heap
-  ctx.here=ctx.heap;
+  ctx.code_here=ctx.code_heap;
+
+  // init code heap
+  ctx.data_heap=malloc(DATA_HEAP_SIZE);
+  assert(ctx.data_heap);
+  // point here at heap
+  ctx.data_here=ctx.data_heap;
 
   // load block 0
   load(0);
@@ -503,8 +514,9 @@ void compiler_run(const char *block_filename, int extra_block,
   // load extra block if any
   if(extra_block>=0) load(extra_block);
 
-  // cleanup heap
-  free(ctx.heap);
+  // cleanup heaps
+  free(ctx.code_heap);
+  free(ctx.data_heap);
 
   // close main file
   fclose(ctx.file);

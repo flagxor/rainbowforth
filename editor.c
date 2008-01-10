@@ -536,6 +536,8 @@ static void run(void) {
   if(err.is_error) {
     // restore layout
     startup_layout();
+    // draw block
+    redraw(); 
     // goto error
     ctx.cursor_pos=err.offset;
     change_block(err.block);
