@@ -1,7 +1,7 @@
 # Makefile for rainbowforth
 
 TARGET=rainbowforth
-OBJECTS=main.o editor.o compiler.o console.o
+OBJECTS=main.o editor.o compiler.o console.o library.o
 CFLAGS=-g -Wall -Werror $(PLATFORM_CFLAGS)
 
 $(TARGET): $(OBJECTS)

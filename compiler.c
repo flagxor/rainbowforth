@@ -21,6 +21,7 @@
 
 #include "compiler.h"
 #include "common.h"
+#include "library.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,12 +59,12 @@ typedef int CELL;
 // a dictionary cell
 typedef struct _DICTIONARY_ENTRY {
   struct _DICTIONARY_ENTRY *next; // OFFSET 0
-  void *code_addr; // OFFSET 1
-  void *data_addr; // OFFSET 4
-  int is_macro; // OFFSET 8
-  int smudged;
-  int name_len;
-  unsigned char name[MAX_WORD_SIZE];
+  void *code_addr; // OFFSET 4
+  void *data_addr; // OFFSET 8
+  int is_macro; // OFFSET 12
+  int smudged; // OFFSET 16
+  int name_len; // OFFSET 20
+  unsigned char name[MAX_WORD_SIZE+1]; // OFFSET 24
 } DICTIONARY_ENTRY;
 
 // global context type
@@ -204,6 +205,12 @@ static int execute_built_in(const unsigned char *word, int word_len) {
   } else if(counted_string_equal(word, word_len, "b,", -1)) {
     (*ctx.code_here)=dstack_pop();
     ctx.code_here++;
+  } else if(counted_string_equal(word, word_len, "is-windows", -1)) {
+#ifdef _WIN32
+    dstack_push(1);
+#else
+    dstack_push(0);
+#endif
   } else if(counted_string_equal(word, word_len, "load", -1)) {
     load(dstack_pop());
   } else if(counted_string_equal(word, word_len, "thru", -1)) {
@@ -271,6 +278,8 @@ static void create(void) {
   // copy name
   memcpy(e->name, ctx.current_word, ctx.current_word_len);
   e->name_len=ctx.current_word_len;
+  // add null so c functions can use name
+  e->name[e->name_len]=0;
 
   // set addresses
   e->code_addr=ctx.code_here;
@@ -460,6 +469,8 @@ static void *util_functions[]={
   print_number,
   key,
   emit,
+  library_load,
+  library_symbol,
 };
 
 void compiler_run(const char *block_filename, int extra_block, 
