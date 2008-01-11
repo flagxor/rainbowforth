@@ -78,14 +78,14 @@ typedef struct {
   void **function_table;
   // last dictionary word (OFFSET 16)
   DICTIONARY_ENTRY *dictionary;
+  // data heap here (OFFSET 20)
+  unsigned char *data_here;
   // other random ones
   FILE *file;
   // code heap
   unsigned char *code_heap;
   // data heap
   unsigned char *data_heap;
-  // data heap here
-  unsigned char *data_here;
   // bottom guard on stack
   int dstack_guard_bottom[GUARD_SIZE];
   // data stack
@@ -347,7 +347,8 @@ static void lookup_word(void) {
   if(e) {
     dstack_push((CELL)e->code_addr);
   } else {
-    dstack_push(0);
+    ctx.err->is_error=1;
+    sprintf(ctx.err->message, "unknown word '%s'", ctx.current_word);
   }
 }
 
