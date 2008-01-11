@@ -27,13 +27,12 @@
 #ifdef _WIN32
 
 #include <windows.h>
-
+  
 // mimic unix
+#define RTLD_LAZY 0
 static void *dlopen(const char *filename, int flag) {
   return (void*)LoadLibrary(filename);
 }
-
-// mimic unix
 static void *dlsym(void *handle, const char *name) {
   return (void*)GetProcAddress((HMODULE)handle, name);
 }
