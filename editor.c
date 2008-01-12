@@ -547,6 +547,8 @@ static void run(void) {
     console_write(err.message);
     // put back cursor
     update_cursor();
+    // update status info
+    update_status();
     // get key
     console_read();
     // blank it 

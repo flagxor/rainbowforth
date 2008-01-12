@@ -423,10 +423,10 @@ static void execute(const unsigned char *buf, int len, int update_err) {
   blank_current_word();
   // go thru
   for(pos=0;pos<len && !ctx.err->is_error;pos++) {
-    // handle this one character
-    execute_char(buf[pos]);
     // update current offset if requested
     if(update_err) ctx.err->offset=pos;
+    // handle this one character
+    execute_char(buf[pos]);
   }
 }
 
@@ -435,7 +435,7 @@ static void load(int block) {
   int old_block=ctx.err->block;
 
   // set error block to match
-  ctx.err->block=block;
+  if(!ctx.err->is_error) ctx.err->block=block;
   // blank current word
   blank_current_word();
   // load the data
