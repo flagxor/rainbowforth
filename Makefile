@@ -13,6 +13,9 @@ $(TARGET): $(OBJECTS)
 clean:
 	rm -f $(TARGET) $(OBJECTS)
 
+website:
+	./block_view <rainbowforth_data >web/blocks.html
+
 
 # handle platform specific
 ifeq ($(shell uname -o),Cygwin)

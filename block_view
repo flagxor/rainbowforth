@@ -1,22 +1,87 @@
 #!/usr/bin/perl
+use strict;
 
-$block=0;
+print <<FOO;
+<html>
+<head>
+<title>Rainbow Forth Source Blocks</title>
+<body bgcolor="#ffffff">
+FOO
+
+sub pick_char {
+  my ($blk, $pos)=@_;
+  my $ch=substr($blk, $pos, 1);
+  my $val=unpack("C", $ch);
+  if($val>=250) {
+    return " ";
+  } else {
+    return $ch;
+  }
+}
+
+sub pick_color {
+  my ($blk, $pos)=@_;
+
+  for(my $i=$pos;$i<length($blk);$i++) {
+    my $val=unpack("C", substr($blk, $i, 1));
+    if($val==32) {
+      return "#ffffff";
+    } elsif($val==255) {
+      return "#ff0000";
+    } elsif($val==254) {
+      return "#ffff00";
+    } elsif($val==253) {
+      return "#00ff00";
+    } elsif($val==252) {
+      return "#00ffff";
+    } elsif($val==251) {
+      return "#0000ff";
+    } elsif($val==250) {
+      return "#ff00ff";
+    } elsif($val==255) {
+      return "#ff0000";
+    }
+  }
+  return "#ffffff";
+}
+
+# print each block
+my $block=0;
 while(!eof(STDIN)) {
-  print "    $block\n";
-  print "----------------------------------------------------------------\n";
+  print "<font size=\"4\">$block</font><br>\n";
+  print "<table bgcolor=\"#000000\"><tr><td><pre>\n";
   $block++;
-  for($j=0;$j<16;$j++) {
-    for($i=0;$i<64;$i++) {
-      read(STDIN, $ln, 1);
-      if(unpack("C", $ln)>=250) {
-        print " ";
-      } else {
-        print $ln;
+  # load blk
+  my $blk="";
+  read(STDIN, $blk, 1024);
+  # print it
+  my $pos=0;
+  my $col="";
+  for(my $j=0;$j<16;$j++) {
+    for(my $i=0;$i<64;$i++) {
+      # get char to print
+      my $ch=pick_char($blk, $pos);
+      # get color
+      my $next_col=pick_color($blk, $pos);
+      # update color if needed
+      if(($ch ne " ") && ($next_col ne $col)) {
+        if($col ne "") { print "</font>"; }
+        print "<font color=\"".$next_col."\">";
+	$col=$next_col;
       }
+      # print character
+      print $ch;
+      # next color
+      $pos++;
     }
     print "\n";
   }
-  print "----------------------------------------------------------------\n";
+  print "</font>";
+  print "</pre></td></tr></table><br>\n";
 }
 
+print <<FOO;
+</body>
+</html>
+FOO
 

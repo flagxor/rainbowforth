@@ -1,0 +1,671 @@
+<html>
+<head>
+<title>Rainbow Forth Source Blocks</title>
+<body bgcolor="#ffffff">
+<font size="4">0</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">MASTER LOAD BLOCK                                               
+                                                                
+</font><font color="#ffff00">1 21 thru </font><font color="#ffffff">Load basic system                                     
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">1</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">MAIN ENTRY POINT </font><font color="#ff0000">execute-forth                                  
+  </font><font color="#ffff00">55h b,                 </font><font color="#ffffff">push ebp                               
+  </font><font color="#ffff00">8Bh b, ECh b,          </font><font color="#ffffff">mov ebp,esp                            
+  </font><font color="#ffff00">60h b,                 </font><font color="#ffffff">pusha                                  
+  </font><font color="#ffff00">8Bh b, 7Dh b, 08h b,   </font><font color="#ffffff">mov edi,[ebp+8]                        
+  </font><font color="#ffff00">8Bh b, 6Fh b, 00h b,   </font><font color="#ffffff">mov ebp,[edi+0] (dstack_ptr)           
+  </font><font color="#ffff00">83h b, EDh b, 08h b,   </font><font color="#ffffff">sub ebp,8                              
+  </font><font color="#ffff00">8Bh b, 5Dh b, 04h b,   </font><font color="#ffffff">mov ebx,[ebp+4]                        
+  </font><font color="#ffff00">8Bh b, 45h b, 08h b,   </font><font color="#ffffff">mov eax,[ebp+8]                        
+  </font><font color="#ffff00">FFh b, D0h b,          </font><font color="#ffffff">call eax                               
+  </font><font color="#ffff00">83h b, C5h b, 04h b,   </font><font color="#ffffff">add ebp,4                              
+  </font><font color="#ffff00">89h b, 5Dh b, 00h b,   </font><font color="#ffffff">mov [ebp],ebx                          
+  </font><font color="#ffff00">89h b, 6Fh b, 00h b,   </font><font color="#ffffff">mov [edi+0],ebp (dstack_ptr)           
+  </font><font color="#ffff00">61h b,                 </font><font color="#ffffff">popa                                   
+  </font><font color="#ffff00">5Dh b,                 </font><font color="#ffffff">pop ebp                                
+  </font><font color="#ffff00">C3h b,                 </font><font color="#ffffff">ret                                    
+</font></pre></td></tr></table><br>
+<font size="4">2</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">IMPLEMENT </font><font color="#ff0000">compile, </font><font color="#ffffff">DIRECTLY                                     
+                                                                
+</font><font color="#ffff00">8Bh b, 47h b, 04h b,   </font><font color="#ffffff">mov eax,[edi+4] ( here )                 
+</font><font color="#ffff00">C6h b, 00h b, E8h b,   </font><font color="#ffffff">mov [eax],E8h ( call xxxx )              
+</font><font color="#ffff00">2Bh b, D8h b,          </font><font color="#ffffff">sub ebx,eax                              
+</font><font color="#ffff00">83h b, EBh b, 05h b,   </font><font color="#ffffff">sub ebx,5                                
+</font><font color="#ffff00">89h b, 58h b, 01h b,   </font><font color="#ffffff">mov [eax+1],ebx                          
+</font><font color="#ffff00">8Dh b, 40h b, 05h b,   </font><font color="#ffffff">lea eax,[eax+5]                          
+</font><font color="#ffff00">89h b, 47h b, 04h b,   </font><font color="#ffffff">mov [edi+4],eax ( here )                 
+</font><font color="#ffff00">8Bh b, 5Dh b, 00h b,   </font><font color="#ffffff">mov ebx,[ebp]                            
+</font><font color="#ffff00">83h b, EDh b, 04h b,   </font><font color="#ffffff">sub ebp,4                                
+</font><font color="#ffff00">C3h b,                 </font><font color="#ffffff">ret                                      
+                                                                
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">3</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">IMPLEMENT </font><font color="#ff0000">literal </font><font color="#ffffff">DIRECTLY                                      
+                                                                
+</font><font color="#ffff00">8Bh b, 47h b, 04h b,   </font><font color="#ffffff">mov eax,[edi+4] ( here )                 
+</font><font color="#ffff00">C7h b, 00h b,          </font><font color="#ffffff">mov [eax],dword x                        
+       </font><font color="#ffff00">83h b, C5h b, 04h b, 89h b,          </font><font color="#ffffff">| add ebp,4         
+</font><font color="#ffff00">C7h b, 40h b, 04h b,   </font><font color="#ffffff">mov [eax+4],dword x  | mov [ebp],ebx     
+       </font><font color="#ffff00">5Dh b, 00h b, BBh b, 00h b,          </font><font color="#ffffff">| mov ebx,x         
+</font><font color="#ffff00">89h b, 58h b, 07h b,   </font><font color="#ffffff">mov [eax+7],ebx                          
+</font><font color="#ffff00">8Dh b, 40h b, 0Bh b,   </font><font color="#ffffff">lea eax,[eax+11]                         
+</font><font color="#ffff00">89h b, 47h b, 04h b,   </font><font color="#ffffff">mov [edi+4],eax                          
+</font><font color="#ffff00">8Bh b, 5Dh b, 00h b,   </font><font color="#ffffff">mov ebx,[ebp]                            
+</font><font color="#ffff00">83h b, EDh b, 04h b,   </font><font color="#ffffff">sub ebp,4                                
+</font><font color="#ffff00">C3h b,                 </font><font color="#ffffff">ret                                      
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">4</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">WORDS TO COMPILE BYTES AND CELLS                                
+</font><font color="#ff0000">b, </font><font color="#ffff00">smudge  8Bh b, 47h b, 04h b,   </font><font color="#ffffff">mov eax,[edi+4]               
+           </font><font color="#ffff00">88h b, 18h b,          </font><font color="#ffffff">mov [eax],bl                  
+           </font><font color="#ffff00">FFh b, 47h b, 04h b,   </font><font color="#ffffff">inc [edi+4]                   
+           </font><font color="#ffff00">8Bh b, 5Dh b, 00h b,   </font><font color="#ffffff">mov ebx,[ebp]                 
+           </font><font color="#ffff00">83h b, EDh b, 04h b,   </font><font color="#ffffff">sub ebp,4                     
+           </font><font color="#ffff00">C3h b,                 </font><font color="#ffffff">ret                           
+  </font><font color="#ffff00">unsmudge                                                      
+                                                                
+</font><font color="#ff0000">d, </font><font color="#ffff00">8Bh b, 47h b, 04h b,          </font><font color="#ffffff">mov eax,[edi+4]                
+   </font><font color="#ffff00">89h b, 18h b,                 </font><font color="#ffffff">mov [eax],ebx                  
+   </font><font color="#ffff00">83h b, 47h b, 04h b, 04h b,   </font><font color="#ffffff">add [edi+4],04h                
+   </font><font color="#ffff00">8Bh b, 5Dh b, 00h b,          </font><font color="#ffffff">mov ebx,[ebp]                  
+   </font><font color="#ffff00">83h b, EDh b, 04h b,          </font><font color="#ffffff">sub ebp,4                      
+   </font><font color="#ffff00">C3h b,                        </font><font color="#ffffff">ret                            
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">5</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">CALL HANDLING </font><font color="#ffff00">macro </font><font color="#ffffff">DEFINITIONS                                 
+                                                                
+</font><font color="#ff0000">; </font><font color="#00ff00">C3h b, </font><font color="#ffff00">C3h b,   </font><font color="#ffffff">ret                                           
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                          </font><font color="#ffff00">forth 
+</font></pre></td></tr></table><br>
+<font size="4">6</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">STACK MANIPULATION </font><font color="#ffff00">macro </font><font color="#ffffff">DEFINITIONS                            
+ </font><font color="#ff0000">nip </font><font color="#00ff00">83h b, EDh b, 04h b, ; </font><font color="#ffffff">sub ebp,4                           
+                                                                
+</font><font color="#ff0000">swap </font><font color="#00ff00">8Bh b, 45h b, 00h b,   </font><font color="#ffffff">mov eax,[ebp]                       
+     </font><font color="#00ff00">89h b, 5Dh b, 00h b,   </font><font color="#ffffff">mov [ebp],ebx                       
+     </font><font color="#00ff00">8Bh b, D8h b,        ; </font><font color="#ffffff">mov ebx,eax                         
+                                                                
+</font><font color="#ff0000">drop </font><font color="#00ff00">8Bh b, 5Dh b, 00h b,   </font><font color="#ffffff">mov ebx,[ebp]                       
+     </font><font color="#00ffff">nip                  </font><font color="#00ff00">;                                     
+                                                                
+ </font><font color="#ff0000">dup </font><font color="#00ff00">83h b, C5h b, 04h b,   </font><font color="#ffffff">add ebp,4                           
+     </font><font color="#00ff00">89h b, 5Dh b, 00h b, ; </font><font color="#ffffff">mov [ebp],ebx                       
+                                                                
+</font><font color="#ff0000">over </font><font color="#00ff00">8Bh b, 45h b, 00h b,   </font><font color="#ffffff">mov eax,[ebp]                       
+     </font><font color="#00ffff">dup    </font><font color="#00ff00">8Bh b, D8h b, ; </font><font color="#ffffff">mov ebx,eax                         
+                                                          </font><font color="#ffff00">forth 
+</font></pre></td></tr></table><br>
+<font size="4">7</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">IN-PLACE ARITHMETIC </font><font color="#ffff00">macro </font><font color="#ffffff">DEFINITIONS                           
+                                                                
+</font><font color="#ff0000">1+ </font><font color="#00ff00">43h b, ; </font><font color="#ffffff">inc ebx                                             
+</font><font color="#ff0000">1- </font><font color="#00ff00">4Bh b, ; </font><font color="#ffffff">dec ebx                                             
+</font><font color="#ff0000">2+ </font><font color="#00ff00">83h b, C3h b, 02h b, ; </font><font color="#ffffff">add ebx,2                             
+</font><font color="#ff0000">2- </font><font color="#00ff00">83h b, EBh b, 02h b, ; </font><font color="#ffffff">sub ebx,2                             
+</font><font color="#ff0000">4+ </font><font color="#00ff00">83h b, C3h b, 04h b, ; </font><font color="#ffffff">add ebx,4                             
+</font><font color="#ff0000">4- </font><font color="#00ff00">83h b, EBh b, 04h b, ; </font><font color="#ffffff">sub ebx,4                             
+                                                                
+</font><font color="#ff0000">2* </font><font color="#00ff00">D1h b, E3h b, ; </font><font color="#ffffff">sal ebx,1                                    
+</font><font color="#ff0000">2/ </font><font color="#00ff00">D1h b, FBh b, ; </font><font color="#ffffff">sar ebx,1                                    
+</font><font color="#ff0000">4* </font><font color="#00ff00">C1h b, E3h b, 02h b, ; </font><font color="#ffffff">sal ebx,2                             
+</font><font color="#ff0000">4/ </font><font color="#00ff00">C1h b, FBh b, 02h b, ; </font><font color="#ffffff">sar ebx,2                             
+                                                                
+</font><font color="#ff0000">negate </font><font color="#00ff00">F7h b, DBh b, ; </font><font color="#ffffff">neg ebx                                  
+                                                          </font><font color="#ffff00">forth 
+</font></pre></td></tr></table><br>
+<font size="4">8</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">ADDITION AND SUBTRACTION </font><font color="#ffff00">macro </font><font color="#ffffff">DEFINITIONS                      
+                                                                
+</font><font color="#ff0000">+ </font><font color="#00ff00">03h b, 5Dh b, 00h b,   </font><font color="#ffffff">add ebx,[ebp]                          
+  </font><font color="#00ff00">83h b, EDh b, 04h b, ; </font><font color="#ffffff">sub ebp,4                              
+                                                                
+</font><font color="#ff0000">- </font><font color="#00ff00">29h b, 5Dh b, 00h b,   </font><font color="#ffffff">sub [ebp],ebx                          
+  </font><font color="#00ffff">drop                 </font><font color="#00ff00">;                                        
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                          </font><font color="#ffff00">forth 
+</font></pre></td></tr></table><br>
+<font size="4">9</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">MULTIPLY AND DIVIDE </font><font color="#ffff00">macro </font><font color="#ffffff">DEFINITIONS                           
+                                                                
+</font><font color="#ff0000">* </font><font color="#00ff00">0Fh b, AFh b, 5Dh b, 00h b,   </font><font color="#ffffff">imul ebx,[ebp]                  
+  </font><font color="#00ff00">83h b, EDh b, 04h b,        ; </font><font color="#ffffff">sub ebp,4                       
+                                                                
+</font><font color="#ff0000">/mod </font><font color="#00ff00">33h b, D2h b,          </font><font color="#ffffff">xor edx,edx                         
+     </font><font color="#00ff00">8Bh b, 45h b, 00h b,   </font><font color="#ffffff">mov eax,[ebp]                       
+     </font><font color="#00ff00">F7h b, FBh b,          </font><font color="#ffffff">idiv ebx                            
+     </font><font color="#00ff00">8Bh b, D8h b,          </font><font color="#ffffff">mov ebx,eax                         
+     </font><font color="#00ff00">89h b, 55h b, 00h b, ; </font><font color="#ffffff">mov [ebp],edx                       
+                                                                
+</font><font color="#ff0000">*/ </font><font color="#00ff00">83h b, EDh b, 08h b,   </font><font color="#ffffff">sub ebp,8                             
+   </font><font color="#00ff00">8Bh b, 45h b, 04h b,   </font><font color="#ffffff">mov eax,[ebp+4]                       
+   </font><font color="#00ff00">F7h b, 6Dh b, 08h b,   </font><font color="#ffffff">imul [ebp+8]                          
+   </font><font color="#00ff00">F7h b, FBh b,          </font><font color="#ffffff">idiv ebx                              
+   </font><font color="#00ff00">8Bh b, D8h b,        ; </font><font color="#ffffff">mov ebx,eax                     </font><font color="#ffff00">forth 
+</font></pre></td></tr></table><br>
+<font size="4">10</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">BITWISE </font><font color="#ffff00">macro </font><font color="#ffffff">DEFINITIONS                                       
+                                                                
+</font><font color="#ff0000">and </font><font color="#00ff00">23h b, 5Dh b, 00h b,   </font><font color="#ffffff">and ebx,[ebp]                        
+    </font><font color="#00ff00">83h b, EDh b, 04h b, ; </font><font color="#ffffff">sub ebp,4                            
+ </font><font color="#ff0000">or </font><font color="#00ff00">0Bh b, 5Dh b, 00h b,   </font><font color="#ffffff">or ebx,[ebp]                         
+    </font><font color="#00ff00">83h b, EDh b, 04h b, ; </font><font color="#ffffff">sub ebp,4                            
+</font><font color="#ff0000">xor </font><font color="#00ff00">33h b, 5Dh b, 00h b,   </font><font color="#ffffff">xor ebx,[ebp]                        
+    </font><font color="#00ff00">83h b, EDh b, 04h b, ; </font><font color="#ffffff">sub ebp,4                            
+                                                                
+</font><font color="#ff0000">invert </font><font color="#00ff00">F7h b, D3h b, ; </font><font color="#ffffff">not ebx                                  
+                                                                
+</font><font color="#ff0000">>ecx </font><font color="#00ff00">89h b, D9h b, ; </font><font color="#ffffff">mov ecx,ebx                                
+</font><font color="#ff0000">shl </font><font color="#00ffff">>ecx drop </font><font color="#00ff00">D3h b, E3h b, ; </font><font color="#ffffff">shl ebx,cl                        
+</font><font color="#ff0000">shr </font><font color="#00ffff">>ecx drop </font><font color="#00ff00">D3h b, EBh b, ; </font><font color="#ffffff">shr ebx,cl                        
+</font><font color="#ff0000">sar </font><font color="#00ffff">>ecx drop </font><font color="#00ff00">D3h b, FBh b, ; </font><font color="#ffffff">sar ebx,cl                        
+                                                          </font><font color="#ffff00">forth 
+</font></pre></td></tr></table><br>
+<font size="4">11</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">RETURN STACK RELATED </font><font color="#ffff00">macro </font><font color="#ffffff">DEFINITIONS                          
+</font><font color="#ff0000">push </font><font color="#00ff00">53h b, </font><font color="#00ffff">drop </font><font color="#00ff00">; </font><font color="#ffffff">push ebx                                     
+</font><font color="#ff0000">pop </font><font color="#00ffff">dup </font><font color="#00ff00">5Bh b, ; </font><font color="#ffffff">pop ebx                                        
+</font><font color="#ff0000">rdrop </font><font color="#00ff00">59h b, ; </font><font color="#ffffff">pop ecx                                          
+</font><font color="#ff0000">rdrop-many </font><font color="#00ffff">4* </font><font color="#00ff00">03h b, E3h b, </font><font color="#00ffff">drop </font><font color="#00ff00">; </font><font color="#ffffff">add esp,ebx                  
+</font><font color="#ff0000">push-many </font><font color="#00ff00">83h b, FBh b, 00h b,       </font><font color="#ffffff">start: cmp ebx,0           
+          </font><font color="#00ff00">7Eh b, 09h b,                     </font><font color="#ffffff">jle done            
+          </font><font color="#00ff00">FFh b, 75h b, 00h b,              </font><font color="#ffffff">push dword [ebp]    
+          </font><font color="#00ff00">4Bh b,                            </font><font color="#ffffff">dec ebx             
+          </font><font color="#00ff00">83h b, EDh b, 04h b,              </font><font color="#ffffff">sub ebp,4           
+          </font><font color="#00ff00">EBh b, F2h b,                     </font><font color="#ffffff">jmp start           
+          </font><font color="#00ffff">drop </font><font color="#00ff00">;                      </font><font color="#ffffff">done:                     
+                                                                
+                                                                
+                                                                
+                                                          </font><font color="#ffff00">forth 
+</font></pre></td></tr></table><br>
+<font size="4">12</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">MEMORY ACCESS </font><font color="#ffff00">macro </font><font color="#ffffff">DEFINITIONS                                 
+                                                                
+</font><font color="#ff0000">@ </font><font color="#00ff00">8Bh b, 1Bh b, ; </font><font color="#ffffff">mov ebx,[ebx]                                 
+                                                                
+</font><font color="#ff0000">c@ </font><font color="#00ff00">8Ah b, 1Bh b,          </font><font color="#ffffff">mov bl,[ebx]                          
+   </font><font color="#00ff00">0Fh b, B6h b, DBh b, ; </font><font color="#ffffff">movzx ebx,bl                          
+                                                                
+</font><font color="#ff0000">! </font><font color="#00ff00">8Bh b, 45h b, 00h b,   </font><font color="#ffffff">mov eax,[ebp]                          
+  </font><font color="#00ff00">89h b, 03h b,          </font><font color="#ffffff">mov [ebx],eax                          
+  </font><font color="#00ff00">83h b, EDh b, 08h b,   </font><font color="#ffffff">sub ebp,8                              
+  </font><font color="#00ff00">8Bh b, 5Dh b, 04h b, ; </font><font color="#ffffff">mov ebx,[ebp+4]                        
+                                                                
+</font><font color="#ff0000">c! </font><font color="#00ff00">8Ah b, 45h b, 00h b,   </font><font color="#ffffff">mov al,[ebp]                          
+   </font><font color="#00ff00">88h b, 03h b,          </font><font color="#ffffff">mov [ebx],al                          
+   </font><font color="#00ff00">83h b, EDh b, 08h b,   </font><font color="#ffffff">sub ebp,8                             
+   </font><font color="#00ff00">8Bh b, 5Dh b, 04h b, ; </font><font color="#ffffff">mov ebx,[ebp+4]                 </font><font color="#ffff00">forth 
+</font></pre></td></tr></table><br>
+<font size="4">13</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">COMPARISON TO ZERO </font><font color="#ffff00">macro </font><font color="#ffffff">DEFINITIONS                            
+                                                                
+</font><font color="#ff0000">_compare1 </font><font color="#00ff00">83h b, FBh b, 00h b,   </font><font color="#ffffff">cmp ebx,0                      
+          </font><font color="#00ff00">0Fh b,               ; </font><font color="#ffffff">(first of of set?)             
+</font><font color="#ff0000">_compare2     </font><font color="#00ff00">b, FBh b,          </font><font color="#ffffff">(second half of set?)          
+          </font><font color="#00ff00">0Fh b, B6h b, DBh b, ; </font><font color="#ffffff">movzx ebx,bl                   
+                                                                
+                                                                
+</font><font color="#ff0000">0= </font><font color="#00ffff">_compare1 </font><font color="#00ff00">94h </font><font color="#00ffff">_compare2 </font><font color="#00ff00">;                                    
+</font><font color="#ff0000">0<> </font><font color="#00ffff">_compare1 </font><font color="#00ff00">95h </font><font color="#00ffff">_compare2 </font><font color="#00ff00">;                                   
+</font><font color="#ff0000">0< </font><font color="#00ffff">_compare1 </font><font color="#00ff00">9Ch </font><font color="#00ffff">_compare2 </font><font color="#00ff00">;                                    
+</font><font color="#ff0000">0> </font><font color="#00ffff">_compare1 </font><font color="#00ff00">9Fh </font><font color="#00ffff">_compare2 </font><font color="#00ff00">;                                    
+</font><font color="#ff0000">0<= </font><font color="#00ffff">_compare1 </font><font color="#00ff00">9Eh </font><font color="#00ffff">_compare2 </font><font color="#00ff00">;                                   
+</font><font color="#ff0000">0>= </font><font color="#00ffff">_compare1 </font><font color="#00ff00">9Dh </font><font color="#00ffff">_compare2 </font><font color="#00ff00">;                                   
+                                                                
+                                                          </font><font color="#ffff00">forth 
+</font></pre></td></tr></table><br>
+<font size="4">14</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">COMPARISON </font><font color="#ffff00">macro </font><font color="#ffffff">DEFINITIONS                                    
+                                                                
+</font><font color="#ff0000">_compare1 </font><font color="#00ff00">3Bh b, 5Dh b, 00h b,   </font><font color="#ffffff">cmp [ebp],ebx                  
+          </font><font color="#00ff00">0Fh b,               ; </font><font color="#ffffff">(first half of set?)           
+</font><font color="#ff0000">_compare2     </font><font color="#00ff00">b, FBh b,          </font><font color="#ffffff">(second half of set?)          
+          </font><font color="#00ff00">0Fh b, B6h b, DBh b,   </font><font color="#ffffff">movzx ebx,bl                   
+          </font><font color="#00ffff">nip </font><font color="#00ff00">;                                                 
+                                                                
+</font><font color="#ff0000">= </font><font color="#00ffff">_compare1 </font><font color="#00ff00">94h </font><font color="#00ffff">_compare2 </font><font color="#00ff00">;                                     
+</font><font color="#ff0000"><> </font><font color="#00ffff">_compare1 </font><font color="#00ff00">95h </font><font color="#00ffff">_compare2 </font><font color="#00ff00">;                                    
+</font><font color="#ff0000">< </font><font color="#00ffff">_compare1 </font><font color="#00ff00">9Fh </font><font color="#00ffff">_compare2 </font><font color="#00ff00">;                                     
+</font><font color="#ff0000">> </font><font color="#00ffff">_compare1 </font><font color="#00ff00">9Ch </font><font color="#00ffff">_compare2 </font><font color="#00ff00">;                                     
+</font><font color="#ff0000"><= </font><font color="#00ffff">_compare1 </font><font color="#00ff00">9Dh </font><font color="#00ffff">_compare2 </font><font color="#00ff00">;                                    
+</font><font color="#ff0000">>= </font><font color="#00ffff">_compare1 </font><font color="#00ff00">9Eh </font><font color="#00ffff">_compare2 </font><font color="#00ff00">;                                    
+                                                                
+                                                          </font><font color="#ffff00">forth 
+</font></pre></td></tr></table><br>
+<font size="4">15</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">CONTEXT RELATED                                                 
+                                                                
+</font><font color="#ff0000">context-base </font><font color="#00ff00">dup </font><font color="#ffff00">8Bh b, DFh b, </font><font color="#00ff00">; </font><font color="#ffffff">mov ebx,edi                    
+</font><font color="#ff0000">code-here </font><font color="#00ff00">context-base 4 + @ ;                                  
+</font><font color="#ff0000">data-here-ptr </font><font color="#00ff00">context-base 20 + ;                               
+</font><font color="#ff0000">here </font><font color="#00ff00">data-here-ptr @ ;                                          
+</font><font color="#ff0000">dictionary-last </font><font color="#00ff00">context-base 16 + @ ;                           
+</font><font color="#ff0000">last-code </font><font color="#00ff00">dictionary-last 4 + @ ;                               
+</font><font color="#ff0000">last-data </font><font color="#00ff00">dictionary-last 8 + @ ;                               
+</font><font color="#ff0000">last-name </font><font color="#00ff00">dictionary-last 24 + ;                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">16</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">CALLING EXTERNAL ROUTINES                                       
+</font><font color="#ff0000">function-table </font><font color="#00ff00">context-base 12 + @ ;                            
+</font><font color="#ff0000">external-raw </font><font color="#00ff00">4 * function-table + @ compile, ;                  
+</font><font color="#ff0000">return-value </font><font color="#00ff00">dup </font><font color="#ffff00">8Bh b, D8h b, </font><font color="#00ff00">; </font><font color="#ffffff">mov ebx,eax                    
+</font><font color="#ff0000">external </font><font color="#00ff00">over literal </font><font color="#00ffff">push-many </font><font color="#00ff00">external-raw                    
+              literal </font><font color="#00ffff">rdrop-many </font><font color="#00ff00">;                              
+                                                                
+                                                                
+                                                                
+</font><font color="#ffffff">Table of external entry points                                  
+   </font><font color="#ff0000">load           </font><font color="#ffff00">1 0 external </font><font color="#00ff00">;                                
+      </font><font color="#ff0000">.           </font><font color="#ffff00">1 1 external </font><font color="#00ff00">;                                
+    </font><font color="#ff0000">key           </font><font color="#ffff00">0 2 external </font><font color="#00ff00">return-value ;                   
+   </font><font color="#ff0000">emit           </font><font color="#ffff00">1 3 external </font><font color="#00ff00">;                                
+</font><font color="#ff0000">library </font><font color="#00ff00">last-name </font><font color="#ffff00">1 4 external </font><font color="#00ff00">;                                
+ </font><font color="#ff0000">symbol </font><font color="#00ff00">last-name </font><font color="#ffff00">1 5 external </font><font color="#00ff00">return-value ;                   
+</font></pre></td></tr></table><br>
+<font size="4">17</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">DEFINE NON-MACRO VERSIONS OF BASIC WORDS                        
+</font><font color="#ff0000">nip </font><font color="#00ff00">nip ;   </font><font color="#ff0000">swap </font><font color="#00ff00">swap ;   </font><font color="#ff0000">drop </font><font color="#00ff00">drop ;   </font><font color="#ff0000">dup </font><font color="#00ff00">dup ;   </font><font color="#ff0000">over </font><font color="#00ff00">over ; 
+</font><font color="#ff0000">+ </font><font color="#00ff00">+ ;   </font><font color="#ff0000">- </font><font color="#00ff00">- ;   </font><font color="#ff0000">* </font><font color="#00ff00">* ;   </font><font color="#ff0000">/mod </font><font color="#00ff00">/mod ;   </font><font color="#ff0000">*/ </font><font color="#00ff00">*/ ;                   
+</font><font color="#ff0000">1+ </font><font color="#00ff00">1+ ;   </font><font color="#ff0000">1- </font><font color="#00ff00">1- ;   </font><font color="#ff0000">2+ </font><font color="#00ff00">2+ ;   </font><font color="#ff0000">2- </font><font color="#00ff00">2- ;   </font><font color="#ff0000">4+ </font><font color="#00ff00">4+ ;   </font><font color="#ff0000">4- </font><font color="#00ff00">4- ;       
+</font><font color="#ff0000">2* </font><font color="#00ff00">2* ;   </font><font color="#ff0000">2/ </font><font color="#00ff00">2/ ;   </font><font color="#ff0000">4* </font><font color="#00ff00">4* ;   </font><font color="#ff0000">4/ </font><font color="#00ff00">4/ ;                           
+</font><font color="#ff0000">negate </font><font color="#00ff00">negate ;                                                 
+</font><font color="#ff0000">and </font><font color="#00ff00">and ;   </font><font color="#ff0000">or </font><font color="#00ff00">or ;   </font><font color="#ff0000">xor </font><font color="#00ff00">xor ;   </font><font color="#ff0000">invert </font><font color="#00ff00">invert ;               
+</font><font color="#ff0000">shl </font><font color="#00ff00">shl ;   </font><font color="#ff0000">shr </font><font color="#00ff00">shr ;   </font><font color="#ff0000">sar </font><font color="#00ff00">sar ;                               
+</font><font color="#ff0000">@ </font><font color="#00ff00">@ ;   </font><font color="#ff0000">c@ </font><font color="#00ff00">c@ ;   </font><font color="#ff0000">! </font><font color="#00ff00">! ;   </font><font color="#ff0000">c! </font><font color="#00ff00">c! ;                               
+</font><font color="#ff0000">0= </font><font color="#00ff00">0= ;   </font><font color="#ff0000">0<> </font><font color="#00ff00">0<> ;   </font><font color="#ff0000">0< </font><font color="#00ff00">0< ;   </font><font color="#ff0000">0> </font><font color="#00ff00">0> ;   </font><font color="#ff0000">0<= </font><font color="#00ff00">0<= ;   </font><font color="#ff0000">0>= </font><font color="#00ff00">0>= ; 
+</font><font color="#ff0000">= </font><font color="#00ff00">= ;   </font><font color="#ff0000"><> </font><font color="#00ff00"><> ;   </font><font color="#ff0000">< </font><font color="#00ff00">< ;   </font><font color="#ff0000">> </font><font color="#00ff00">> ;   </font><font color="#ff0000"><= </font><font color="#00ff00"><= ;   </font><font color="#ff0000">>= </font><font color="#00ff00">>= ;             
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">18</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">FLOW CONTROL </font><font color="#ffff00">macro </font><font color="#ffffff">DEFINITIONS                                  
+                                                                
+</font><font color="#ff0000">if </font><font color="#00ff00">8Bh b, CBh b,          </font><font color="#ffffff">mov ecx,ebx  </font><font color="#00ffff">drop                     
+   </font><font color="#00ff00">83h b, F9h b, 00h b,   </font><font color="#ffffff">cmp ecx,0                             
+   </font><font color="#00ff00">0Fh b, 84h b, code-here 0 d, ; </font><font color="#ffffff">je +0                         
+</font><font color="#ff0000">then </font><font color="#00ff00">code-here over 4+ - swap ! ; </font><font color="#ffffff">backpatch                     
+</font><font color="#ff0000">else </font><font color="#00ff00">E9h b, code-here 0 d,   </font><font color="#ffffff">jmp +0                             
+     </font><font color="#00ff00">swap </font><font color="#00ffff">then </font><font color="#00ff00">;                                                
+                                                                
+</font><font color="#ff0000">begin </font><font color="#00ff00">code-here ;                                               
+</font><font color="#ff0000">until </font><font color="#00ff00">8Bh b, CBh b,          </font><font color="#ffffff">mov ecx,ebx  </font><font color="#00ffff">drop                  
+      </font><font color="#00ff00">83h b, F9h b, 00h b,   </font><font color="#ffffff">cmp ecx,0                          
+      </font><font color="#00ff00">0Fh b, 84h b, code-here 4+ - d, ; </font><font color="#ffffff">je +0                   
+                                                                
+</font><font color="#ff0000">recurse; </font><font color="#00ff00">E9h b, last-code code-here 4+ - d, ; </font><font color="#ffffff">jmp +last-code    
+                                                          </font><font color="#ffff00">forth 
+</font></pre></td></tr></table><br>
+<font size="4">19</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">MORE FLOW CONTROL </font><font color="#ffff00">macro </font><font color="#ffffff">DEFINITIONS                             
+                                                                
+</font><font color="#ff0000">i </font><font color="#00ffff">dup </font><font color="#00ff00">8Bh b, 1Ch b, 24h b, ; </font><font color="#ffffff">mov ebx,[esp]                      
+</font><font color="#ff0000">i-limit </font><font color="#00ffff">dup </font><font color="#00ff00">8Bh b, 5Ch b, 24h b, 04h b, ; </font><font color="#ffffff">mov ebx,[esp+4]       
+</font><font color="#ff0000">i+! </font><font color="#00ff00">01h b, 1Ch b, 24h b, </font><font color="#00ffff">drop </font><font color="#00ff00">; </font><font color="#ffffff">add [esp],ebx                   
+                                                                
+</font><font color="#ff0000">while </font><font color="#00ff00">8Bh b, CBh b,           </font><font color="#ffffff">mov ecx,ebx  </font><font color="#00ffff">drop                 
+      </font><font color="#00ff00">83h b, F9h b, 00h b,    </font><font color="#ffffff">cmp ecx,0                         
+      </font><font color="#00ff00">0Fh b, 84h b, code-here 0 d, ; </font><font color="#ffffff">je +0                      
+</font><font color="#ff0000">repeat </font><font color="#00ff00">E9h b, swap code-here 4+ - d,   </font><font color="#ffffff">jmp +begining            
+       </font><font color="#00ff00">dup push 4+ code-here swap - pop ! ;  </font><font color="#ffffff">patch up           
+                                                                
+</font><font color="#ff0000">do </font><font color="#00ffff">swap push push begin i i-limit < while </font><font color="#00ff00">;                     
+</font><font color="#ff0000">+loop </font><font color="#00ffff">i+! repeat rdrop rdrop </font><font color="#00ff00">;                                  
+</font><font color="#ff0000">loop </font><font color="#00ff00">1 literal </font><font color="#00ffff">+loop </font><font color="#00ff00">;                                          
+                                                          </font><font color="#ffff00">forth 
+</font></pre></td></tr></table><br>
+<font size="4">20</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">CONVIENCE SHORTCUTS                                             
+</font><font color="#ff0000">+! </font><font color="#00ff00">dup push @ + pop ! ;            </font><font color="#ff0000">NULL </font><font color="#00ff00">0 ;                     
+</font><font color="#ff0000">/ </font><font color="#00ff00">/mod nip ;                                                    
+</font><font color="#ff0000">mod </font><font color="#00ff00">/mod drop ;                                                 
+</font><font color="#ff0000">2dup </font><font color="#00ff00">over over ;                                                
+</font><font color="#ff0000">cr </font><font color="#00ff00">10 emit ; </font><font color="#ff0000">bl </font><font color="#00ff00">32 ; </font><font color="#ff0000">space </font><font color="#00ff00">bl emit ; </font><font color="#ff0000">spaces </font><font color="#00ff00">0 do space loop ;   
+</font><font color="#ff0000">min </font><font color="#00ff00">2dup < if drop else nip then ;                              
+</font><font color="#ff0000">max </font><font color="#00ff00">2dup < if nip else drop then ;                              
+</font><font color="#ff0000">bit </font><font color="#00ff00">1 swap shl ;    </font><font color="#ff0000">mask </font><font color="#00ff00">bit or ;                               
+</font><font color="#ff0000">import </font><font color="#00ff00">symbol compile, ;                                        
+</font><font color="#ff0000">cimport </font><font color="#00ff00">dup literal </font><font color="#00ffff">push-many </font><font color="#00ff00">symbol compile,                   
+            literal </font><font color="#00ffff">rdrop-many </font><font color="#00ff00">;                                
+                                                                
+                                                                
+</font><font color="#ffffff">CELL SIZE WORDS                                                 
+</font><font color="#ff0000">cells </font><font color="#00ff00">4* ;   </font><font color="#ff0000">cell+ </font><font color="#00ff00">4+ ;   </font><font color="#ff0000">cell </font><font color="#00ff00">4 ;                              
+</font></pre></td></tr></table><br>
+<font size="4">21</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">VARIABLES                                                       
+                                                                
+</font><font color="#ff0000">goto, </font><font color="#00ff00">E9h b, code-here 4+ - d, ; </font><font color="#ffffff">jmp x                          
+</font><font color="#ff0000">does>-hookup </font><font color="#00ff00">last-data literal ;                                
+</font><font color="#ffff00">macro </font><font color="#ff0000">does> </font><font color="#0000ff">does>-hookup </font><font color="#ffff00">literal </font><font color="#00ff00">compile, code-here literal     
+            code-here 17 + literal </font><font color="#ffffff">(HACK 17 instruction bytes)  
+            </font><font color="#0000ff">goto, </font><font color="#ffff00">literal </font><font color="#00ff00">compile, </font><font color="#00ffff">; </font><font color="#00ff00">; </font><font color="#ffff00">forth                    
+                                                                
+</font><font color="#ff0000">allot </font><font color="#00ff00">data-here-ptr +! ;                                        
+</font><font color="#ff0000">, </font><font color="#00ff00">here !   cell allot ;                                         
+</font><font color="#ff0000">variable </font><font color="#00ff00">0 , does> ;                                            
+</font><font color="#ff0000">:constant </font><font color="#00ff00">, does> @ ;                                           
+                                                                
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">22</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">FACTORIAL                                                       
+                                                                
+</font><font color="#ff0000">factorial2 </font><font color="#00ff00">dup 1 <= if ; then dup push * pop 1- recurse;        
+</font><font color="#ff0000">factorial </font><font color="#00ff00">1 swap factorial2 drop ;                              
+</font><font color="#ffff00">5 factorial .                                                   
+                                                                
+                                                                
+                                                                
+</font><font color="#ffffff">EMIT TEST                                                       
+</font><font color="#ff0000">one-key </font><font color="#00ff00">begin key dup emit 27 = until ;                         
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">23</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">PRIME NUMBER TEST                                               
+</font><font color="#ff0000">indivisible </font><font color="#00ff00">mod 0<> ;                                           
+</font><font color="#ff0000">part-prime </font><font color="#00ff00">dup 1 = if drop drop 1 else 2dup 1- part-prime       
+           push indivisible pop and then ;                      
+</font><font color="#ff0000">prime </font><font color="#00ff00">dup 1- part-prime ;                                       
+</font><font color="#ff0000">print-if-prime </font><font color="#00ff00">dup prime if . else drop then ;                  
+</font><font color="#ff0000">primes </font><font color="#00ff00">2 do i print-if-prime loop ;                             
+</font><font color="#ffff00">1000 primes cr                                                  
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">24</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">VARIABLE TEST                                                   
+                                                                
+</font><font color="#ff00ff">x y                                                             
+     </font><font color="#ffff00">1 x !   2 y !    x @ .  y @ .  cr                          
+                                                                
+                                                                
+314159 </font><font color="#ff0000">pi </font><font color="#ffff00">:constant                                             
+pi . pi .  cr                                                   
+                                                                
+                                                                
+                                                                
+</font><font color="#ff0000">:pair </font><font color="#00ff00">, , does> dup cell+ @ swap @ ;                            
+</font><font color="#ffff00">10 11 </font><font color="#ff0000">p </font><font color="#ffff00">:pair                                                   
+p . .  p . . cr                                                 
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">25</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">SYSTEM CALL TESTS                                               
+                                                                
+</font><font color="#ff0000">libncurses.so </font><font color="#ffff00">library                                           
+</font><font color="#ff0000">flash </font><font color="#ffff00">0 cimport </font><font color="#00ff00">;                                               
+</font><font color="#ff0000">usleep </font><font color="#ffff00">1 cimport </font><font color="#00ff00">;                                              
+                                                                
+                                                                
+                                                                
+</font><font color="#ff0000">test1 </font><font color="#00ff00">3 begin 1- flash 50000 usleep                             
+           dup 0= until drop ;                                  
+</font><font color="#ffff00">test1                                                           
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">26</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">WINDOWS SYSTEM CALL TEST                                        
+                                                                
+</font><font color="#ff0000">USER32.DLL </font><font color="#ffff00">library                                              
+</font><font color="#ff0000">beep MessageBeep </font><font color="#00ff00">0 push </font><font color="#ffff00">import </font><font color="#00ff00">;                                
+                                                                
+                                                                
+</font><font color="#ffff00">beep                                                            
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">27</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">X-WINDOWS CALLS    </font><font color="#ff0000">libX11.so </font><font color="#ffff00">library                            
+                                                                
+</font><font color="#ff0000">XOpenDisplay </font><font color="#ffff00">1 cimport </font><font color="#00ff00">return-value ;                           
+</font><font color="#ff0000">XCreateSimpleWindow </font><font color="#ffff00">9 cimport </font><font color="#00ff00">return-value ;                    
+</font><font color="#ff0000">XSelectInput </font><font color="#ffff00">3 cimport </font><font color="#00ff00">;                                        
+</font><font color="#ff0000">XCreateGC </font><font color="#ffff00">4 cimport </font><font color="#00ff00">return-value ;                              
+</font><font color="#ff0000">XMapWindow </font><font color="#ffff00">2 cimport </font><font color="#00ff00">;                                          
+</font><font color="#ff0000">XNextEvent </font><font color="#ffff00">2 cimport </font><font color="#00ff00">;                                          
+</font><font color="#ff0000">XCheckTypedEvent </font><font color="#ffff00">3 cimport </font><font color="#00ff00">return-value ;                       
+</font><font color="#ff0000">XAllocColor </font><font color="#ffff00">3 cimport </font><font color="#00ff00">;                                         
+</font><font color="#ff0000">XSetForeground </font><font color="#ffff00">3 cimport </font><font color="#00ff00">;                                      
+</font><font color="#ff0000">XFillRectangle </font><font color="#ffff00">7 cimport </font><font color="#00ff00">;                                      
+</font><font color="#ff0000">XFreeGC </font><font color="#ffff00">2 cimport </font><font color="#00ff00">;                                             
+</font><font color="#ff0000">XCloseDisplay </font><font color="#ffff00">1 cimport </font><font color="#00ff00">;                                       
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">28</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">MORE X-WINDOWS CALLS    </font><font color="#ff0000">libX11.so </font><font color="#ffff00">library                       
+                                                                
+</font><font color="#ff0000">XDefaultScreen </font><font color="#ffff00">1 cimport </font><font color="#00ff00">return-value ;                         
+</font><font color="#ff0000">XRootWindow </font><font color="#ffff00">2 cimport </font><font color="#00ff00">return-value ;                            
+</font><font color="#ff0000">XBlackPixel </font><font color="#ffff00">2 cimport </font><font color="#00ff00">return-value ;                            
+</font><font color="#ff0000">XWhitePixel </font><font color="#ffff00">2 cimport </font><font color="#00ff00">return-value ;                            
+</font><font color="#ff0000">XDefaultColormap </font><font color="#ffff00">2 cimport </font><font color="#00ff00">return-value ;                       
+                                                                
+                                                                
+</font><font color="#ffffff">STRUCTURE ACCESS                                                
+</font><font color="#ff0000">event-type </font><font color="#00ff00">@ ;                                                  
+</font><font color="#ff0000">xconfig-width </font><font color="#00ff00">8 cells + @ ;                                     
+</font><font color="#ff0000">xconfig-height </font><font color="#00ff00">9 cells + @ ;                                    
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">29</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">X-WINDOWS MASKS                                                 
+</font><font color="#ff0000">KeyPressMask            </font><font color="#00ff00">0 mask ;                                
+</font><font color="#ff0000">KeyReleaseMask          </font><font color="#00ff00">1 mask ;                                
+</font><font color="#ff0000">ButtonPressMask         </font><font color="#00ff00">2 mask ;                                
+</font><font color="#ff0000">ButtonReleaseMask       </font><font color="#00ff00">3 mask ;                                
+</font><font color="#ff0000">ExposureMask           </font><font color="#00ff00">15 mask ;                                
+</font><font color="#ff0000">StructureNotifyMask    </font><font color="#00ff00">17 mask ;                                
+                                                                
+</font><font color="#ffffff">X-WINDOWS EVENT TYPES                                           
+</font><font color="#ff0000">KeyPress               </font><font color="#00ff00">2 ;                                      
+</font><font color="#ff0000">KeyRelease             </font><font color="#00ff00">3 ;                                      
+</font><font color="#ff0000">ButtonPress            </font><font color="#00ff00">4 ;                                      
+</font><font color="#ff0000">ButtonRelease          </font><font color="#00ff00">5 ;                                      
+</font><font color="#ff0000">Expose                </font><font color="#00ff00">12 ;                                      
+</font><font color="#ff0000">ConfigureNotify       </font><font color="#00ff00">22 ;                                      
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">30</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">X-WINDOWS INITIZATION                                           
+</font><font color="#ff00ff">display screen root-window window black white gc                
+</font><font color="#ff0000">create-window                                                   
+</font><font color="#00ff00">NULL XOpenDisplay display !                                     
+display @ XDefaultScreen screen !                               
+display @ screen @ XRootWindow root-window !                    
+display @ screen @ XBlackPixel black !                          
+display @ screen @ XWhitePixel white !                          
+display @ root-window @ 100 100 320 240 4 black @ white @       
+       XCreateSimpleWindow window !                             
+display @ window @ </font><font color="#ffff00">0 ExposureMask KeyPressMask                  
+  ButtonPressMask StructureNotifyMask literal </font><font color="#00ff00">XSelectInput      
+display @ window @ 0 0 XCreateGC gc !                           
+display @ window @ XMapWindow ;                                 
+</font><font color="#ff0000">close-window </font><font color="#00ff00">display @ gc @ XFreeGC                             
+             display @ XCloseDisplay ;                          
+</font></pre></td></tr></table><br>
+<font size="4">31</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">X-WINDOWS event type handlers                                   
+</font><font color="#ff0000">event </font><font color="#ffff00">here literal </font><font color="#00ff00">; </font><font color="#ffff00">200 allot </font><font color="#ffffff">This is just a size guess        
+</font><font color="#ff00ff">width height               pixel red-green blue-flags           
+</font><font color="#ff0000">handle-config </font><font color="#00ff00">event xconfig-width width !                       
+              event xconfig-height height !  0 ;                
+</font><font color="#ff0000">handle-button </font><font color="#00ff00">0 ;                                               
+</font><font color="#ff0000">handle-key </font><font color="#00ff00">1 ;                                                  
+</font><font color="#ff0000">handle-expose                                                   
+</font><font color="#00ff00">7777FFFFh red-green !   0 blue-flags !                          
+display @ display @ screen @ XDefaultColormap pixel XAllocColor 
+display @ gc @ black @ XSetForeground                           
+display @ window @ gc @ 10 10 70 70 XFillRectangle              
+display @ gc @ pixel @ XSetForeground                           
+display @ window @ gc @ 90 10 70 70 XFillRectangle              
+display @ window @ gc @ 10 90 70 70 XFillRectangle              
+0 ;                                                             
+</font></pre></td></tr></table><br>
+<font size="4">32</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">X-WINDOWS EVENT LOOP                                            
+                                                                
+</font><font color="#ff0000">handle-event                                                    
+</font><font color="#00ff00">dup KeyPress = if drop handle-key else                          
+dup ButtonPress = if drop handle-button else                    
+dup ConfigureNotify = if drop handle-config else                
+dup Expose = if drop handle-expose else                         
+drop 0 then then then then ;                                    
+                                                                
+                                                                
+</font><font color="#ff0000">window-loop </font><font color="#00ff00">begin                                               
+  display @ event XNextEvent                                    
+  event event-type handle-event until ;                         
+                                                                
+</font><font color="#ff0000">window-test </font><font color="#00ff00">create-window window-loop close-window ;            
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">33</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">X-WINDOWS START BLOCK                                           
+</font><font color="#ffff00">27 32 thru                                                      
+                                                                
+window-test                                                     
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">34</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">LOOP TEST BLOCK                                                 
+                                                                
+                                                                
+</font><font color="#ff0000">row </font><font color="#00ff00">10 0 do dup . i . 3 spaces loop cr ;                        
+</font><font color="#ff0000">test </font><font color="#00ff00">10 0 do i row loop ;                                       
+</font><font color="#ffff00">test                                                            
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+</body>
+</html>
