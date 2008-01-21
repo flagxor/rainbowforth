@@ -6,7 +6,7 @@
 <table bgcolor="#000000"><tr><td><pre>
 <font color="#ffffff">MASTER LOAD BLOCK                                               
                                                                 
-</font><font color="#ffff00">1 21 thru </font><font color="#ffffff">Load basic system                                     
+</font><font color="#ffff00">1 22 thru </font><font color="#ffffff">Load basic system                                     
                                                                 
                                                                 
                                                                 
@@ -422,16 +422,16 @@
 </font></pre></td></tr></table><br>
 <font size="4">22</font><br>
 <table bgcolor="#000000"><tr><td><pre>
-<font color="#ffffff">FACTORIAL                                                       
+<font color="#ffffff">RANDOM NUMBER GENERATOR   (Knuth V2 pg 185)                     
+</font><font color="#ff00ff">seed </font><font color="#ffff00">1 seed !                                                   
+</font><font color="#ff0000">MM </font><font color="#00ff00">2147483647 ;  </font><font color="#ff0000">AA </font><font color="#00ff00">48271 ;  </font><font color="#ff0000">QQ </font><font color="#00ff00">44488 ;  </font><font color="#ff0000">RR </font><font color="#00ff00">3399 ;              
+</font><font color="#ff0000">random-next </font><font color="#00ff00">seed @ QQ mod AA * seed @ RR QQ */ -                
+            dup 0< if MM + then   seed ! ;                      
+</font><font color="#ff0000">random </font><font color="#00ff00">random-next seed @ MM */ ;                               
                                                                 
-</font><font color="#ff0000">factorial2 </font><font color="#00ff00">dup 1 <= if ; then dup push * pop 1- recurse;        
-</font><font color="#ff0000">factorial </font><font color="#00ff00">1 swap factorial2 drop ;                              
-</font><font color="#ffff00">5 factorial .                                                   
                                                                 
                                                                 
                                                                 
-</font><font color="#ffffff">EMIT TEST                                                       
-</font><font color="#ff0000">one-key </font><font color="#00ff00">begin key dup emit 27 = until ;                         
                                                                 
                                                                 
                                                                 
@@ -441,14 +441,14 @@
 </font></pre></td></tr></table><br>
 <font size="4">23</font><br>
 <table bgcolor="#000000"><tr><td><pre>
-<font color="#ffffff">PRIME NUMBER TEST                                               
-</font><font color="#ff0000">indivisible </font><font color="#00ff00">mod 0<> ;                                           
-</font><font color="#ff0000">part-prime </font><font color="#00ff00">dup 1 = if drop drop 1 else 2dup 1- part-prime       
-           push indivisible pop and then ;                      
-</font><font color="#ff0000">prime </font><font color="#00ff00">dup 1- part-prime ;                                       
-</font><font color="#ff0000">print-if-prime </font><font color="#00ff00">dup prime if . else drop then ;                  
-</font><font color="#ff0000">primes </font><font color="#00ff00">2 do i print-if-prime loop ;                             
-</font><font color="#ffff00">1000 primes cr                                                  
+<font color="#ffffff">empty                                                           
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
                                                                 
                                                                 
                                                                 
@@ -460,26 +460,26 @@
 </font></pre></td></tr></table><br>
 <font size="4">24</font><br>
 <table bgcolor="#000000"><tr><td><pre>
-<font color="#ffffff">VARIABLE TEST                                                   
-                                                                
-</font><font color="#ff00ff">x y                                                             
-     </font><font color="#ffff00">1 x !   2 y !    x @ .  y @ .  cr                          
-                                                                
-                                                                
-314159 </font><font color="#ff0000">pi </font><font color="#ffff00">:constant                                             
-pi . pi .  cr                                                   
+<font color="#ffffff">empty                                                           
                                                                 
                                                                 
                                                                 
-</font><font color="#ff0000">:pair </font><font color="#00ff00">, , does> dup cell+ @ swap @ ;                            
-</font><font color="#ffff00">10 11 </font><font color="#ff0000">p </font><font color="#ffff00">:pair                                                   
-p . .  p . . cr                                                 
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
                                                                 
                                                                 
 </font></pre></td></tr></table><br>
 <font size="4">25</font><br>
 <table bgcolor="#000000"><tr><td><pre>
-<font color="#ffffff">SYSTEM CALL TESTS                                               
+<font color="#ffffff">Linux SYSTEM CALL TESTS                                         
                                                                 
 </font><font color="#ff0000">libncurses.so </font><font color="#ffff00">library                                           
 </font><font color="#ff0000">flash </font><font color="#ffff00">0 cimport </font><font color="#00ff00">;                                               
@@ -582,7 +582,7 @@ display @ XDefaultScreen screen !
 display @ screen @ XRootWindow root-window !                    
 display @ screen @ XBlackPixel black !                          
 display @ screen @ XWhitePixel white !                          
-display @ root-window @ 100 100 320 240 4 black @ white @       
+display @ root-window @ 100 100 500 500 4 black @ white @       
        XCreateSimpleWindow window !                             
 display @ window @ </font><font color="#ffff00">0 ExposureMask KeyPressMask                  
   ButtonPressMask StructureNotifyMask literal </font><font color="#00ff00">XSelectInput      
@@ -593,24 +593,43 @@ display @ window @ XMapWindow ;
 </font></pre></td></tr></table><br>
 <font size="4">31</font><br>
 <table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">X-Windows Drawing                                               
+</font><font color="#ff00ff">pixel red-green blue-flags                                      
+</font><font color="#ff0000">box </font><font color="#00ff00">push push push push display @ window @ gc @                 
+pop pop pop pop XFillRectangle ;                                
+</font><font color="#ff0000">rgb </font><font color="#00ff00">8 shl blue-flags !   24 shl swap 8 shl or red-green !       
+display @ display @ screen @ XDefaultColormap pixel XAllocColor 
+display @ gc @ pixel @ XSetForeground ;                         
+</font><font color="#ff0000">black </font><font color="#00ff00">0 0 0 rgb ;                                               
+</font><font color="#ff0000">white </font><font color="#00ff00">255 255 255 rgb ;                                         
+</font><font color="#ff0000">red </font><font color="#00ff00">255 0 0 rgb ;                                               
+</font><font color="#ff0000">orange </font><font color="#00ff00">255 192 0 rgb ;                                          
+</font><font color="#ff0000">yellow </font><font color="#00ff00">255 255 0 rgb ;                                          
+</font><font color="#ff0000">green </font><font color="#00ff00">0 255 0 rgb ;                                             
+</font><font color="#ff0000">cyan </font><font color="#00ff00">0 255 255 rgb ;                                            
+</font><font color="#ff0000">blue </font><font color="#00ff00">0 0 255 rgb ;                                              
+</font><font color="#ff0000">magenta </font><font color="#00ff00">255 0 255 rgb ;                                         
+</font></pre></td></tr></table><br>
+<font size="4">32</font><br>
+<table bgcolor="#000000"><tr><td><pre>
 <font color="#ffffff">X-WINDOWS event type handlers                                   
 </font><font color="#ff0000">event </font><font color="#ffff00">here literal </font><font color="#00ff00">; </font><font color="#ffff00">200 allot </font><font color="#ffffff">This is just a size guess        
-</font><font color="#ff00ff">width height               pixel red-green blue-flags           
+</font><font color="#ff00ff">width height                                                    
 </font><font color="#ff0000">handle-config </font><font color="#00ff00">event xconfig-width width !                       
               event xconfig-height height !  0 ;                
 </font><font color="#ff0000">handle-button </font><font color="#00ff00">0 ;                                               
-</font><font color="#ff0000">handle-key </font><font color="#00ff00">1 ;                                                  
+</font><font color="#ff0000">handle-key </font><font color="#00ff00">1 ;                  </font><font color="#ff0000">square </font><font color="#00ff00">100 100 box ;            
 </font><font color="#ff0000">handle-expose                                                   
-</font><font color="#00ff00">7777FFFFh red-green !   0 blue-flags !                          
-display @ display @ screen @ XDefaultColormap pixel XAllocColor 
-display @ gc @ black @ XSetForeground                           
-display @ window @ gc @ 10 10 70 70 XFillRectangle              
-display @ gc @ pixel @ XSetForeground                           
-display @ window @ gc @ 90 10 70 70 XFillRectangle              
-display @ window @ gc @ 10 90 70 70 XFillRectangle              
+</font><font color="#00ff00">1000 0 do   256 random 256 random 256 random rgb                
+       width @ 20 - random height @ 20 - random 20 20 box  loop 
+0 0 width @ 2/ height @ 2/ black box                            
+10 10 red square       20 20 orange square                      
+30 30 yellow square    40 40 green square                       
+50 50 cyan square      60 60 blue square                        
+70 70 magenta square   80 80 white square                       
 0 ;                                                             
 </font></pre></td></tr></table><br>
-<font size="4">32</font><br>
+<font size="4">33</font><br>
 <table bgcolor="#000000"><tr><td><pre>
 <font color="#ffffff">X-WINDOWS EVENT LOOP                                            
                                                                 
@@ -629,10 +648,10 @@ drop 0 then then then then ;
 </font><font color="#ff0000">window-test </font><font color="#00ff00">create-window window-loop close-window ;            
                                                                 
 </font></pre></td></tr></table><br>
-<font size="4">33</font><br>
+<font size="4">34</font><br>
 <table bgcolor="#000000"><tr><td><pre>
 <font color="#ffffff">X-WINDOWS START BLOCK                                           
-</font><font color="#ffff00">27 32 thru                                                      
+</font><font color="#ffff00">27 33 thru                                                      
                                                                 
 window-test                                                     
                                                                 
@@ -648,7 +667,7 @@ window-test
                                                                 
                                                                 
 </font></pre></td></tr></table><br>
-<font size="4">34</font><br>
+<font size="4">35</font><br>
 <table bgcolor="#000000"><tr><td><pre>
 <font color="#ffffff">LOOP TEST BLOCK                                                 
                                                                 
@@ -656,6 +675,82 @@ window-test
 </font><font color="#ff0000">row </font><font color="#00ff00">10 0 do dup . i . 3 spaces loop cr ;                        
 </font><font color="#ff0000">test </font><font color="#00ff00">10 0 do i row loop ;                                       
 </font><font color="#ffff00">test                                                            
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">36</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">FACTORIAL                                                       
+                                                                
+</font><font color="#ff0000">factorial2 </font><font color="#00ff00">dup 1 <= if ; then dup push * pop 1- recurse;        
+</font><font color="#ff0000">factorial </font><font color="#00ff00">1 swap factorial2 drop ;                              
+</font><font color="#ffff00">5 factorial .                                                   
+                                                                
+                                                                
+                                                                
+</font><font color="#ffffff">EMIT TEST                                                       
+</font><font color="#ff0000">one-key </font><font color="#00ff00">begin key dup emit 27 = until ;                         
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">37</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">PRIME NUMBER TEST                                               
+</font><font color="#ff0000">indivisible </font><font color="#00ff00">mod 0<> ;                                           
+</font><font color="#ff0000">part-prime </font><font color="#00ff00">dup 1 = if drop drop 1 else 2dup 1- part-prime       
+           push indivisible pop and then ;                      
+</font><font color="#ff0000">prime </font><font color="#00ff00">dup 1- part-prime ;                                       
+</font><font color="#ff0000">print-if-prime </font><font color="#00ff00">dup prime if . else drop then ;                  
+</font><font color="#ff0000">primes </font><font color="#00ff00">2 do i print-if-prime loop ;                             
+</font><font color="#ffff00">1000 primes cr                                                  
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">38</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">VARIABLE TEST                                                   
+                                                                
+</font><font color="#ff00ff">x y                                                             
+     </font><font color="#ffff00">1 x !   2 y !    x @ .  y @ .  cr                          
+                                                                
+                                                                
+314159 </font><font color="#ff0000">pi </font><font color="#ffff00">:constant                                             
+pi . pi .  cr                                                   
+                                                                
+                                                                
+                                                                
+</font><font color="#ff0000">:pair </font><font color="#00ff00">, , does> dup cell+ @ swap @ ;                            
+</font><font color="#ffff00">10 11 </font><font color="#ff0000">p </font><font color="#ffff00">:pair                                                   
+p . .  p . . cr                                                 
+                                                                
+                                                                
+</font></pre></td></tr></table><br>
+<font size="4">39</font><br>
+<table bgcolor="#000000"><tr><td><pre>
+<font color="#ffffff">RANDOM TEST                                                     
+                                                                
+</font><font color="#ff0000">test </font><font color="#00ff00">400 0 do 10 random . loop ;                                
+</font><font color="#ffff00">test                                                            
+                                                                
+                                                                
                                                                 
                                                                 
                                                                 
