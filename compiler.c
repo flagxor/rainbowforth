@@ -205,7 +205,7 @@ static int execute_built_in(const unsigned char *word, int word_len) {
   } else if(counted_string_equal(word, word_len, "b,", -1)) {
     (*ctx.code_here)=dstack_pop();
     ctx.code_here++;
-  } else if(counted_string_equal(word, word_len, "is-windows", -1)) {
+  } else if(counted_string_equal(word, word_len, "windows?", -1)) {
 #ifdef _WIN32
     dstack_push(1);
 #else
