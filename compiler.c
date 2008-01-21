@@ -217,9 +217,6 @@ static int execute_built_in(const unsigned char *word, int word_len) {
     j=dstack_pop();
     i=dstack_pop();
     for(;i<=j;i++) load(i);
-  } else if(counted_string_equal(word, word_len, ".", -1)) {
-    sprintf(str, "%d ", dstack_pop());
-    ctx.write(str);
   } else {
     return 0;
   }
