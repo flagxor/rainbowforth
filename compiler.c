@@ -187,7 +187,6 @@ static void word_dump(void) {
 }
 
 static int execute_built_in(const unsigned char *word, int word_len) {
-  char str[100];
   int i, j;
 
   if(counted_string_equal(word, word_len, "macro", -1)) {
