@@ -1,0 +1,98 @@
+<html>
+<body>
+
+
+<table align="center" bgcolor="#000000" border="0" cellpadding="0" cellspacing="0">
+<tr border="0" cellpadding="0" cellspacing="0">
+<td border="0" cellpadding="0" cellspacing="0">
+<b><font size="7">
+<pre id="scr">
+</pre>
+</font></b>
+</td>
+</tr>
+</table>
+
+
+<script type="text/javascript">
+
+var cursor_x=0;
+var cursor_y=0;
+var scr = new Array();
+
+
+function numberToColor(n) {
+  var col = ("00000" + n.toString(16));
+  col = col.substr(col.length-6, 6);
+  return "#" + col;
+}
+
+function plot(x, y, text, fg, bg) {
+  var element = scr[x+y*64];
+  element.firstChild.nodeValue = String.fromCharCode(text);
+  element.setAttribute("color", numberToColor(fg));
+  element.setAttribute("style", "background-color: " + numberToColor(bg));
+}
+
+function rand(low, high) {
+  return Math.floor(Math.random()*(high-low))+low;
+}
+
+function fillScreen() {
+  for(var j=0;j<16;j++) {
+    for(var i=0;i<64;i++) {
+      plot(i, j, rand(32, 127), rand(0, 0xffffff), rand(0, 0xffffff));
+    }
+  }
+}
+
+function keydown(e) {
+  var e = window.event || e;
+  code = e.keyCode;
+  if(code==75) {
+    cursor_y--;
+    if(cursor_y<0) cursor_y=0;
+  } else if(code==74) {
+    cursor_y++;
+    if(cursor_y>15) cursor_y=15;
+  } else if(code==72) {
+    cursor_x--;
+    if(cursor_x<0) cursor_x=0;
+  } else if(code==76) {
+    cursor_x++;
+    if(cursor_x>63) cursor_x=63;
+  } else if(code==65) {
+    fillScreen();
+    return;
+  }
+  plot(cursor_x, cursor_y, rand(32, 127),
+       rand(0, 0x1000000), rand(0, 0x1000000));
+}
+
+
+function setup() {
+  for(var y=0;y<16;y++) {
+    for(var x=0;x<64;x++) {
+      var element=document.createElement("font");
+      scr[x+y*64]=element;
+      element.appendChild(document.createTextNode(" "))
+      document.getElementById("scr").appendChild(element);
+    }
+    var element=document.createElement("br")
+    document.getElementById("scr").appendChild(element);
+  }
+
+  document.onkeydown=keydown;
+}
+
+setup();
+
+
+</script>
+
+
+
+
+</body>
+</html>
+

@@ -1,0 +1,477 @@
+<html>
+<head>
+<title>RainbowForth</title>
+</head>
+<body>
+
+
+<table align="center" bgcolor="#000000"
+       border="0" cellpadding="0" cellspacing="0">
+<tr border="0" cellpadding="0" cellspacing="0">
+<td border="0" cellpadding="0" cellspacing="0">
+<b><font size="7">
+<pre id="console">
+</pre>
+</font></b>
+</td></tr></table>
+
+
+<script type="text/javascript">
+
+// -----------------------------------------------------------------
+
+var HTTP = {};
+
+HTTP._factories = [
+  function() { return new XMLHttpRequest(); },
+  function() { return new ActiveXObject('Msxml2.XMLHTTP'); },
+  function() { return new ActiveXObject('Microsoft.XMLHTTP'); },
+];
+
+HTTP._factory = null;
+
+HTTP.newRequest = function() {
+  if (HTTP._factory != null) return HTTP._factory();
+  for(var i = 0; i < HTTP._factories.length; i++) {
+    try {
+      var factory = HTTP._factories[i];
+      var request = factory();
+      if (request != null) {
+        HTTP._factory = factory;
+        return request;
+      }
+    } catch(e) {
+      continue;
+    }
+  }
+  HTTP._factory = function() {
+    throw new Error('XMLHttpRequest not supported');
+  }
+  HTTP._factory();
+};
+
+HTTP.encodeFormData = function(data) {
+  var pairs = [];
+  var regexp = /%20/g;
+
+  for (var name in data) {
+    var value = data[name].toString();
+    var pair = encodeURIComponent(name).replace(regexp, '+') + '=' +
+               encodeURIComponent(value).replace(regexp, '+');
+    pairs.push(pair);
+  }
+
+  return pairs.join('&');
+};
+
+HTTP.post = function(url, values, callback, errorHandler) {
+  var request = HTTP.newRequest();
+  request.onreadystatechange = function() {
+    if (request.readyState == 4) {
+      if (request.status == 200) {
+        callback(HTTP._getReponse(request));
+      } else {
+        if (errorHandler) {
+          errorHandler(request.status, request.statusText);
+        } else {
+          callback(null);
+        }
+      }
+    }
+  };
+  request.open('POST', url);
+  request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  request.send(HTTP.encodeFormData(values));
+};
+
+HTTP.getText = function(url, callback) {
+  var request = HTTP.newRequest();
+  request.onreadystatechange = function() {
+    if (request.readyState == 4) {
+      if (request.status == 200) {
+        callback(request.responseText);
+      } else {
+        callback(null);
+      }
+    }
+  }
+  request.open('GET', url);
+  request.send(null);
+};
+
+
+// -----------------------------------------------------------------
+
+
+var CONSOLE_WIDTH = 64;
+var CONSOLE_HEIGHT = 16;
+
+var console = new Array();
+
+function setupConsole() {
+  for (var y=0;y<CONSOLE_HEIGHT;y++) {
+    for (var x=0;x<CONSOLE_WIDTH;x++) {
+      var element=document.createElement('font');
+      element.appendChild(document.createTextNode(' '))
+      document.getElementById('console').appendChild(element);
+      console[x+y*CONSOLE_WIDTH]=element;
+    }
+    var element=document.createElement('br')
+    document.getElementById('console').appendChild(element);
+  }
+}
+
+function numberToColor(n) {
+  var col = ("00000" + n.toString(16));
+  col = col.substr(col.length - 6, 6);
+  return "#" + col;
+}
+
+function consolePlot(x, y, text, fg, bg) {
+  var element = console[x+y*CONSOLE_WIDTH];
+  element.firstChild.nodeValue = String.fromCharCode(text);
+  element.setAttribute("color", numberToColor(fg));
+  element.setAttribute("style", "background-color: " + numberToColor(bg));
+}
+
+function consoleClear(fg, bg) {
+  for (var j = 0; j < CONSOLE_HEIGHT; j++) {
+    for (var i = 0; i < CONSOLE_WIDTH; i++) {
+      consolePlot(i, j, 32, fg, bg);
+    }
+  }
+}
+
+function consoleEmit(c, ch) {
+  if(ch == 13) {
+    c.console_x = 0;
+    c.console_y++;
+    if (c.console_y == CONSOLE_HEIGHT) {
+      c.console_y--;
+    }
+  } else {
+    consolePlot(c.console_x, c.console_y, ch,
+                c.foreground, c.background);
+    c.console_x++;
+    if (c.console_x == CONSOLE_WIDTH) {
+      c.console_y++;
+      if (c.console_y == CONSOLE_HEIGHT) {
+        c.console_y--;
+      }
+    }
+  }
+}
+
+function consoleEmitString(c, str) {
+  for (var i = 0; i < str.length; i++) {
+    consoleEmit(c, str.charCodeAt(i));
+  }
+}
+
+
+// -----------------------------------------------------------------
+
+
+var heap = new Array();
+
+
+// -----------------------------------------------------------------
+
+
+var threads = new Array();
+
+function ThreadContext() {
+  this.ip = 0;
+  this.dstack = new Array();
+  this.rstack = new Array();
+  this.foreground = 0xffffff;
+  this.background = 0x000000;
+  this.console_x = 0;
+  this.console_y = 0;
+  this.yield = 0;
+}
+
+ThreadContext.prototype.run = function() {
+  do {
+    heap[this.ip++](this);
+  } while(!this.yield);
+}
+
+function runAll() {
+  var runSet = threads.slice();
+  for (var i = 0; i < runSet.length; i++) {
+    runSet[i].run();
+  }
+}
+
+function createThread(ip, value) {
+  var c = new ThreadContext();
+  c.ip = ip;
+  c.dstack.push(value);
+  threads.push(c);
+}
+
+function dropThread(c) {
+  for (var i = 0; i < threads.length; i++) {
+    if (threads[i] == c) {
+      threads[i] = threads[threads.length - 1];
+      threads.pop();
+      break;
+    }
+  }
+}
+
+
+// -----------------------------------------------------------------
+
+
+var lastEvent = 0;
+
+function setupEvents() {
+  document.onkeydown = function(e) {
+    var e = window.event || e;
+    lastEvent = e;
+    runAll();
+  }
+}
+
+
+// -----------------------------------------------------------------
+
+
+function literal(n) {
+  return function(c) {
+    c.dstack.push(n);
+  };
+}
+
+function call_addr(n) {
+  return function(c) {
+    c.ip = n;
+  };
+}
+
+var macro_mode = false;
+var dictionary_macro = {};
+
+var dictionary = {
+  ',': function(c) {
+    heap.push(c.dstack.pop());
+  },
+  'literal': function(c) {
+    var n = c.dstack.pop();
+    heap.push(literal(n));
+  },
+  'execute': function(c) {
+    var n = c.dstack.pop();
+    heap.push(call_addr(n));
+  },
+  ';': function(c) {
+    c.ip = c.rstack.pop();
+  },
+  'macro': function(c) {
+    macro_mode = true;
+  },
+  'forth': function(c) {
+    macro_mode = false;
+  },
+  'swap': function(c) {
+    var tmp1 = c.dstack.pop();
+    var tmp2 = c.dstack.pop();
+    c.dstack.push(tmp1);
+    c.dstack.push(tmp2);
+  },
+  'drop': function(c) {
+    c.dstack.pop();
+  },
+  'over': function(c) {
+    c.dstack.push(c.dstack[c.dstack.length - 2]);
+  },
+  'dup': function(c) {
+    c.dstack.push(c.dstack[c.dstack.length - 1]);
+  },
+  'push': function(c) {
+    c.rstack.push(c.dstack.pop());
+  },
+  'pop': function(c) {
+    c.dstack.push(c.rstack.pop());
+  },
+  '+': function(c) {
+    c.dstack.push(c.dstack.pop() + c.dstack.pop());
+  },
+  '-': function(c) {
+    var tmp = c.dstack.pop();
+    c.dstack.push(c.dstack.pop() - tmp);
+  },
+  '*': function(c) {
+    c.dstack.push(c.dstack.pop() * c.dstack.pop());
+  },
+  '<': function(c) {
+    c.dstack.push(c.dstack.pop() > c.dstack.pop());
+  },
+  'here': function(c) {
+    c.dstack.push(heap.length);
+  },
+  '!': function(c) {
+    var addr = dstack.pop();
+    var val = dstack.pop();
+    heap[addr] = val;
+  },
+  '@': function(c) {
+    dstack.push(heap[dstack.pop()]);
+  },
+  'random': function(c) {
+    var high = dstack.pop();
+    var low = dstack.pop();
+    var pick = Math.floor(Math.random() * (high - low + 1)) + low;
+    dstack.push(pick);
+  },
+  'foreground': function(c) {
+    c.foreground = dstack.pop();
+  },
+  'background': function(c) {
+    c.background = dstack.pop();
+  },
+  'setxy': function(c) {
+    c.console_y = dstack.pop();
+    c.console_x = dstack.pop();
+  },
+  'emit': function(c) {
+    var ch = c.dstack.pop();
+    consoleEmit(c, ch);
+  },
+  'cls': function(c) {
+    consoleClear(c.foreground, c.background);
+    c.console_x = 0;
+    c.console_y = 0;
+  },
+  'key': function(c) {
+    if (lastEvent == 0) {
+      c.yield = 1;
+      c.ip--;
+    } else {
+      c.yield = 0;
+      c.dstack.push(lastEvent.keyCode);
+    }
+  },
+  'fork': function(c) {
+    createThread(c.ip, 1);
+    dstack.push(0);
+  },
+  'terminate': function(c) {
+    c.yield = 1;
+    dropThread(c);
+  },
+  'raw-load': function(c) {
+    var text = c.dstack.pop();
+    var word = '';
+    for(var i = 0; i < text.length; i++) {
+      var code = text[i].toCharCode();
+      if (text[i] == ' ' || code >= 250) {
+        if (!text.length) { continue; }
+        if (text[i] == ' ') {
+          // White - Skip comments.
+        } else if (code == 255) {
+          // Red - Define a word.
+          dictionary[word] = call_addr(heap.length);
+          dictionary_macro[word] = macro_mode;
+        } else if (code == 254) {
+          // Yellow - Execute a word or push a literal.
+          if (dictionary.exists(word)) {
+            dictionary[word](c);
+          } else if(text[text.length-1] == 'h') {
+            c.dstack.push(word.parseInt(16));
+          } else {
+            c.dstack.push(word.parseInt());
+          }
+        } else if (code == 253) {
+          // Green - Compile a word (unless macro) or compile a literal.
+          if (dictionary.exists(word)) {
+            if (dictionary_macro.exists(word) && dictionary_macro[word]) {
+              dictionary[word](c);
+            } else {
+              heap.push(dictionary[word]);
+            }
+          } else if (word[word.length-1] == 'h') {
+            heap.push(literal(word.parseInt(16)));
+          } else {
+            heap.push(literal(word.parseInt()));
+          }
+        } else if (code == 252) {
+          // Cyan - Compile a word (including macros) or compile a literal.
+          if (dictionary.exists(word)) {
+            if (dictionary_macro.exists(word) && dictionary_macro[word]) {
+              dictionary[word](c);
+            } else {
+              heap.push(dictionary[word]);
+            }
+          } else if (text[text.length-1] == 'h') {
+            heap.push(literal(word.parseInt(16)));
+          } else {
+            heap.push(literal(word.parseInt()));
+          }
+        } else if (code == 251) {
+          // Blue - Push xt for word on stack.
+          c.dstack.push(dictionary[word]);
+        } else if (code == 250) {
+          // Magenta - define a variable.
+          dictionary[word] = literal(heap.length);
+          heap.push(0);
+        }
+        word = '';
+      } else {
+        word += text[i];
+      }
+    }
+  }
+  // IE can't handle trailing commas here.
+};
+
+
+// -----------------------------------------------------------------
+
+
+function afterLoad(result) {
+  consoleClear(0, 0);
+  consolePlot(10, 10, 65, 0xff0000, 0x007700);
+  heap.push(literal(65));
+  heap.push(dictionary.emit);
+  heap.push(dictionary.key);
+  heap.push(dictionary.emit);
+  heap.push(dictionary.key);
+  heap.push(dictionary.emit);
+  heap.push(dictionary.key);
+  heap.push(dictionary.emit);
+  heap.push(dictionary.cls);
+  heap.push(dictionary.key);
+  heap.push(dictionary.emit);
+  heap.push(dictionary.key);
+  heap.push(dictionary.emit);
+  heap.push(dictionary.terminate);
+  createThread(0, 0);
+  runAll();
+}
+
+
+function main() {
+  setupConsole();
+  setupEvents();
+  var c = {'console_x': 0, 'console_y': 0,
+           'foreground': 0xffffff, 'background': 0x000000};
+  consoleEmitString(c, 'Loading...');
+  HTTP.getText('http://rainbowforth.svn.sourceforge.net/viewvc/' +
+               'rainbowforth/rainbowforth_data?revision=28', afterLoad);
+}
+
+main();
+
+
+// -----------------------------------------------------------------
+
+
+</script>
+
+
+</body>
+</html>
+

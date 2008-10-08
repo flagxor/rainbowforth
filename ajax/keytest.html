@@ -1,0 +1,54 @@
+<html>
+<body>
+
+
+<p id="bob">
+</p>
+
+<p id="joe">
+</p>
+
+
+<script type="text/javascript">
+var keys=new Array();
+function updateKeys() {
+  var txt = "";
+  for(var i=0;i<256;i++) {
+    if(keys[i]) {
+      txt += (i + " ");
+    }
+  }
+  document.getElementById("bob").innerHTML=txt;
+}
+function keydown(e) {
+  var e = window.event || e;
+  keys[e.keyCode]=1;
+  updateKeys();
+}
+function keyup(e) {
+  var e = window.event || e;
+  keys[e.keyCode]=0;
+  updateKeys();
+}
+
+
+
+x=document.createElement("font");
+x.setAttribute("color", "#00ff00");
+x.appendChild(document.createTextNode("Hold down many keys"));
+document.getElementById("joe").appendChild(x);
+
+
+document.onkeydown=keydown;
+document.onkeyup=keyup;
+
+
+
+</script>
+
+
+
+
+</body>
+</html>
+
