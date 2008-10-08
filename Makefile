@@ -1,6 +1,6 @@
 # Makefile for rainbowforth
 
-TARGET=rainbowforth
+TARGET=rainbowforth$(EXE)
 OBJECTS=main.o editor.o compiler.o console.o library.o
 CFLAGS=-g -Wall -Werror $(PLATFORM_CFLAGS)
 
@@ -21,8 +21,8 @@ website:
 ifeq ($(shell uname -o),Cygwin)
   PLATFORM_CFLAGS=-D_WIN32 -mno-cygwin
   LIBS=-mno-cygwin
-else 
+  EXE=.exe
+else
   LIBS=-lcurses
+  EXE=
 endif
-
-
