@@ -69,9 +69,9 @@ HTTP.post = function(url, values, callback, errorHandler) {
   request.onreadystatechange = function() {
     if (request.readyState == 4) {
       if (request.status == 200) {
-        callback(HTTP._getReponse(request));
+        callback(request.responseText);
       } else {
-        if (errorHandler) {
+        if (errorHandler != null) {
           errorHandler(request.status, request.statusText);
         } else {
           callback(null);
@@ -452,15 +452,16 @@ function afterLoad(result) {
   runAll();
 }
 
-
 function main() {
   setupConsole();
   setupEvents();
   var c = {'console_x': 0, 'console_y': 0,
            'foreground': 0xffffff, 'background': 0x000000};
   consoleEmitString(c, 'Loading...');
-  HTTP.getText('http://rainbowforth.svn.sourceforge.net/viewvc/' +
-               'rainbowforth/rainbowforth_data?revision=28', afterLoad);
+  HTTP.post(
+      '/read',
+      {'category': 'test', 'index': '0'},
+      afterLoad, null);
 }
 
 main();
