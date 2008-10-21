@@ -72,7 +72,7 @@ class TestPage(webapp.RequestHandler):
   def get(self):
     user = users.get_current_user()
     if user:
-      path = os.path.join(os.path.dirname(__file__), 'blocktest.html')
+      path = os.path.join(os.path.dirname(__file__), 'html/blocktest.html')
       self.response.out.write(template.render(path, {}))
     else:
       self.redirect(users.create_login_url(self.request.uri))
@@ -82,7 +82,7 @@ class MainPage(webapp.RequestHandler):
   def get(self):
     user = users.get_current_user()
     if user:
-      path = os.path.join(os.path.dirname(__file__), 'rainbowforth.html')
+      path = os.path.join(os.path.dirname(__file__), 'html/rainbowforth.html')
       self.response.out.write(template.render(path, {}))
     else:
       self.redirect(users.create_login_url(self.request.uri))
