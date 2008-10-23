@@ -238,6 +238,18 @@ function setupEvents() {
 
 // -----------------------------------------------------------------
 
+var RED_SPACE = String.fromCharCode(255);
+var YELLOW_SPACE = String.fromCharCode(254);
+var GREEN_SPACE = String.fromCharCode(253);
+var CYAN_SPACE = String.fromCharCode(252);
+var BLUE_SPACE = String.fromCharCode(251);
+var MAGENTA_SPACE = String.fromCharCode(250);
+var WHITE_SPACE = ' ';
+var ALL_SPACES = RED_SPACE + YELLOW_SPACE + GREEN_SPACE + CYAN_SPACE +
+                 BLUE_SPACE + MAGENTA_SPACE + WHITE_SPACE;
+
+// -----------------------------------------------------------------
+
 
 function literal(n) {
   return function(c) {
@@ -247,6 +259,7 @@ function literal(n) {
 
 function call_addr(n) {
   return function(c) {
+    c.rstack.push(c.ip);
     c.ip = n;
   };
 }
@@ -262,7 +275,7 @@ var dictionary = {
     var n = c.dstack.pop();
     heap.push(literal(n));
   },
-  'execute': function(c) {
+  'compile,': function(c) {
     var n = c.dstack.pop();
     heap.push(call_addr(n));
   },
@@ -366,61 +379,61 @@ var dictionary = {
     var text = c.dstack.pop();
     var word = '';
     for(var i = 0; i < text.length; i++) {
-      var code = text[i].toCharCode();
-      if (text[i] == ' ' || code >= 250) {
-        if (!text.length) { continue; }
-        if (text[i] == ' ') {
+      var ch = text[i];
+      if (ALL_SPACES.indexOf(ch) >= 0) {
+        if (!word.length) continue;
+        if (ch == WHITE_SPACE) {
           // White - Skip comments.
-        } else if (code == 255) {
+        } else if (ch == RED_SPACE) {
           // Red - Define a word.
           dictionary[word] = call_addr(heap.length);
           dictionary_macro[word] = macro_mode;
-        } else if (code == 254) {
+        } else if (ch == YELLOW_SPACE) {
           // Yellow - Execute a word or push a literal.
-          if (dictionary.exists(word)) {
+          if (dictionary[word] != undefined) {
             dictionary[word](c);
-          } else if(text[text.length-1] == 'h') {
-            c.dstack.push(word.parseInt(16));
+          } else if (word[word.length-1] == 'h') {
+            c.dstack.push(parseInt(word, 16));
           } else {
-            c.dstack.push(word.parseInt());
+            c.dstack.push(parseInt(word));
           }
-        } else if (code == 253) {
+        } else if (ch == GREEN_SPACE) {
           // Green - Compile a word (unless macro) or compile a literal.
-          if (dictionary.exists(word)) {
-            if (dictionary_macro.exists(word) && dictionary_macro[word]) {
+          if (dictionary[word] != undefined) {
+            if (dictionary_macro[word]) {
               dictionary[word](c);
             } else {
               heap.push(dictionary[word]);
             }
           } else if (word[word.length-1] == 'h') {
-            heap.push(literal(word.parseInt(16)));
+            heap.push(literal(parseInt(word, 16)));
           } else {
-            heap.push(literal(word.parseInt()));
+            heap.push(literal(parseInt(word)));
           }
-        } else if (code == 252) {
+        } else if (ch == CYAN_SPACE) {
           // Cyan - Compile a word (including macros) or compile a literal.
-          if (dictionary.exists(word)) {
-            if (dictionary_macro.exists(word) && dictionary_macro[word]) {
+          if (dictionary[word] != undefined) {
+            if (dictionary_macro[word]) {
               dictionary[word](c);
             } else {
               heap.push(dictionary[word]);
             }
-          } else if (text[text.length-1] == 'h') {
-            heap.push(literal(word.parseInt(16)));
+          } else if (word[word.length-1] == 'h') {
+            heap.push(literal(parseInt(word, 16)));
           } else {
-            heap.push(literal(word.parseInt()));
+            heap.push(literal(parseInt(word)));
           }
-        } else if (code == 251) {
+        } else if (ch == BLUE_SPACE) {
           // Blue - Push xt for word on stack.
           c.dstack.push(dictionary[word]);
-        } else if (code == 250) {
+        } else if (code == MAGENTA_SPACE) {
           // Magenta - define a variable.
           dictionary[word] = literal(heap.length);
           heap.push(0);
         }
         word = '';
       } else {
-        word += text[i];
+        word += ch;
       }
     }
   }
@@ -430,10 +443,64 @@ var dictionary = {
 
 // -----------------------------------------------------------------
 
+function PlainToColor(text) {
+  var color = GREEN_SPACE;
+  var ret = '';
+  var word = '';
+  for (var i = 0; i < text.length ; i++) {
+    var ch = text[i];
+    if (ch == ' ') {
+      if (!word.length) continue;
+      if (word == '(') {
+        color = WHITE_SPACE;
+      } else if (word == '[') {
+        color = YELLOW_SPACE;
+      } else if (word == '{') {
+        color = CYAN_SPACE;
+      } else if (word == ')' || word == ']' || word == '}') {
+        color = GREEN_SPACE;
+      } else if (word == ':') {
+        color = RED_SPACE;
+      } else if (word == "'") {
+        color = BLUE_SPACE;
+      } else if (word == '') {
+        color = CYAN_SPACE;
+      } else if (word == 'variable') {
+        color = MAGENTA_SPACE;
+      } else {
+        ret += word;
+        ret += color;
+        if (color == RED_SPACE || color == CYAN_SPACE ||
+            color == BLUE_SPACE || color == MAGENTA_SPACE) {
+          color = GREEN_SPACE;
+        }
+      }
+      word = '';
+    } else {
+      word += ch;
+    }
+  }
+  return ret;
+}
+
+// -----------------------------------------------------------------
+
+var bootstrap = PlainToColor(
+' : test1  49 emit 50 emit 51 emit 52 emit ; ' +
+' : test2  65 emit 66 emit 67 emit 68 emit ; ' +
+' : test3  90 emit 90 emit 90 emit 90 emit ; ' +
+' : all  test1 test2 test2 test1 test1 test3 ; ' +
+' [ all test1 ]  ' +
+' ');
+
+// -----------------------------------------------------------------
+
 
 function afterLoad(result) {
   consoleClear(0, 0);
   consolePlot(10, 10, 65, 0xff0000, 0x007700);
+  heap.push(literal(bootstrap));
+  heap.push(dictionary['raw-load']);
   heap.push(literal(65));
   heap.push(dictionary.emit);
   heap.push(dictionary.key);
@@ -458,11 +525,9 @@ function main() {
   var c = {'console_x': 0, 'console_y': 0,
            'foreground': 0xffffff, 'background': 0x000000};
   consoleEmitString(c, 'Loading...');
-  HTTP.post(
-      '/read',
-      {'category': 'test', 'index': '0'},
-      afterLoad, null);
+  HTTP.post('/read', {'category': 'test', 'index': '0'}, afterLoad, null);
 }
+
 
 main();
 
