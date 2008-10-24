@@ -391,7 +391,10 @@ var dictionary = {
         } else if (ch == YELLOW_SPACE) {
           // Yellow - Execute a word or push a literal.
           if (dictionary[word] != undefined) {
+            c.ip -= 1;
+            c.dstack.push(text.substr(i));
             dictionary[word](c);
+            return;
           } else if (word[word.length-1] == 'h') {
             c.dstack.push(parseInt(word, 16));
           } else {
@@ -401,7 +404,10 @@ var dictionary = {
           // Green - Compile a word (unless macro) or compile a literal.
           if (dictionary[word] != undefined) {
             if (dictionary_macro[word]) {
+              c.ip -= 1;
+              c.dstack.push(text.substr(i));
               dictionary[word](c);
+              return;
             } else {
               heap.push(dictionary[word]);
             }
@@ -414,7 +420,10 @@ var dictionary = {
           // Cyan - Compile a word (including macros) or compile a literal.
           if (dictionary[word] != undefined) {
             if (dictionary_macro[word]) {
+              c.ip -= 1;
+              c.dstack.push(text.substr(i));
               dictionary[word](c);
+              return;
             } else {
               heap.push(dictionary[word]);
             }
@@ -490,7 +499,7 @@ var bootstrap = PlainToColor(
 ' : test2  65 emit 66 emit 67 emit 68 emit ; ' +
 ' : test3  90 emit 90 emit 90 emit 90 emit ; ' +
 ' : all  test1 test2 test2 test1 test1 test3 ; ' +
-' [ all test1 ]  ' +
+' [ all test1 test1 ]  ' +
 ' ');
 
 // -----------------------------------------------------------------
