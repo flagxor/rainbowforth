@@ -44,7 +44,8 @@ class WriteBlock(webapp.RequestHandler):
     if user:
       category = self.request.get('category')
       index = int(self.request.get('index'))
-      data = str(self.request.get('data'))
+      sys.stderr.write( '@@@@@@@@@' + repr(self.request.get('data')) )
+      data = self.request.get('data').encode('latin-1')
       query = Block.gql('WHERE author = :author and '
                         'index = :index and '
                         'category = :category '
@@ -63,7 +64,7 @@ class WriteBlock(webapp.RequestHandler):
         b.author = user
         b.data = data
         b.put()
-      self.redirect('/')
+      self.response.headers['Content-Type'] = 'text/plain'
     else:
       self.redirect(users.create_login_url(self.request.uri))
 

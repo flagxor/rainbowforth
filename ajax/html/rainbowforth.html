@@ -274,6 +274,12 @@ var macro_mode = false;
 var dictionary_macro = {};
 
 var dictionary = {
+  'allot': function(c) {
+    var sz = c.dstack.pop();
+    while(sz--) {
+      heap.push(0);
+    }
+  },
   ',': function(c) {
     heap.push(c.dstack.pop());
   },
@@ -340,6 +346,9 @@ var dictionary = {
   },
   'negate': function(c) { c.dstack.push(-c.dstack.pop()); },
   'not': function(c) { c.dstack.push(!c.dstack.pop()); },
+  'and': function(c) { c.dstack.push(c.dstack.pop() & c.dstack.pop()); },
+  'or': function(c) { c.dstack.push(c.dstack.pop() | c.dstack.pop()); },
+  'xor': function(c) { c.dstack.push(c.dstack.pop() ^ c.dstack.pop()); },
   '=': function(c) { c.dstack.push(c.dstack.pop() == c.dstack.pop()); },
   '<>': function(c) { c.dstack.push(c.dstack.pop() != c.dstack.pop()); },
   '<': function(c) { c.dstack.push(c.dstack.pop() > c.dstack.pop()); },
@@ -417,6 +426,39 @@ var dictionary = {
       c.dstack.push(lastEvent.keyCode);
       lastEvent = 0;
     }
+  },
+  'read': function(c) {
+    var addr = c.dstack.pop();
+    var block = c.dstack.pop();
+    HTTP.post('/read', {'category': 'test', 'index': String(block)},
+              function(result) {
+                if (result == null) {
+                  alert('READ FAILED!');
+                  return;
+                }
+                for (var i = 0; i < 1024; i++) {
+                  heap[addr + i] = result.charCodeAt(i);
+                }
+                c.yield = 0;
+                runAll();
+              }, null);
+    c.yield = 1;
+  },
+  'write': function(c) {
+    var addr = c.dstack.pop();
+    var block = c.dstack.pop();
+    var dt = '';
+    for (var i = 0; i < 1024; i++) {
+      dt += String.fromCharCode(heap[addr + i]);
+    }
+    HTTP.post('/write', {'category': 'test',
+                        'index': String(block),
+                        'data': dt},
+              function(result) {
+                c.yield = 0;
+                runAll();
+              }, null);
+    c.yield = 1;
   },
   'fork': function(c) {
     createThread(c.ip, 1);
@@ -539,6 +581,9 @@ function PlainToColor(text) {
 // -----------------------------------------------------------------
 
 var bootstrap = PlainToColor(
+" : nip   swap drop ; " +
+" : width   sizexy drop ; " +
+" : height   sizexy nip ; " +
 " : ifskip,   ' ifskip [ literal ] , ; " +
 " : jump-later,   here 0 literal ; " +
 " [ macro ] " +
@@ -551,8 +596,6 @@ var bootstrap = PlainToColor(
 " : until   ifskip,  jump-later, jump! ; " +
 " : again   jump-later, jump! ; " +
 " [ forth ] " +
-" variable cursor-pos " +
-" variable cursor-block " +
 //" : test1   2 > if 66 emit else 67 emit then ; " +
 //" [ 1 test1 2 test1 3 test1 4 test1 ]  " +
 //" : test2   65 begin dup emit 1 +   dup 90 > until drop ; " +
@@ -575,16 +618,19 @@ var bootstrap = PlainToColor(
 //" [ 251 color-ch 65 color-ch 66 color-ch ] " +
 //" [ 250 color-ch 65 color-ch 66 color-ch ] " +
 //" [ 32 color-ch 65 color-ch 66 color-ch ] " +
-" : nip   swap drop ; " +
-" : width   sizexy drop ; " +
-" : height   sizexy nip ; " +
+" variable cursor-pos " +
+" variable cursor-block " +
+" variable edit-buffer [ 1024 allot edit-buffer ! ] " +
+" : test5   0 edit-buffer @ write 65 emit" +
+"           0 edit-buffer @ read 66 emit ; " +
 " [ 32 64 8 * + cursor-pos ! ] " +
-" : clip-cursor  cursor-pos @  0 max  width height 1 - * min  cursor-pos ! ; " +
+" : clip-cursor  cursor-pos @  0 max  width height * 1 - min  cursor-pos ! ; " +
 " : handle-key " +
 "      dup 37 = if -1 cursor-pos +! then " +
 "      dup 39 = if 1 cursor-pos +! then " +
 "      dup 38 = if width negate cursor-pos +! then " +
 "      dup 40 = if width cursor-pos +! then " +
+"      dup 65 = if test5 then " +
 "      clip-cursor " +
 "      drop cursor-pos @ setraw 777777h background 0 90 emit 0 background ; " +
 " : main   begin key handle-key again ; " +
@@ -596,11 +642,9 @@ var bootstrap = PlainToColor(
 
 function afterLoad(result) {
   consoleClear(0, 0);
-  consolePlot(10, 10, 65, 0xff0000, 0x007700);
   heap.push(literal(bootstrap));
   heap.push(dictionary.push);
   heap.push(dictionary['raw-load']);
-  heap.push(dictionary.key);
   heap.push(dictionary.terminate);
   createThread(0, 0);
   runAll();
