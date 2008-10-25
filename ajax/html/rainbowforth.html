@@ -264,6 +264,12 @@ function call_addr(n) {
   };
 }
 
+function jump_addr(n) {
+  return function(c) {
+    c.ip = n;
+  };
+}
+
 var macro_mode = false;
 var dictionary_macro = {};
 
@@ -275,7 +281,7 @@ var dictionary = {
     var n = c.dstack.pop();
     heap.push(literal(n));
   },
-  'compile,': function(c) {
+  'raw-compile,': function(c) {
     var n = c.dstack.pop();
     heap.push(call_addr(n));
   },
@@ -309,6 +315,9 @@ var dictionary = {
   'pop': function(c) {
     c.dstack.push(c.rstack.pop());
   },
+  'i': function(c) {
+    c.dstack.push(c.rstack.back());
+  },
   '+': function(c) {
     c.dstack.push(c.dstack.pop() + c.dstack.pop());
   },
@@ -319,39 +328,80 @@ var dictionary = {
   '*': function(c) {
     c.dstack.push(c.dstack.pop() * c.dstack.pop());
   },
-  '<': function(c) {
-    c.dstack.push(c.dstack.pop() > c.dstack.pop());
+  'min': function(c) {
+    var a = c.dstack.pop();
+    var b = c.dstack.pop();
+    if (a < b) { c.dstack.push(a); } else { c.dstack.push(b); }
+  },
+  'max': function(c) {
+    var a = c.dstack.pop();
+    var b = c.dstack.pop();
+    if (a > b) { c.dstack.push(a); } else { c.dstack.push(b); }
+  },
+  'negate': function(c) { c.dstack.push(-c.dstack.pop()); },
+  'not': function(c) { c.dstack.push(!c.dstack.pop()); },
+  '=': function(c) { c.dstack.push(c.dstack.pop() == c.dstack.pop()); },
+  '<>': function(c) { c.dstack.push(c.dstack.pop() != c.dstack.pop()); },
+  '<': function(c) { c.dstack.push(c.dstack.pop() > c.dstack.pop()); },
+  '>': function(c) { c.dstack.push(c.dstack.pop() < c.dstack.pop()); },
+  '<=': function(c) { c.dstack.push(c.dstack.pop() >= c.dstack.pop()); },
+  '>=': function(c) { c.dstack.push(c.dstack.pop() <= c.dstack.pop()); },
+  'ifskip': function(c) {
+    if (c.dstack.pop()) {
+      c.ip++;
+    }
+  },
+  'jump!': function(c) {
+    var addr = c.dstack.pop();
+    var towhere = c.dstack.pop();
+    heap[addr] = jump_addr(towhere);
   },
   'here': function(c) {
     c.dstack.push(heap.length);
   },
   '!': function(c) {
-    var addr = dstack.pop();
-    var val = dstack.pop();
+    var addr = c.dstack.pop();
+    var val = c.dstack.pop();
     heap[addr] = val;
   },
   '@': function(c) {
-    dstack.push(heap[dstack.pop()]);
+    c.dstack.push(heap[c.dstack.pop()]);
+  },
+  '+!': function(c) {
+    var addr = c.dstack.pop();
+    heap[addr] += c.dstack.pop();
   },
   'random': function(c) {
-    var high = dstack.pop();
-    var low = dstack.pop();
+    var high = c.dstack.pop();
+    var low = c.dstack.pop();
     var pick = Math.floor(Math.random() * (high - low + 1)) + low;
-    dstack.push(pick);
+    c.dstack.push(pick);
   },
   'foreground': function(c) {
-    c.foreground = dstack.pop();
+    c.foreground = c.dstack.pop();
   },
   'background': function(c) {
-    c.background = dstack.pop();
+    c.background = c.dstack.pop();
+  },
+  'setraw': function(c) {
+    var pos = c.dstack.pop();
+    c.console_y = Math.floor(pos / CONSOLE_WIDTH);
+    c.console_x = pos % CONSOLE_WIDTH;
   },
   'setxy': function(c) {
-    c.console_y = dstack.pop();
-    c.console_x = dstack.pop();
+    c.console_y = c.dstack.pop();
+    c.console_x = c.dstack.pop();
+  },
+  'sizexy': function(c) {
+    c.dstack.push(CONSOLE_WIDTH);
+    c.dstack.push(CONSOLE_HEIGHT);
   },
   'emit': function(c) {
     var ch = c.dstack.pop();
     consoleEmit(c, ch);
+  },
+  'alert': function(c) {
+    alert(c.dstack.pop());
   },
   'cls': function(c) {
     consoleClear(c.foreground, c.background);
@@ -365,18 +415,19 @@ var dictionary = {
     } else {
       c.yield = 0;
       c.dstack.push(lastEvent.keyCode);
+      lastEvent = 0;
     }
   },
   'fork': function(c) {
     createThread(c.ip, 1);
-    dstack.push(0);
+    c.dstack.push(0);
   },
   'terminate': function(c) {
     c.yield = 1;
     dropThread(c);
   },
   'raw-load': function(c) {
-    var text = c.dstack.pop();
+    var text = c.rstack.pop();
     var word = '';
     for(var i = 0; i < text.length; i++) {
       var ch = text[i];
@@ -391,8 +442,8 @@ var dictionary = {
         } else if (ch == YELLOW_SPACE) {
           // Yellow - Execute a word or push a literal.
           if (dictionary[word] != undefined) {
-            c.ip -= 1;
-            c.dstack.push(text.substr(i));
+            c.ip--;
+            c.rstack.push(text.substr(i));
             dictionary[word](c);
             return;
           } else if (word[word.length-1] == 'h') {
@@ -404,8 +455,8 @@ var dictionary = {
           // Green - Compile a word (unless macro) or compile a literal.
           if (dictionary[word] != undefined) {
             if (dictionary_macro[word]) {
-              c.ip -= 1;
-              c.dstack.push(text.substr(i));
+              c.ip--;
+              c.rstack.push(text.substr(i));
               dictionary[word](c);
               return;
             } else {
@@ -419,14 +470,7 @@ var dictionary = {
         } else if (ch == CYAN_SPACE) {
           // Cyan - Compile a word (including macros) or compile a literal.
           if (dictionary[word] != undefined) {
-            if (dictionary_macro[word]) {
-              c.ip -= 1;
-              c.dstack.push(text.substr(i));
-              dictionary[word](c);
-              return;
-            } else {
-              heap.push(dictionary[word]);
-            }
+            heap.push(dictionary[word]);
           } else if (word[word.length-1] == 'h') {
             heap.push(literal(parseInt(word, 16)));
           } else {
@@ -435,7 +479,7 @@ var dictionary = {
         } else if (ch == BLUE_SPACE) {
           // Blue - Push xt for word on stack.
           c.dstack.push(dictionary[word]);
-        } else if (code == MAGENTA_SPACE) {
+        } else if (ch == MAGENTA_SPACE) {
           // Magenta - define a variable.
           dictionary[word] = literal(heap.length);
           heap.push(0);
@@ -495,12 +539,57 @@ function PlainToColor(text) {
 // -----------------------------------------------------------------
 
 var bootstrap = PlainToColor(
-' : test1  49 emit 50 emit 51 emit 52 emit ; ' +
-' : test2  65 emit 66 emit 67 emit 68 emit ; ' +
-' : test3  90 emit 90 emit 90 emit 90 emit ; ' +
-' : all  test1 test2 test2 test1 test1 test3 ; ' +
-' [ all test1 test1 ]  ' +
-' ');
+" : ifskip,   ' ifskip [ literal ] , ; " +
+" : jump-later,   here 0 literal ; " +
+" [ macro ] " +
+" : if   ifskip, jump-later, ; " +
+" : then   here swap jump! ; " +
+" : else    jump-later,  swap  { then } ; " +
+" : begin   here ; " +
+" : while   ifskip, jump-later, ; " +
+" : repeat   swap  jump-later, jump!  { then } ; " +
+" : until   ifskip,  jump-later, jump! ; " +
+" : again   jump-later, jump! ; " +
+" [ forth ] " +
+" variable cursor-pos " +
+" variable cursor-block " +
+//" : test1   2 > if 66 emit else 67 emit then ; " +
+//" [ 1 test1 2 test1 3 test1 4 test1 ]  " +
+//" : test2   65 begin dup emit 1 +   dup 90 > until drop ; " +
+//" [ test2 ] " +
+//" : test3   65 begin dup 127 < while dup emit 1 + repeat drop ; " +
+//" [ test3 ] " +
+" : color-ch " +
+"      dup 255 = if ff0000h foreground then " +
+"      dup 254 = if ffff00h foreground then " +
+"      dup 253 = if 00ff00h foreground then " +
+"      dup 252 = if 00ffffh foreground then " +
+"      dup 251 = if 0000ffh foreground then " +
+"      dup 250 = if ff00ffh foreground then " +
+"      dup 32  = if ffffffh foreground then " +
+"      dup 250 >= if drop 32 emit else emit then ; " +
+//" [ 255 color-ch 65 color-ch 66 color-ch ] " +
+//" [ 254 color-ch 65 color-ch 66 color-ch ] " +
+//" [ 253 color-ch 65 color-ch 66 color-ch ] " +
+//" [ 252 color-ch 65 color-ch 66 color-ch ] " +
+//" [ 251 color-ch 65 color-ch 66 color-ch ] " +
+//" [ 250 color-ch 65 color-ch 66 color-ch ] " +
+//" [ 32 color-ch 65 color-ch 66 color-ch ] " +
+" : nip   swap drop ; " +
+" : width   sizexy drop ; " +
+" : height   sizexy nip ; " +
+" [ 32 64 8 * + cursor-pos ! ] " +
+" : clip-cursor  cursor-pos @  0 max  width height 1 - * min  cursor-pos ! ; " +
+" : handle-key " +
+"      dup 37 = if -1 cursor-pos +! then " +
+"      dup 39 = if 1 cursor-pos +! then " +
+"      dup 38 = if width negate cursor-pos +! then " +
+"      dup 40 = if width cursor-pos +! then " +
+"      clip-cursor " +
+"      drop cursor-pos @ setraw 777777h background 0 90 emit 0 background ; " +
+" : main   begin key handle-key again ; " +
+" [ main ] " +
+" ");
 
 // -----------------------------------------------------------------
 
@@ -509,20 +598,9 @@ function afterLoad(result) {
   consoleClear(0, 0);
   consolePlot(10, 10, 65, 0xff0000, 0x007700);
   heap.push(literal(bootstrap));
+  heap.push(dictionary.push);
   heap.push(dictionary['raw-load']);
-  heap.push(literal(65));
-  heap.push(dictionary.emit);
   heap.push(dictionary.key);
-  heap.push(dictionary.emit);
-  heap.push(dictionary.key);
-  heap.push(dictionary.emit);
-  heap.push(dictionary.key);
-  heap.push(dictionary.emit);
-  heap.push(dictionary.cls);
-  heap.push(dictionary.key);
-  heap.push(dictionary.emit);
-  heap.push(dictionary.key);
-  heap.push(dictionary.emit);
   heap.push(dictionary.terminate);
   createThread(0, 0);
   runAll();
