@@ -380,6 +380,14 @@ var dictionary = {
     var addr = c.dstack.pop();
     heap[addr] += c.dstack.pop();
   },
+  'fill': function(c) {
+    var ch = c.dstack.pop();
+    var count = c.dstack.pop();
+    var addr = c.dstack.pop();
+    for (var i = 0; i < count; i++) {
+      heap[addr + i] = ch;
+    }
+  },
   'random': function(c) {
     var high = c.dstack.pop();
     var low = c.dstack.pop();
