@@ -226,11 +226,19 @@ function dropThread(c) {
 
 
 var lastEvent = 0;
+var lastKeyCode = 0;
 
 function setupEvents() {
   document.onkeydown = function(e) {
     var e = window.event || e;
     lastEvent = e;
+    lastKeyCode = -e.keyCode;
+    runAll();
+  }
+  document.onkeypress = function(e) {
+    var e = window.event || e;
+    lastEvent = e;
+    lastKeyCode = e.keyCode;
     runAll();
   }
 }
@@ -415,6 +423,7 @@ var dictionary = {
   },
   'emit': function(c) {
     var ch = c.dstack.pop();
+    if (ch == 0) { ch = 32; }
     consoleEmit(c, ch);
   },
   'alert': function(c) {
@@ -431,7 +440,7 @@ var dictionary = {
       c.ip--;
     } else {
       c.yield = 0;
-      c.dstack.push(lastEvent.keyCode);
+      c.dstack.push(lastKeyCode);
       lastEvent = 0;
     }
   },
@@ -645,14 +654,20 @@ var bootstrap = PlainToColor(
 "           0 edit-buffer @ read 66 emit ; " +
 " [ 32 64 8 * + cursor-pos ! ] " +
 " : clip-cursor  cursor-pos @  0 max  width height * 1 - min  cursor-pos ! ; " +
+" : handle-cursor " +
+"      cursor-pos @ = if 777777h background else 0 background then ; " +
+" : redraw-one   dup handle-cursor dup setraw edit-buffer @ + @ color-ch ; " +
+" : redraw   1024 begin dup 0 > while 1 - dup redraw-one repeat drop ; " +
+" : type-one   edit-buffer @ cursor-pos @ + !   1 cursor-pos +! ; " +
 " : handle-key " +
-"      dup 37 = if -1 cursor-pos +! then " +
-"      dup 39 = if 1 cursor-pos +! then " +
-"      dup 38 = if width negate cursor-pos +! then " +
-"      dup 40 = if width cursor-pos +! then " +
-"      dup 65 = if test5 67 emit then " +
+"      dup -37 = if -1 cursor-pos +! then " +
+"      dup -39 = if 1 cursor-pos +! then " +
+"      dup -38 = if width negate cursor-pos +! then " +
+"      dup -40 = if width cursor-pos +! then " +
+"      dup 33 >= if dup 126 <= if type-one then then " +
+"      dup 32 = if 255 type-one then " +
 "      clip-cursor " +
-"      drop cursor-pos @ setraw 777777h background 0 90 emit 0 background ; " +
+"      redraw drop ; " +
 " : main   begin key handle-key again ; " +
 " [ main ] " +
 " ");
