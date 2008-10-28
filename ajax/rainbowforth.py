@@ -44,8 +44,7 @@ class WriteBlock(webapp.RequestHandler):
     if user:
       category = self.request.get('category')
       index = int(self.request.get('index'))
-      sys.stderr.write( '@@@@@@@@@' + repr(self.request.get('data')) )
-      data = self.request.get('data').encode('latin-1')
+      data = self.request.str_POST['data']
       query = Block.gql('WHERE author = :author and '
                         'index = :index and '
                         'category = :category '

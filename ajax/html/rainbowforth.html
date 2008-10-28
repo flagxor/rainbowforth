@@ -428,6 +428,10 @@ var dictionary = {
     }
   },
   'read': function(c) {
+    if (c.yield) {
+      c.ip--;
+      return;
+    }
     var addr = c.dstack.pop();
     var block = c.dstack.pop();
     HTTP.post('/read', {'category': 'test', 'index': String(block)},
@@ -440,11 +444,17 @@ var dictionary = {
                   heap[addr + i] = result.charCodeAt(i);
                 }
                 c.yield = 0;
+                c.ip++;
                 runAll();
               }, null);
     c.yield = 1;
+    c.ip--;
   },
   'write': function(c) {
+    if (c.yield) {
+      c.ip--;
+      return;
+    }
     var addr = c.dstack.pop();
     var block = c.dstack.pop();
     var dt = '';
@@ -456,9 +466,11 @@ var dictionary = {
                         'data': dt},
               function(result) {
                 c.yield = 0;
+                c.ip++;
                 runAll();
               }, null);
     c.yield = 1;
+    c.ip--;
   },
   'fork': function(c) {
     createThread(c.ip, 1);
@@ -620,8 +632,8 @@ var bootstrap = PlainToColor(
 //" [ 32 color-ch 65 color-ch 66 color-ch ] " +
 " variable cursor-pos " +
 " variable cursor-block " +
-" variable edit-buffer [ 1024 allot edit-buffer ! ] " +
-" : test5   0 edit-buffer @ write 65 emit" +
+" variable edit-buffer [ here 1024 allot edit-buffer ! ] " +
+" : test5   0 edit-buffer @ write 65 emit " +
 "           0 edit-buffer @ read 66 emit ; " +
 " [ 32 64 8 * + cursor-pos ! ] " +
 " : clip-cursor  cursor-pos @  0 max  width height * 1 - min  cursor-pos ! ; " +
@@ -630,7 +642,7 @@ var bootstrap = PlainToColor(
 "      dup 39 = if 1 cursor-pos +! then " +
 "      dup 38 = if width negate cursor-pos +! then " +
 "      dup 40 = if width cursor-pos +! then " +
-"      dup 65 = if test5 then " +
+"      dup 65 = if test5 67 emit then " +
 "      clip-cursor " +
 "      drop cursor-pos @ setraw 777777h background 0 90 emit 0 background ; " +
 " : main   begin key handle-key again ; " +
