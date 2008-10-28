@@ -650,8 +650,6 @@ var bootstrap = PlainToColor(
 " variable cursor-pos " +
 " variable cursor-block " +
 " variable edit-buffer [ here 1024 allot edit-buffer ! ] " +
-" : test5   0 edit-buffer @ write 65 emit " +
-"           0 edit-buffer @ read 66 emit ; " +
 " [ 32 64 8 * + cursor-pos ! ] " +
 " : clip-cursor  cursor-pos @  0 max  width height * 1 - min  cursor-pos ! ; " +
 " : handle-cursor " +
@@ -659,11 +657,15 @@ var bootstrap = PlainToColor(
 " : redraw-one   dup handle-cursor dup setraw edit-buffer @ + @ color-ch ; " +
 " : redraw   1024 begin dup 0 > while 1 - dup redraw-one repeat drop ; " +
 " : type-one   edit-buffer @ cursor-pos @ + !   1 cursor-pos +! ; " +
+" : editor-save   cursor-block @ edit-buffer @ write ; " +
+" : editor-load   cursor-block @ edit-buffer @ read ; " +
 " : handle-key " +
 "      dup -37 = if -1 cursor-pos +! then " +
 "      dup -39 = if 1 cursor-pos +! then " +
 "      dup -38 = if width negate cursor-pos +! then " +
 "      dup -40 = if width cursor-pos +! then " +
+"      dup -33 = if editor-save then " +
+"      dup -34 = if editor-load then " +
 "      dup 33 >= if dup 126 <= if type-one then then " +
 "      dup 32 = if 255 type-one then " +
 "      clip-cursor " +
