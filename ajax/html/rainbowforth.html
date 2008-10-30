@@ -451,7 +451,7 @@ var dictionary = {
     }
     var addr = c.dstack.pop();
     var block = c.dstack.pop();
-    HTTP.post('/read', {'category': 'test', 'index': String(block)},
+    HTTP.post('/read', {'index': String(block)},
               function(result) {
                 if (result == null) {
                   alert('READ FAILED!');
@@ -478,9 +478,8 @@ var dictionary = {
     for (var i = 0; i < 1024; i++) {
       dt += String.fromCharCode(heap[addr + i]);
     }
-    HTTP.post('/write', {'category': 'test',
-                        'index': String(block),
-                        'data': dt},
+    HTTP.post('/write', {'index': String(block),
+                         'data': dt},
               function(result) {
                 c.yield = 0;
                 c.ip++;
@@ -693,7 +692,7 @@ function main() {
   var c = {'console_x': 0, 'console_y': 0,
            'foreground': 0xffffff, 'background': 0x000000};
   consoleEmitString(c, 'Loading...');
-  HTTP.post('/read', {'category': 'test', 'index': '0'}, afterLoad, null);
+  HTTP.post('/read', {'index': '0'}, afterLoad, null);
 }
 
 

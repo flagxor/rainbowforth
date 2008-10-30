@@ -9,7 +9,6 @@ from google.appengine.ext.webapp import template
 
 class Block(db.Model):
   author = db.UserProperty()
-  category = db.StringProperty()
   index = db.IntegerProperty()
   data = db.BlobProperty()
 
@@ -18,15 +17,12 @@ class ReadBlock(webapp.RequestHandler):
   def post(self):
     user = users.get_current_user()
     if user:
-      category = self.request.get('category')
       index = int(self.request.get('index'))
       query = Block.gql('WHERE author = :author and '
-                        'index = :index and '
-                        'category = :category '
+                        'index = :index '
                         'LIMIT 1',
                         author=user,
-                        index=index,
-                        category=category)
+                        index=index)
       block = query.fetch(1)
       if block:
         self.response.headers['Content-Type'] = 'text/plain'
@@ -42,23 +38,19 @@ class WriteBlock(webapp.RequestHandler):
   def post(self):
     user = users.get_current_user()
     if user:
-      category = self.request.get('category')
       index = int(self.request.get('index'))
       data = self.request.str_POST['data']
       query = Block.gql('WHERE author = :author and '
-                        'index = :index and '
-                        'category = :category '
+                        'index = :index '
                         'LIMIT 1',
                         author=user,
-                        index=index,
-                        category=category)
+                        index=index)
       block = query.fetch(1)
       if block:
         block[0].data = data
         block[0].put()
       else:
         b = Block()
-        b.category = category
         b.index = index
         b.author = user
         b.data = data
