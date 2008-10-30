@@ -104,7 +104,7 @@ HTTP.getText = function(url, callback) {
 
 
 var CONSOLE_WIDTH = 64;
-var CONSOLE_HEIGHT = 16;
+var CONSOLE_HEIGHT = 18;
 
 var console = new Array();
 
@@ -225,20 +225,17 @@ function dropThread(c) {
 // -----------------------------------------------------------------
 
 
-var lastEvent = 0;
-var lastKeyCode = 0;
+var keyBuffer = [];
 
 function setupEvents() {
   document.onkeydown = function(e) {
     var e = window.event || e;
-    lastEvent = e;
-    lastKeyCode = -e.keyCode;
+    keyBuffer.unshift(-e.keyCode);
     runAll();
   }
   document.onkeypress = function(e) {
     var e = window.event || e;
-    lastEvent = e;
-    lastKeyCode = e.keyCode;
+    keyBuffer.unshift(e.keyCode);
     runAll();
   }
 }
@@ -426,6 +423,10 @@ var dictionary = {
     if (ch == 0) { ch = 32; }
     consoleEmit(c, ch);
   },
+  '.': function(c) {
+    var number = String(c.dstack.pop());
+    consoleEmitString(c, number);
+  },
   'alert': function(c) {
     alert(c.dstack.pop());
   },
@@ -435,13 +436,12 @@ var dictionary = {
     c.console_y = 0;
   },
   'key': function(c) {
-    if (lastEvent == 0) {
+    if (keyBuffer.length == 0) {
       c.yield = 1;
       c.ip--;
     } else {
       c.yield = 0;
-      c.dstack.push(lastKeyCode);
-      lastEvent = 0;
+      c.dstack.push(keyBuffer.pop());
     }
   },
   'read': function(c) {
@@ -611,7 +611,7 @@ function PlainToColor(text) {
 var bootstrap = PlainToColor(
 " : nip   swap drop ; " +
 " : width   sizexy drop ; " +
-" : height   sizexy nip ; " +
+" : height   sizexy nip 2 - ; " +
 " : ifskip,   ' ifskip [ literal ] , ; " +
 " : jump-later,   here 0 literal ; " +
 " [ macro ] " +
@@ -624,12 +624,6 @@ var bootstrap = PlainToColor(
 " : until   ifskip,  jump-later, jump! ; " +
 " : again   jump-later, jump! ; " +
 " [ forth ] " +
-//" : test1   2 > if 66 emit else 67 emit then ; " +
-//" [ 1 test1 2 test1 3 test1 4 test1 ]  " +
-//" : test2   65 begin dup emit 1 +   dup 90 > until drop ; " +
-//" [ test2 ] " +
-//" : test3   65 begin dup 127 < while dup emit 1 + repeat drop ; " +
-//" [ test3 ] " +
 " : color-ch " +
 "      dup 255 = if ff0000h foreground then " +
 "      dup 254 = if ffff00h foreground then " +
@@ -639,37 +633,46 @@ var bootstrap = PlainToColor(
 "      dup 250 = if ff00ffh foreground then " +
 "      dup 32  = if ffffffh foreground then " +
 "      dup 250 >= if drop 32 emit else emit then ; " +
-//" [ 255 color-ch 65 color-ch 66 color-ch ] " +
-//" [ 254 color-ch 65 color-ch 66 color-ch ] " +
-//" [ 253 color-ch 65 color-ch 66 color-ch ] " +
-//" [ 252 color-ch 65 color-ch 66 color-ch ] " +
-//" [ 251 color-ch 65 color-ch 66 color-ch ] " +
-//" [ 250 color-ch 65 color-ch 66 color-ch ] " +
-//" [ 32 color-ch 65 color-ch 66 color-ch ] " +
 " variable cursor-pos " +
 " variable cursor-block " +
+" variable cursor-color [ 32 cursor-color ! ] " +
 " variable edit-buffer [ here 1024 allot edit-buffer ! ] " +
-" [ 32 64 8 * + cursor-pos ! ] " +
 " : clip-cursor  cursor-pos @  0 max  width height * 1 - min  cursor-pos ! ; " +
 " : handle-cursor " +
 "      cursor-pos @ = if 777777h background else 0 background then ; " +
 " : redraw-one   dup handle-cursor dup setraw edit-buffer @ + @ color-ch ; " +
+" : blanks    begin 0 > while 32 emit 1 - repeat drop ; " +
+" : show-page   0 17 setxy ffffffh foreground " +
+"                          0 background cursor-block @ . 10 blanks ; " +
 " : redraw   1024 begin dup 0 > while 1 - dup redraw-one repeat drop ; " +
+" : redraw-all   redraw show-page ; " +
 " : type-one   edit-buffer @ cursor-pos @ + !   1 cursor-pos +! ; " +
 " : editor-save   cursor-block @ edit-buffer @ write ; " +
 " : editor-load   cursor-block @ edit-buffer @ read ; " +
+" : pick-color " +
+"      dup 114 = if 255 cursor-color ! then " +
+"      dup 121 = if 254 cursor-color ! then " +
+"      dup 103 = if 253 cursor-color ! then " +
+"      dup 99 = if 252 cursor-color ! then " +
+"      dup 98 = if 251 cursor-color ! then " +
+"      dup 109 = if 250 cursor-color ! then " +
+"      dup 119 = if 32 cursor-color ! then " +
+"      dup 39 = if 39 type-one then " +
+"      redraw-all drop ; " +
 " : handle-key " +
 "      dup -37 = if -1 cursor-pos +! then " +
 "      dup -39 = if 1 cursor-pos +! then " +
 "      dup -38 = if width negate cursor-pos +! then " +
 "      dup -40 = if width cursor-pos +! then " +
-"      dup -33 = if editor-save then " +
-"      dup -34 = if editor-load then " +
-"      dup 33 >= if dup 126 <= if type-one then then " +
-"      dup 32 = if 255 type-one then " +
+"      dup -33 = if cursor-block @ 0 > if " +
+"          editor-save -1 cursor-block +! editor-load then then " +
+"      dup -34 = if editor-save 1 cursor-block +! editor-load then " +
+"      dup 39 = if key . 39 type-one else " +
+"         dup 33 >= if dup 126 <= if type-one then then then " +
+"      dup 32 = if cursor-color @ type-one then " +
 "      clip-cursor " +
-"      redraw drop ; " +
-" : main   begin key handle-key again ; " +
+"      redraw-all drop ; " +
+" : main   redraw-all begin key handle-key again ; " +
 " [ main ] " +
 " ");
 
