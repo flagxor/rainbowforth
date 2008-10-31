@@ -649,17 +649,18 @@ var bootstrap = PlainToColor(
 " : type-one   edit-buffer @ cursor-pos @ + !   1 cursor-pos +! ; " +
 " : editor-save   cursor-block @ edit-buffer @ write ; " +
 " : editor-load   cursor-block @ edit-buffer @ read ; " +
-" : pick-color " +
-"      dup 114 = if 255 cursor-color ! then " +
-"      dup 121 = if 254 cursor-color ! then " +
-"      dup 103 = if 253 cursor-color ! then " +
-"      dup 99 = if 252 cursor-color ! then " +
-"      dup 98 = if 251 cursor-color ! then " +
-"      dup 109 = if 250 cursor-color ! then " +
-"      dup 119 = if 32 cursor-color ! then " +
-"      dup 39 = if 39 type-one then " +
-"      redraw-all drop ; " +
-" : handle-key " +
+" : special-mode    begin key " +
+"      dup 114 = if 255 cursor-color ! ; then " +
+"      dup 121 = if 254 cursor-color ! ; then " +
+"      dup 103 = if 253 cursor-color ! ; then " +
+"      dup 99 = if 252 cursor-color ! ; then " +
+"      dup 98 = if 251 cursor-color ! ; then " +
+"      dup 109 = if 250 cursor-color ! ; then " +
+"      dup 119 = if 32 cursor-color ! ; then " +
+"      dup 39 = if 39 type-one ; then " +
+"      clip-cursor " +
+"      redraw-all drop again ; " +
+" : edit-mode    begin key " +
 "      dup -37 = if -1 cursor-pos +! then " +
 "      dup -39 = if 1 cursor-pos +! then " +
 "      dup -38 = if width negate cursor-pos +! then " +
@@ -667,12 +668,12 @@ var bootstrap = PlainToColor(
 "      dup -33 = if cursor-block @ 0 > if " +
 "          editor-save -1 cursor-block +! editor-load then then " +
 "      dup -34 = if editor-save 1 cursor-block +! editor-load then " +
-"      dup 39 = if key . 39 type-one else " +
+"      dup 39 = if special-mode else " +
 "         dup 33 >= if dup 126 <= if type-one then then then " +
 "      dup 32 = if cursor-color @ type-one then " +
 "      clip-cursor " +
-"      redraw-all drop ; " +
-" : main   redraw-all begin key handle-key again ; " +
+"      redraw-all drop again ; " +
+" : main   redraw-all edit-mode ; " +
 " [ main ] " +
 " ");
 
