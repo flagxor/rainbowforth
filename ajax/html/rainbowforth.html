@@ -2,17 +2,17 @@
 <head>
 <title>RainbowForth</title>
 </head>
-<body>
+<body bgcolor="#050505">
 
 
 <table align="center" bgcolor="#000000"
        border="0" cellpadding="0" cellspacing="0">
 <tr border="0" cellpadding="0" cellspacing="0">
 <td border="0" cellpadding="0" cellspacing="0">
-<b><font size="7">
-<pre id="console">
+<b>
+<pre id="console" style="font-size:350%">
 </pre>
-</font></b>
+</b>
 </td></tr></table>
 
 
@@ -122,16 +122,16 @@ function setupConsole() {
 }
 
 function numberToColor(n) {
-  var col = ("00000" + n.toString(16));
+  var col = ('00000' + n.toString(16));
   col = col.substr(col.length - 6, 6);
-  return "#" + col;
+  return '#' + col;
 }
 
 function consolePlot(x, y, text, fg, bg) {
   var element = console[x+y*CONSOLE_WIDTH];
   element.firstChild.nodeValue = String.fromCharCode(text);
-  element.setAttribute("color", numberToColor(fg));
-  element.setAttribute("style", "background-color: " + numberToColor(bg));
+  element.setAttribute('color', numberToColor(fg));
+  element.setAttribute('style', 'background-color: ' + numberToColor(bg));
 }
 
 function consoleClear(fg, bg) {
@@ -232,11 +232,14 @@ function setupEvents() {
     var e = window.event || e;
     keyBuffer.unshift(-e.keyCode);
     runAll();
+    return true;
   }
   document.onkeypress = function(e) {
     var e = window.event || e;
-    keyBuffer.unshift(e.keyCode);
+    var ch = e.which || e.keyCode;
+    keyBuffer.unshift(ch);
     runAll();
+    return true;
   }
 }
 
@@ -427,6 +430,10 @@ var dictionary = {
     var number = String(c.dstack.pop());
     consoleEmitString(c, number);
   },
+  'set-font-size': function(c) {
+    var sz = 'font-size:' + c.dstack.pop() + '%';
+    document.getElementById('console').setAttribute('style', sz);
+  },
   'alert': function(c) {
     alert(c.dstack.pop());
   },
@@ -500,7 +507,7 @@ var dictionary = {
     var text = c.rstack.pop();
     var word = '';
     for(var i = 0; i < text.length; i++) {
-      var ch = text[i];
+      var ch = text.charAt(i);
       if (ALL_SPACES.indexOf(ch) >= 0) {
         if (!word.length) continue;
         if (ch == WHITE_SPACE) {
@@ -516,7 +523,7 @@ var dictionary = {
             c.rstack.push(text.substr(i));
             dictionary[word](c);
             return;
-          } else if (word[word.length-1] == 'h') {
+          } else if (word.charAt(word.length - 1) == 'h') {
             c.dstack.push(parseInt(word, 16));
           } else {
             c.dstack.push(parseInt(word));
@@ -532,7 +539,7 @@ var dictionary = {
             } else {
               heap.push(dictionary[word]);
             }
-          } else if (word[word.length-1] == 'h') {
+          } else if (word.charAt(word.length - 1) == 'h') {
             heap.push(literal(parseInt(word, 16)));
           } else {
             heap.push(literal(parseInt(word)));
@@ -541,7 +548,7 @@ var dictionary = {
           // Cyan - Compile a word (including macros) or compile a literal.
           if (dictionary[word] != undefined) {
             heap.push(dictionary[word]);
-          } else if (word[word.length-1] == 'h') {
+          } else if (word.charAt(word.length - 1) == 'h') {
             heap.push(literal(parseInt(word, 16)));
           } else {
             heap.push(literal(parseInt(word)));
@@ -571,7 +578,7 @@ function PlainToColor(text) {
   var ret = '';
   var word = '';
   for (var i = 0; i < text.length ; i++) {
-    var ch = text[i];
+    var ch = text.charAt(i);
     if (ch == ' ') {
       if (!word.length) continue;
       if (word == '(') {
@@ -637,6 +644,7 @@ var bootstrap = PlainToColor(
 " variable cursor-block " +
 " variable cursor-color [ 32 cursor-color ! ] " +
 " variable edit-buffer [ here 1024 allot edit-buffer ! ] " +
+" variable font-size [ 350 font-size ! ] " +
 " : clip-cursor  cursor-pos @  0 max  width height * 1 - min  cursor-pos ! ; " +
 " : handle-cursor " +
 "      cursor-pos @ = if 777777h background else 0 background then ; " +
@@ -657,7 +665,9 @@ var bootstrap = PlainToColor(
 "      dup 98 = if 251 cursor-color ! ; then " +
 "      dup 109 = if 250 cursor-color ! ; then " +
 "      dup 119 = if 32 cursor-color ! ; then " +
-"      dup 39 = if 39 type-one ; then " +
+"      dup 91 = if -20 font-size +! font-size @ set-font-size ; then " +
+"      dup 93 = if 20 font-size +! font-size @ set-font-size ; then " +
+"      dup 92 = if 92 type-one ; then " +
 "      clip-cursor " +
 "      redraw-all drop again ; " +
 " : edit-mode    begin key " +
@@ -668,7 +678,7 @@ var bootstrap = PlainToColor(
 "      dup -33 = if cursor-block @ 0 > if " +
 "          editor-save -1 cursor-block +! editor-load then then " +
 "      dup -34 = if editor-save 1 cursor-block +! editor-load then " +
-"      dup 39 = if special-mode else " +
+"      dup 92 = if special-mode else " +
 "         dup 33 >= if dup 126 <= if type-one then then then " +
 "      dup 32 = if cursor-color @ type-one then " +
 "      clip-cursor " +
