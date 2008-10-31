@@ -327,7 +327,29 @@ var dictionary = {
     c.dstack.push(c.rstack.pop());
   },
   'i': function(c) {
-    c.dstack.push(c.rstack.back());
+    c.dstack.push(c.rstack[c.rstack.length - 2]);
+  },
+  'rawdo': function(c) {
+    if (c.rstack[c.rstack.length - 2] < c.rstack[c.rstack.length - 1]) {
+      c.ip++;
+    } else {
+      c.rstack.pop();
+      c.rstack.pop();
+    }
+  },
+  'rawdo-': function(c) {
+    if (c.rstack[c.rstack.length - 2] > c.rstack[c.rstack.length - 1]) {
+      c.ip++;
+    } else {
+      c.rstack.pop();
+      c.rstack.pop();
+    }
+  },
+  'rawloop': function(c) {
+    c.rstack[c.rstack.length - 2]++;
+  },
+  '+rawloop': function(c) {
+    c.rstack[c.rstack.length - 2] += c.dstack.pop();
   },
   '+': function(c) {
     c.dstack.push(c.dstack.pop() + c.dstack.pop());
@@ -616,6 +638,11 @@ var bootstrap = PlainToColor(
 " : width   sizexy drop ; " +
 " : height   sizexy nip 2 - ; " +
 " : ifskip,   ' ifskip [ literal ] , ; " +
+" : push,   ' push [ literal ] , ; " +
+" : rawdo,   ' rawdo [ literal ] , ; " +
+" : rawdo-,   ' rawdo- [ literal ] , ; " +
+" : rawloop,   ' rawloop [ literal ] , ; " +
+" : +rawloop,   ' +rawloop [ literal ] , ; " +
 " : jump-later,   here 0 literal ; " +
 " [ macro ] " +
 " : if   ifskip, jump-later, ; " +
@@ -626,6 +653,10 @@ var bootstrap = PlainToColor(
 " : repeat   swap  jump-later, jump!  { then } ; " +
 " : until   ifskip,  jump-later, jump! ; " +
 " : again   jump-later, jump! ; " +
+" : do   push, push, here rawdo, jump-later, ; " +
+" : -do   push, push, here rawdo-, jump-later, ; " +
+" : loop   rawloop, { repeat } ; " +
+" : +loop   +rawloop, { repeat } ; " +
 " [ forth ] " +
 " : color-ch " +
 "      dup 255 = if ff0000h foreground then " +
@@ -644,12 +675,16 @@ var bootstrap = PlainToColor(
 " : clip-cursor  cursor-pos @  0 max  width height * 1 - min  cursor-pos ! ; " +
 " : handle-cursor " +
 "      cursor-pos @ = if 777777h background else 0 background then ; " +
-" : redraw-one   dup handle-cursor dup setraw edit-buffer @ + @ color-ch ; " +
 " : blanks    begin 0 > while 32 emit 1 - repeat drop ; " +
 " : show-page   0 17 setxy ffffffh foreground " +
 "                          0 background cursor-block @ . 10 blanks ; " +
-" : redraw   1024 begin dup 0 > while 1 - dup redraw-one repeat drop ; " +
-" : redraw-all   redraw show-page ; " +
+" : redraw-one   dup handle-cursor dup setraw edit-buffer @ + @ color-ch ; " +
+" : redraw-range   -do i redraw-one drop -1 +loop ; " +
+" : redraw   -1 1023 redraw-range ; " +
+" : cursor-ahead   cursor-pos @ 10 - 0 max ; " +
+" : cursor-behind   cursor-pos @ 10 + 1023 min ; " +
+" : redraw-around   cursor-ahead cursor-behind redraw-range ; " +
+" : redraw-all   redraw-around show-page ; " +
 " : type-one   edit-buffer @ cursor-pos @ + !   1 cursor-pos +! ; " +
 " : editor-save   cursor-block @ edit-buffer @ write ; " +
 " : editor-load   cursor-block @ edit-buffer @ read ; " +
