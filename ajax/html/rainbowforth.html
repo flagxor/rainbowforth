@@ -2,19 +2,14 @@
 <head>
 <title>RainbowForth</title>
 </head>
-<body bgcolor="#050505">
+<body bgcolor="#111111">
 
-
-<table align="center" bgcolor="#000000"
-       border="0" cellpadding="0" cellspacing="0">
+<table align="center" bgcolor="#000000" border="0"
+       cellpadding="0" cellspacing="0">
 <tr border="0" cellpadding="0" cellspacing="0">
 <td border="0" cellpadding="0" cellspacing="0">
-<b>
-<pre id="console" style="font-size:350%">
-</pre>
-</b>
+<b><pre id="console" style="font-size:200%"></pre></b>
 </td></tr></table>
-
 
 <script type="text/javascript">
 
@@ -109,15 +104,16 @@ var CONSOLE_HEIGHT = 18;
 var console = new Array();
 
 function setupConsole() {
-  for (var y=0;y<CONSOLE_HEIGHT;y++) {
-    for (var x=0;x<CONSOLE_WIDTH;x++) {
-      var element=document.createElement('font');
-      element.appendChild(document.createTextNode(' '))
-      document.getElementById('console').appendChild(element);
-      console[x+y*CONSOLE_WIDTH]=element;
+  var console_tag = document.getElementById('console');
+  for (var y = 0; y < CONSOLE_HEIGHT; y++) {
+    for (var x = 0; x < CONSOLE_WIDTH; x++) {
+      var element = document.createElement('font');
+      element.appendChild(document.createTextNode(' '));
+      console_tag.appendChild(element);
+      console[x+y*CONSOLE_WIDTH] = element;
     }
     var element=document.createElement('br')
-    document.getElementById('console').appendChild(element);
+    console_tag.appendChild(element);
   }
 }
 
@@ -130,8 +126,8 @@ function numberToColor(n) {
 function consolePlot(x, y, text, fg, bg) {
   var element = console[x+y*CONSOLE_WIDTH];
   element.firstChild.nodeValue = String.fromCharCode(text);
-  element.setAttribute('color', numberToColor(fg));
-  element.setAttribute('style', 'background-color: ' + numberToColor(bg));
+  element.color = numberToColor(fg);
+  element.style.backgroundColor = numberToColor(bg);
 }
 
 function consoleClear(fg, bg) {
@@ -236,7 +232,8 @@ function setupEvents() {
   }
   document.onkeypress = function(e) {
     var e = window.event || e;
-    var ch = e.which || e.keyCode;
+    var ch = e.which;
+    if (ch == undefined) ch = e.keyCode;
     keyBuffer.unshift(ch);
     runAll();
     return true;
@@ -431,8 +428,7 @@ var dictionary = {
     consoleEmitString(c, number);
   },
   'set-font-size': function(c) {
-    var sz = 'font-size:' + c.dstack.pop() + '%';
-    document.getElementById('console').setAttribute('style', sz);
+    document.getElementById('console').style.fontSize = c.dstack.pop() + '%';
   },
   'alert': function(c) {
     alert(c.dstack.pop());
@@ -644,7 +640,7 @@ var bootstrap = PlainToColor(
 " variable cursor-block " +
 " variable cursor-color [ 32 cursor-color ! ] " +
 " variable edit-buffer [ here 1024 allot edit-buffer ! ] " +
-" variable font-size [ 350 font-size ! ] " +
+" variable font-size [ 200 font-size !  font-size @ set-font-size ] " +
 " : clip-cursor  cursor-pos @  0 max  width height * 1 - min  cursor-pos ! ; " +
 " : handle-cursor " +
 "      cursor-pos @ = if 777777h background else 0 background then ; " +
