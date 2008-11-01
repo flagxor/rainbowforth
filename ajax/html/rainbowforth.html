@@ -668,9 +668,10 @@ var bootstrap = PlainToColor(
 "      dup 32  = if ffffffh foreground then " +
 "      dup 250 >= if drop 32 emit else emit then ; " +
 " variable cursor-pos " +
+" variable cursor-pos-old " +
 " variable cursor-block " +
 " variable cursor-color [ 32 cursor-color ! ] " +
-" variable edit-buffer [ here 1024 allot edit-buffer ! ] " +
+" variable edit-buffer [ 20 allot  here 1024 allot edit-buffer !  20 allot ] " +
 " variable font-size [ 200 font-size !  font-size @ set-font-size ] " +
 " : clip-cursor  cursor-pos @  0 max  width height * 1 - min  cursor-pos ! ; " +
 " : handle-cursor " +
@@ -681,13 +682,27 @@ var bootstrap = PlainToColor(
 " : redraw-one   dup handle-cursor dup setraw edit-buffer @ + @ color-ch ; " +
 " : redraw-range   -do i redraw-one drop -1 +loop ; " +
 " : redraw   -1 1023 redraw-range ; " +
-" : cursor-ahead   cursor-pos @ 10 - 0 max ; " +
-" : cursor-behind   cursor-pos @ 10 + 1023 min ; " +
-" : redraw-around   cursor-ahead cursor-behind redraw-range ; " +
-" : redraw-all   redraw-around show-page ; " +
-" : type-one   edit-buffer @ cursor-pos @ + !   1 cursor-pos +! ; " +
-" : editor-save   cursor-block @ edit-buffer @ write ; " +
-" : editor-load   cursor-block @ edit-buffer @ read ; " +
+" : filter-null   dup 0 = if drop 32 ; then ; " +
+" : filter-block 1024 0 do dup i + @ filter-null over i + ! loop ; " +
+" : is-space   dup 32 = if drop 1 ; then 250 >= ; " +
+" : next-space   begin dup edit-buffer @ + @ is-space not while 1 + repeat " +
+"                    1023 min ; " +
+" : last-space   begin dup edit-buffer @ + @ is-space not while 1 - repeat " +
+"                    1 - -1 max ; " +
+" : space-range   dup push 1 - last-space pop next-space ; " +
+" : redraw-around   space-range redraw-range ; " +
+" : redraw-around-cursor   cursor-pos @ redraw-around ; " +
+" : redraw-around-old   cursor-pos-old @ redraw-around ; " +
+" : redraw-all   redraw show-page ; " +
+" : redraw-most   redraw-around-cursor redraw-around-old ; " +
+" : type-one-raw   edit-buffer @ cursor-pos @ + !   1 cursor-pos +! ; " +
+" : type-one   type-one-raw cursor-pos @ dup " +
+"              edit-buffer @ + @ is-space if " +
+"                      cursor-color @ type-one-raw then " +
+"              cursor-pos ! ; " +
+" : editor-save   cursor-block @ edit-buffer @ write redraw ; " +
+" : editor-load   cursor-block @ edit-buffer @ read " +
+"                                edit-buffer @ filter-null redraw-all ; " +
 " : special-mode    begin key " +
 "      dup 114 = if 255 cursor-color ! ; then " +
 "      dup 121 = if 254 cursor-color ! ; then " +
@@ -700,8 +715,9 @@ var bootstrap = PlainToColor(
 "      dup 93 = if 20 font-size +! font-size @ set-font-size ; then " +
 "      dup 92 = if 92 type-one ; then " +
 "      clip-cursor " +
-"      redraw-all drop again ; " +
+"      redraw-most drop again ; " +
 " : edit-mode    begin key " +
+"      cursor-pos @ cursor-pos-old ! " +
 "      dup -37 = if -1 cursor-pos +! then " +
 "      dup -39 = if 1 cursor-pos +! then " +
 "      dup -38 = if width negate cursor-pos +! then " +
@@ -713,8 +729,8 @@ var bootstrap = PlainToColor(
 "         dup 33 >= if dup 126 <= if type-one then then then " +
 "      dup 32 = if cursor-color @ type-one then " +
 "      clip-cursor " +
-"      redraw-all drop again ; " +
-" : main   redraw-all edit-mode ; " +
+"      redraw-most drop again ; " +
+" : main   editor-load edit-mode ; " +
 " [ main ] " +
 " ");
 
