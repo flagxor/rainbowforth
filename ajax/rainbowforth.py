@@ -121,7 +121,7 @@ class MainPage(webapp.RequestHandler):
   def get(self):
     user = users.get_current_user()
     if user:
-      bootstrap = '" [ start-block raw-read push raw-load ] "'
+      bootstrap = '" [ 0 raw-read push raw-load ] "'
       path = os.path.join(os.path.dirname(__file__), 'html/rainbowforth.html')
       self.response.out.write(template.render(path, {'bootstrap': bootstrap}))
     else:
