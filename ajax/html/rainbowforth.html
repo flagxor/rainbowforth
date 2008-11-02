@@ -541,7 +541,7 @@ var dictionary = {
     HTTP.post('/read', {'index': String(block)},
               function(result) {
                 if (result == null) {
-                  alert('READ FAILED!');
+                  alert('READ ' + block + ' FAILED!');
                   return;
                 }
                 for (var i = 0; i < 1024; i++) {
@@ -563,7 +563,7 @@ var dictionary = {
     HTTP.post('/read', {'index': String(block)},
               function(result) {
                 if (result == null) {
-                  alert('READ FAILED!');
+                  alert('RAW-READ ' + block + ' FAILED!');
                   return;
                 }
                 c.dstack.push(result);
