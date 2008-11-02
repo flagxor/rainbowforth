@@ -544,6 +544,26 @@ var dictionary = {
     c.yield = 1;
     c.ip--;
   },
+  'raw-read': function(c) {
+    if (c.yield) {
+      c.ip--;
+      return;
+    }
+    var block = c.dstack.pop();
+    HTTP.post('/read', {'index': String(block)},
+              function(result) {
+                if (result == null) {
+                  alert('READ FAILED!');
+                  return;
+                }
+                c.dstack.push(result);
+                c.yield = 0;
+                c.ip++;
+                runAll();
+              }, null);
+    c.yield = 1;
+    c.ip--;
+  },
   'write': function(c) {
     if (c.yield) {
       c.ip--;
@@ -705,23 +725,26 @@ var bootstrap = PlainToColor({{ bootstrap }});
 // -----------------------------------------------------------------
 
 
-function afterLoad(result) {
-  consoleClear(0, 0);
+function main() {
+  setupConsole();
+  setupEvents();
+
+  // Create console.
+  var c = {'console_x': 0, 'console_y': 0,
+    'foreground': 0xffffff, 'background': 0x000000};
+
+  // Show loading message.
+  consoleEmitString(c, 'Loading...');
+
+  // Create initial bootup sequence.
   heap.push(literal(bootstrap));
   heap.push(dictionary.push);
   heap.push(dictionary['raw-load']);
   heap.push(dictionary.terminate);
+
+  // Create a thread and run.
   createThread(0, 0);
   runAll();
-}
-
-function main() {
-  setupConsole();
-  setupEvents();
-  var c = {'console_x': 0, 'console_y': 0,
-           'foreground': 0xffffff, 'background': 0x000000};
-  consoleEmitString(c, 'Loading...');
-  HTTP.post('/read', {'index': '0'}, afterLoad, null);
 }
 
 
