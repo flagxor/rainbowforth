@@ -367,6 +367,12 @@ var dictionary = {
     var tmp = c.dstack.pop();
     c.dstack.push(Math.floor(c.dstack.pop() / tmp));
   },
+  '1+': function(c) {
+    c.dstack[c.dstack.length - 1]++;
+  },
+  '1-': function(c) {
+    c.dstack[c.dstack.length - 1]--;
+  },
   'min': function(c) {
     var a = c.dstack.pop();
     var b = c.dstack.pop();
