@@ -511,6 +511,16 @@ var dictionary = {
       c.dstack.push(keyBuffer.pop());
     }
   },
+  'start-block': function(c) {
+    var path = window.location.href;
+    var index = path.lastIndexOf('/');
+    if (index >=0 && index < path.length - 1) {
+      var number = path.substring(index + 1);
+      c.dstack.push(parseInt(number));
+    } else {
+      c.dstack.push(0);
+    }
+  },
   'read': function(c) {
     if (c.yield) {
       c.ip--;

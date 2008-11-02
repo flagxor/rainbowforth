@@ -107,7 +107,7 @@ class MainPage(webapp.RequestHandler):
 def main():
   application = webapp.WSGIApplication(
       [
-        ('/', MainPage),
+        ('/[0-9]*', MainPage),
         ('/read', ReadBlock),
         ('/write', WriteBlock),
         ('/delete', DeleteBlock),
