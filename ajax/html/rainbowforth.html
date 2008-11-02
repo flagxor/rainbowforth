@@ -476,6 +476,7 @@ var dictionary = {
     var form = document.createElement('form');
     form.action = '/reflect/datafile.dat';
     form.method = 'post';
+    form.enctype = 'multipart/form-data';
     extra.appendChild(form);
     var submit = document.createElement('input');
     submit.type = 'submit';
