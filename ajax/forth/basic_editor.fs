@@ -50,7 +50,7 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
 : handle-cursor
      cursor-pos @ = if 777777h background else 0 background then ;
 : blanks    begin 0 > while 32 emit 1 - repeat drop ;
-: show-page   0 17 setxy ffffffh foreground
+: show-page   0 17 setxy 777777h foreground
                          0 background cursor-block @ . 10 blanks ;
 : redraw-one   dup handle-cursor dup setraw edit-buffer @ + @ color-ch ;
 : redraw-range   -do i redraw-one drop -1 +loop ;
