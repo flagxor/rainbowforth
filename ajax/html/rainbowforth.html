@@ -546,6 +546,21 @@ var dictionary = {
     c.yield = 1;
     c.ip--;
   },
+  'delete': function(c) {
+    if (c.yield) {
+      c.ip--;
+      return;
+    }
+    var block = c.dstack.pop();
+    HTTP.post('/delete', {'index': String(block)},
+              function(result) {
+                c.yield = 0;
+                c.ip++;
+                runAll();
+              }, null);
+    c.yield = 1;
+    c.ip--;
+  },
   'fork': function(c) {
     createThread(c.ip, 1);
     c.dstack.push(0);
@@ -740,6 +755,7 @@ var bootstrap = PlainToColor(
 " : editor-save   editor-dirty @ if editor-save-raw 0 editor-dirty ! then ; " +
 " : editor-load   cursor-block @ edit-buffer @ read " +
 "                                edit-buffer @ filter-null redraw-all ; " +
+" : editor-delete   cursor-block @ delete  editor-load ; " +
 " : special-mode    begin key " +
 "      dup 114 = if 255 cursor-color ! ; then " +
 "      dup 121 = if 254 cursor-color ! ; then " +
@@ -751,6 +767,7 @@ var bootstrap = PlainToColor(
 "      dup 91 = if -20 font-size +! font-size @ set-font-size ; then " +
 "      dup 93 = if 20 font-size +! font-size @ set-font-size ; then " +
 "      dup 65 = if edit-buffer @ 1024 download ; then " +
+"      dup 100 = if editor-delete ; then " +
 "      dup 92 = if 92 type-one ; then " +
 "      clip-cursor " +
 "      redraw-most drop again ; " +
