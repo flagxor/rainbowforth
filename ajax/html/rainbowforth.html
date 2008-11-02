@@ -152,6 +152,7 @@ function consoleEmit(c, ch) {
                 c.foreground, c.background);
     c.console_x++;
     if (c.console_x == CONSOLE_WIDTH) {
+      c.console_x = 0;
       c.console_y++;
       if (c.console_y == CONSOLE_HEIGHT) {
         c.console_y--;
