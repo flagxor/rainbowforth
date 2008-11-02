@@ -58,9 +58,9 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
 : filter-null   dup 0 = if drop 32 ; then ;
 : filter-block 1024 0 do dup i + @ filter-null over i + ! loop ;
 : is-space   dup 32 = if drop 1 ; then 250 >= ;
-: next-space   begin dup edit-buffer @ + @ is-space not while 1 + repeat
+: next-space   begin dup edit-buffer @ + @ is-space not while 1+ repeat
                    1023 min ;
-: last-space   begin dup edit-buffer @ + @ is-space not while 1 - repeat
+: last-space   begin dup edit-buffer @ + @ is-space not while 1- repeat
                    1 - -1 max ;
 : space-range   dup push 1 - last-space pop next-space ;
 : redraw-around   space-range redraw-range ;
@@ -83,7 +83,7 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
                                edit-buffer @ filter-null redraw-all ;
 : editor-delete   cursor-block @ delete  editor-load ;
 
-: editor-copy    cursor-pos @ 1 + cursor-mark @ -  0 max  grab-size !
+: editor-copy    cursor-pos @ 1+ cursor-mark @ -  0 max  grab-size !
                  edit-buffer @ cursor-mark @ +
                  grab-buffer @   grab-size @  copy ;
 : editor-paste   grab-buffer @
