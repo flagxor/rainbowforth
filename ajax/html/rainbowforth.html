@@ -417,6 +417,15 @@ var dictionary = {
       heap[addr + i] = ch;
     }
   },
+  'copy': function(c) {
+    var count = c.dstack.pop();
+    var dst_addr = c.dstack.pop();
+    var src_addr = c.dstack.pop();
+    var dt = '';
+    for (var i = 0; i < count; i++) {
+      heap[dst_addr + i] = heap[src_addr + i];
+    }
+  },
   'random': function(c) {
     var high = c.dstack.pop();
     var low = c.dstack.pop();
@@ -717,10 +726,13 @@ var bootstrap = PlainToColor(
 "      dup 250 >= if drop 32 emit else emit then ; " +
 " variable cursor-pos " +
 " variable cursor-pos-old " +
+" variable cursor-mark " +
 " variable cursor-block " +
 " variable cursor-color [ 32 cursor-color ! ] " +
 " variable editor-dirty " +
 " variable edit-buffer [ 20 allot  here 1024 allot edit-buffer !  20 allot ] " +
+" variable grab-buffer [ here 1024 allot grab-buffer ! ] " +
+" variable grab-size [ 0 grab-size ! ] " +
 " variable font-size [ 200 font-size !  font-size @ set-font-size ] " +
 " : clip-cursor  cursor-pos @  0 max  width height * 1 - min  cursor-pos ! ; " +
 " : handle-cursor " +
@@ -730,7 +742,7 @@ var bootstrap = PlainToColor(
 "                          0 background cursor-block @ . 10 blanks ; " +
 " : redraw-one   dup handle-cursor dup setraw edit-buffer @ + @ color-ch ; " +
 " : redraw-range   -do i redraw-one drop -1 +loop ; " +
-" : redraw   -1 1023 redraw-range ; " +
+" : redraw-whole   -1 1023 redraw-range ; " +
 " : filter-null   dup 0 = if drop 32 ; then ; " +
 " : filter-block 1024 0 do dup i + @ filter-null over i + ! loop ; " +
 " : is-space   dup 32 = if drop 1 ; then 250 >= ; " +
@@ -742,7 +754,7 @@ var bootstrap = PlainToColor(
 " : redraw-around   space-range redraw-range ; " +
 " : redraw-around-cursor   cursor-pos @ redraw-around ; " +
 " : redraw-around-old   cursor-pos-old @ redraw-around ; " +
-" : redraw-all   redraw show-page ; " +
+" : redraw-all   redraw-whole show-page ; " +
 " : redraw-most   redraw-around-cursor redraw-around-old ; " +
 " : type-one-raw   edit-buffer @ cursor-pos @ + ! " +
 "                  1 editor-dirty ! " +
@@ -751,11 +763,17 @@ var bootstrap = PlainToColor(
 "              edit-buffer @ + @ is-space if " +
 "                      cursor-color @ type-one-raw then " +
 "              cursor-pos ! ; " +
-" : editor-save-raw   cursor-block @ edit-buffer @ write redraw ; " +
+" : editor-save-raw   cursor-block @ edit-buffer @ write redraw-whole ; " +
 " : editor-save   editor-dirty @ if editor-save-raw 0 editor-dirty ! then ; " +
 " : editor-load   cursor-block @ edit-buffer @ read " +
 "                                edit-buffer @ filter-null redraw-all ; " +
 " : editor-delete   cursor-block @ delete  editor-load ; " +
+" : editor-copy    cursor-pos @ 1 + cursor-mark @ -  0 max  grab-size ! " +
+"                  edit-buffer @ cursor-mark @ + " +
+"                  grab-buffer @   grab-size @  copy ; " +
+" : editor-paste   grab-buffer @ " +
+"                  edit-buffer @ cursor-pos @ + " +
+"                  grab-size @  copy   1 editor-dirty !   redraw-all ; " +
 " : special-mode    begin key " +
 "      dup 114 = if 255 cursor-color ! ; then " +
 "      dup 121 = if 254 cursor-color ! ; then " +
@@ -764,8 +782,11 @@ var bootstrap = PlainToColor(
 "      dup 98 = if 251 cursor-color ! ; then " +
 "      dup 109 = if 250 cursor-color ! ; then " +
 "      dup 119 = if 32 cursor-color ! ; then " +
-"      dup 91 = if -20 font-size +! font-size @ set-font-size ; then " +
-"      dup 93 = if 20 font-size +! font-size @ set-font-size ; then " +
+"      dup 91 = if cursor-pos @ cursor-mark ! ; then " +
+"      dup 93 = if editor-copy ; then " +
+"      dup 112 = if editor-paste ; then " +
+"      dup 45 = if -20 font-size +! font-size @ set-font-size ; then " +
+"      dup 61 = if 20 font-size +! font-size @ set-font-size ; then " +
 "      dup 65 = if edit-buffer @ 1024 download ; then " +
 "      dup 100 = if editor-delete ; then " +
 "      dup 92 = if 92 type-one ; then " +
