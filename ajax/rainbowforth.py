@@ -41,7 +41,7 @@ class WriteBlock(webapp.RequestHandler):
     if user:
       index = int(self.request.get('index'))
       data = self.request.str_POST['data']
-      if len(data) > 1024: return
+      if len(data) > 2048: return  # Seems to encode it wastefully.
       query = Block.gql('WHERE index = :index LIMIT 1', index=index)
       block = query.fetch(1)
       if block:

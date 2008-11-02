@@ -704,6 +704,7 @@ var bootstrap = PlainToColor(
 " variable cursor-pos-old " +
 " variable cursor-block " +
 " variable cursor-color [ 32 cursor-color ! ] " +
+" variable editor-dirty " +
 " variable edit-buffer [ 20 allot  here 1024 allot edit-buffer !  20 allot ] " +
 " variable font-size [ 200 font-size !  font-size @ set-font-size ] " +
 " : clip-cursor  cursor-pos @  0 max  width height * 1 - min  cursor-pos ! ; " +
@@ -728,12 +729,15 @@ var bootstrap = PlainToColor(
 " : redraw-around-old   cursor-pos-old @ redraw-around ; " +
 " : redraw-all   redraw show-page ; " +
 " : redraw-most   redraw-around-cursor redraw-around-old ; " +
-" : type-one-raw   edit-buffer @ cursor-pos @ + !   1 cursor-pos +! ; " +
+" : type-one-raw   edit-buffer @ cursor-pos @ + ! " +
+"                  1 editor-dirty ! " +
+"                  1 cursor-pos +! ; " +
 " : type-one   type-one-raw cursor-pos @ dup " +
 "              edit-buffer @ + @ is-space if " +
 "                      cursor-color @ type-one-raw then " +
 "              cursor-pos ! ; " +
-" : editor-save   cursor-block @ edit-buffer @ write redraw ; " +
+" : editor-save-raw   cursor-block @ edit-buffer @ write redraw ; " +
+" : editor-save   editor-dirty @ if editor-save-raw 0 editor-dirty ! then ; " +
 " : editor-load   cursor-block @ edit-buffer @ read " +
 "                                edit-buffer @ filter-null redraw-all ; " +
 " : special-mode    begin key " +
