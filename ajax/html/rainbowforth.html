@@ -363,6 +363,10 @@ var dictionary = {
   '*': function(c) {
     c.dstack.push(c.dstack.pop() * c.dstack.pop());
   },
+  '/': function(c) {
+    var tmp = c.dstack.pop();
+    c.dstack.push(Math.floor(c.dstack.pop() / tmp));
+  },
   'min': function(c) {
     var a = c.dstack.pop();
     var b = c.dstack.pop();

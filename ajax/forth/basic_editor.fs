@@ -1,6 +1,4 @@
 : nip   swap drop ;
-: width   sizexy drop ;
-: height   sizexy nip 2 - ;
 : ifskip,   ' ifskip [ literal ] , ;
 : push,   ' push [ literal ] , ;
 : rawdo,   ' rawdo [ literal ] , ;
@@ -33,6 +31,9 @@
      dup 250 = if ff00ffh foreground then
      dup 32  = if ffffffh foreground then
      dup 250 >= if drop 32 emit else emit then ;
+
+: width   sizexy drop ;
+: height   sizexy nip 2 - ;
 
 variable cursor-pos
 variable cursor-pos-old
@@ -120,6 +121,7 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
      dup 92 = if special-mode else
         dup 33 >= if dup 126 <= if type-one then then then
      dup 32 = if cursor-color @ type-one then
+     dup 13 = if cursor-pos @ 64 + 16 / 16 * cursor-pos ! then
      clip-cursor
      redraw-most drop again ;
 
