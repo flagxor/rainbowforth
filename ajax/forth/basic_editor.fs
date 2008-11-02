@@ -121,7 +121,7 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
      dup 92 = if special-mode else
         dup 33 >= if dup 126 <= if type-one then then then
      dup 32 = if cursor-color @ type-one then
-     dup 13 = if cursor-pos @ 64 + 16 / 16 * cursor-pos ! then
+     dup 13 = if cursor-pos @ 64 + 64 / 64 * cursor-pos ! then
      clip-cursor
      redraw-most drop again ;
 
