@@ -40,6 +40,7 @@ class WriteBlock(webapp.RequestHandler):
     user = users.get_current_user()
     if user:
       index = int(self.request.get('index'))
+      if index < 0 or index > 4096: return  # Limit range.
       data = self.request.str_POST['data']
       if len(data) > 2048: return  # Seems to encode it wastefully.
       query = Block.gql('WHERE index = :index LIMIT 1', index=index)
@@ -94,12 +95,34 @@ class TestPage(webapp.RequestHandler):
       self.redirect(users.create_login_url(self.request.uri))
 
 
+class Bootstrap(webapp.RequestHandler):
+  def get(self):
+    user = users.get_current_user()
+    if user:
+      # Load bootstrap file, assumes no quotes.
+      path = os.path.join(os.path.dirname(__file__), 'forth/bootstrap.fs')
+      bootstrap = ''
+      fh = open(path, 'r')
+      for line in fh:
+        nline = line
+        nline = nline.replace('\r', ' ')
+        nline = nline.replace('\n', ' ')
+        bootstrap += '" ' + nline + '" +\n'
+      bootstrap += '""'
+
+      # Add bootstrap into template.
+      path = os.path.join(os.path.dirname(__file__), 'html/rainbowforth.html')
+      self.response.out.write(template.render(path, {'bootstrap': bootstrap}))
+    else:
+      self.redirect(users.create_login_url(self.request.uri))
+
+
 class MainPage(webapp.RequestHandler):
   def get(self):
     user = users.get_current_user()
     if user:
       path = os.path.join(os.path.dirname(__file__), 'html/rainbowforth.html')
-      self.response.out.write(template.render(path, {}))
+      self.response.out.write(template.render(path, {'bootstrap': '""'}))
     else:
       self.redirect(users.create_login_url(self.request.uri))
 
@@ -108,6 +131,7 @@ def main():
   application = webapp.WSGIApplication(
       [
         ('/[0-9]*', MainPage),
+        ('/bootstrap', Bootstrap),
         ('/read', ReadBlock),
         ('/write', WriteBlock),
         ('/delete', DeleteBlock),
