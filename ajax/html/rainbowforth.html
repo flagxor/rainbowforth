@@ -11,6 +11,8 @@
 <b><pre id="console" style="font-size:200%"></pre></b>
 </td></tr></table>
 
+<p id="extra"></p>
+
 <script type="text/javascript">
 
 // -----------------------------------------------------------------
@@ -455,6 +457,36 @@ var dictionary = {
   'alert': function(c) {
     alert(c.dstack.pop());
   },
+  'download': function(c) {
+    var len = c.dstack.pop();
+    var addr = c.dstack.pop();
+    var dt = '';
+    for (var i = 0; i < len; i++) {
+      dt += String.fromCharCode(heap[addr + i]);
+    }
+    // Get the extra area.
+    var extra = document.getElementById('extra');
+    // Remove any old buttons.
+    if (extra.hasChildNodes()) {
+      while (extra.childNodes.length >= 1) {
+        extra.removeChild(extra.firstChild);
+      }
+    }
+    // Add in download button.
+    var form = document.createElement('form');
+    form.action = '/reflect/datafile.dat';
+    form.method = 'post';
+    extra.appendChild(form);
+    var submit = document.createElement('input');
+    submit.type = 'submit';
+    submit.value = 'Download';
+    form.appendChild(submit);
+    var hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = 'data';
+    hidden.value = dt;
+    form.appendChild(hidden);
+  },
   'cls': function(c) {
     consoleClear(c.foreground, c.background);
     c.console_x = 0;
@@ -713,6 +745,7 @@ var bootstrap = PlainToColor(
 "      dup 119 = if 32 cursor-color ! ; then " +
 "      dup 91 = if -20 font-size +! font-size @ set-font-size ; then " +
 "      dup 93 = if 20 font-size +! font-size @ set-font-size ; then " +
+"      dup 65 = if edit-buffer @ 1024 download ; then " +
 "      dup 92 = if 92 type-one ; then " +
 "      clip-cursor " +
 "      redraw-most drop again ; " +

@@ -2,14 +2,14 @@ import os
 import sys
 from google.appengine.api import users
 from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
+from google.appengine.ext.webapp.util import run_wsgi_app
 
 
 class Block(db.Model):
-  author = db.UserProperty()
   index = db.IntegerProperty()
+  owner = db.UserProperty()
   data = db.BlobProperty()
 
 
@@ -18,18 +18,19 @@ class ReadBlock(webapp.RequestHandler):
     user = users.get_current_user()
     if user:
       index = int(self.request.get('index'))
-      query = Block.gql('WHERE author = :author and '
-                        'index = :index '
-                        'LIMIT 1',
-                        author=user,
-                        index=index)
+      query = Block.gql('WHERE index = :index LIMIT 1', index=index)
       block = query.fetch(1)
       if block:
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write(block[0].data)
+        if user == block[0].owner:
+          self.response.out.write('u')
+        else:
+          self.response.out.write('o')
       else:
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write(' ' * 1024)
+        self.response.out.write(' ')
     else:
       self.redirect(users.create_login_url(self.request.uri))
 
@@ -40,11 +41,8 @@ class WriteBlock(webapp.RequestHandler):
     if user:
       index = int(self.request.get('index'))
       data = self.request.str_POST['data']
-      query = Block.gql('WHERE author = :author and '
-                        'index = :index '
-                        'LIMIT 1',
-                        author=user,
-                        index=index)
+      if len(data) > 1024: return
+      query = Block.gql('WHERE index = :index LIMIT 1', index=index)
       block = query.fetch(1)
       if block:
         block[0].data = data
@@ -52,10 +50,36 @@ class WriteBlock(webapp.RequestHandler):
       else:
         b = Block()
         b.index = index
-        b.author = user
+        b.owner = user
         b.data = data
         b.put()
       self.response.headers['Content-Type'] = 'text/plain'
+    else:
+      self.redirect(users.create_login_url(self.request.uri))
+
+
+class DeleteBlock(webapp.RequestHandler):
+  def post(self):
+    user = users.get_current_user()
+    if user:
+      index = int(self.request.get('index'))
+      query = Block.gql('WHERE index = :index LIMIT 1', index=index)
+      block = query.fetch(1)
+      if block:
+        if user == block[0].owner:
+          block[0].delete()
+      self.response.headers['Content-Type'] = 'text/plain'
+    else:
+      self.redirect(users.create_login_url(self.request.uri))
+
+
+class Reflect(webapp.RequestHandler):
+  def post(self):
+    user = users.get_current_user()
+    if user:
+      data = self.request.str_POST['data']
+      self.response.headers['Content-Type'] = 'application/x-unknown'
+      self.response.out.write(data)
     else:
       self.redirect(users.create_login_url(self.request.uri))
 
@@ -80,14 +104,16 @@ class MainPage(webapp.RequestHandler):
       self.redirect(users.create_login_url(self.request.uri))
 
 
-
 def main():
   application = webapp.WSGIApplication(
-      [('/', MainPage),
-       ('/test', TestPage),
-       ('/read', ReadBlock),
-       ('/write', WriteBlock)],
-      debug=True)
+      [
+        ('/', MainPage),
+        ('/read', ReadBlock),
+        ('/write', WriteBlock),
+        ('/delete', DeleteBlock),
+        ('/reflect/.*', Reflect),
+        ('/test', TestPage),
+        ], debug=True)
   run_wsgi_app(application)
 
 
