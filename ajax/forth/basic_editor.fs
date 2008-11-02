@@ -104,7 +104,7 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
      dup 45 = if -20 font-size +! font-size @ set-font-size ; then
      dup 61 = if 20 font-size +! font-size @ set-font-size ; then
      dup 65 = if edit-buffer @ 1024 download ; then
-     dup 100 = if editor-delete ; then
+     dup 68 = if editor-delete ; then
      dup 92 = if 92 type-one ; then
      clip-cursor
      redraw-most drop again ;
