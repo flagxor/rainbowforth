@@ -33,8 +33,8 @@
      dup 32  = if ffffffh foreground then
      dup 250 >= if drop 32 emit else emit then ;
 
-: width   sizexy drop ;
-: height   sizexy nip 2 - ;
+: width   [ sizexy drop literal ] ;
+: height   [ sizexy nip 2 - literal ] ;
 
 variable cursor-pos
 variable cursor-pos-old
@@ -51,7 +51,7 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
 : handle-cursor
      cursor-pos @ = if 777777h background else 0 background then ;
 : blanks    0 do 32 emit loop ;
-: show-page   0 17 setxy 777777h foreground
+: show-page   0 16 setxy 777777h foreground
                          0 background cursor-block @ . 10 blanks ;
 : redraw-one   dup handle-cursor dup setraw edit-buffer @ + @ color-ch ;
 : redraw-range   -do i redraw-one drop -1 +loop ;
