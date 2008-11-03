@@ -58,7 +58,7 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
 : blanks    0 do 32 emit loop ;
 : show-page   0 17 setxy 777777h foreground
                          0 background cursor-block @ .
-                         4 blanks block-state @ emit
+                         4 blanks block-status @ emit
                          3 blanks cursor-color @ color-ch 42 emit
                          10 blanks ;
 : redraw-one   dup handle-cursor dup setraw edit-buffer @ + @ color-ch ;
@@ -79,17 +79,17 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
 : redraw-most   redraw-around-cursor redraw-around-old ;
 
 : type-one-raw   block-status @ u-own <> if drop ; then
-                 cursor-pos @ edit-buffer !
+                 cursor-pos @ edit-buffer @ + !
                  1 editor-dirty !
                  1 cursor-pos +! ;
 : type-one   type-one-raw cursor-pos @ dup
-             edit-buffer @ is-space if
+             edit-buffer @ + @ is-space if
                      cursor-color @ type-one-raw then
              cursor-pos ! ;
 
 : editor-save-raw   cursor-block @ edit-buffer @ write redraw-whole ;
 : editor-save   editor-dirty @ if editor-save-raw 0 editor-dirty ! then ;
-: editor-load   cursor-block @ edit-buffer @ read block-state !
+: editor-load   cursor-block @ edit-buffer @ read block-status !
                                edit-buffer @ filter-null redraw-all ;
 : editor-delete   cursor-block @ delete  editor-load ;
 
@@ -119,7 +119,7 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
      dup 61 = if 20 font-size +! font-size @ set-font-size ; then
      dup 65 = if edit-buffer @ 1024 download ; then
      dup 68 = if editor-delete ; then
-     dup 32 = if editor-claim 65 emit ; then
+     dup 32 = if editor-claim ; then
      dup 13 = if editor-save cursor-block @ load ; then
      dup 108 = if cls redraw-all ; then
      dup 92 = if 92 type-one ; then
