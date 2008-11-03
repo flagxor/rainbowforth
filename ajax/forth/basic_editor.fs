@@ -78,7 +78,7 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
 : redraw-all   redraw-whole show-page ;
 : redraw-most   redraw-around-cursor redraw-around-old ;
 
-: type-one-raw   block-status @ u-own <> if ; then
+: type-one-raw   block-status @ u-own <> if drop ; then
                  edit-buffer @ cursor-pos @ + !
                  1 editor-dirty !
                  1 cursor-pos +! ;
