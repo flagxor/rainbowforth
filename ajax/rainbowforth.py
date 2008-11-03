@@ -1,3 +1,4 @@
+import re
 import os
 import sys
 from google.appengine.api import users
@@ -142,7 +143,7 @@ class Export(webapp.RequestHandler):
     blocks = query.fetch(1000)
     for b in blocks:
       data = unicode(b.data, 'utf8')
-      blk =''
+      blk = ''
       col = ' '
       word = ''
       for j in range(15, -1, -1):
@@ -152,16 +153,22 @@ class Export(webapp.RequestHandler):
           if ch in COLOR_MAP:
             if word:
               blk = (COLOR_MAP[col] % word) + blk
-            word = ''
+              word = ''
             col = ch
           else:
             word = ch + word
-      if word:
-        blk = (COLOR_MAP[col] % word) + blk
+        if word:
+          blk = (COLOR_MAP[col] % word) + blk
+          word = ''
 
       dt += 'Block ' + str(b.index) + '\n'
+      dt += '-' * 64 + '\n'
       dt += blk
       dt += '\n\n'
+
+    dt = dt.replace(') ( ', '')
+    dt = dt.replace('} { ', '')
+    dt = dt.replace('] [ ', '')
 
     self.response.headers['Content-Type'] = 'text/plain'
     self.response.out.write(dt)
