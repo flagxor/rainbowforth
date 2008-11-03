@@ -96,7 +96,7 @@ class Export(webapp.RequestHandler):
     blocks = query.fetch(1000)
     for b in blocks:
       data = unicode(b.data, 'utf8')
-      dt += '<table bgcolor="#000000"><tr><td><pre>\n'
+      dt += '<table bgcolor="#000000"><tr><td><b><pre style="font-size:200%">\n'
       blk ='</font>'
       col = '#ffffff'
       for j in range(15, -1, -1):
@@ -114,10 +114,10 @@ class Export(webapp.RequestHandler):
       blk = '<font color="' + col + '">' + blk
 
       dt += blk
-      dt += '</pre></td></tr></table>\n'
-      dt += str(b.index) + '<br><br>\n'
+      dt += '</pre></b></td></tr></table>\n'
+      dt += '<b style="font-size:200%">' + str(b.index) + '</b><br><br>\n'
 
-    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.headers['Content-Type'] = 'text/html'
     self.response.out.write(dt)
     dt += '</body></html>\n'
 
