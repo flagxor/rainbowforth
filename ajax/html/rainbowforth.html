@@ -547,6 +547,32 @@ var dictionary = {
       c.dstack.push(0);
     }
   },
+  'prefetch': function(c) {
+    if (c.yield) {
+      c.ip--;
+      return;
+    }
+    var end = c.dstack.pop();
+    var start = c.dstack.pop();
+    for (var block = start; block <= end; block++) {
+      if (block_cache[block] != undefined) continue;
+      HTTP.post('/read', {'index': String(block)},
+                function(result) {
+                  if (result == null) {
+                    alert('READ ' + block + ' FAILED!');
+                    return;
+                  }
+                  block_cache[block] = result;
+                  c.yield--;
+                  if (!c.yield) {
+                    c.ip++;
+                    runAll();
+                  }
+              }, null);
+      c.yield++;
+    }
+    if (c.yield) c.ip--;
+  },
   'read': function(c) {
     if (c.yield) {
       c.ip--;
