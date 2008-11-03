@@ -645,7 +645,9 @@ var dictionary = {
     for (var i = 0; i < 1024; i++) {
       dt += String.fromCharCode(heap[addr + i]);
     }
-    block_cache[block] = dt + block_cache[block].substr(1024);
+    var owner = if block_cache[block].substr(1024);
+    if (owner == ' ') owner = 'u';
+    block_cache[block] = dt + owner;
     HTTP.post('/write', {'index': String(block),
                          'data': dt},
               function(result) {
