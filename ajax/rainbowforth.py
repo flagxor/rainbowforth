@@ -93,11 +93,14 @@ class View(webapp.RequestHandler):
     query = Block.gql('WHERE index >= :start and index <= :end',
                       start=start, end=end)
 
-    dt = '<html><body bgcolor="#ffffff">\n'
+    self.response.headers['Content-Type'] = 'text/html'
+    self.response.out.write('<html><body bgcolor="#ffffff">\n')
+
     blocks = query.fetch(1000)
     for b in blocks:
+      self.response.out.write(
+          '<table bgcolor="#000000"><tr><td><b><pre style="font-size:200%">\n')
       data = unicode(b.data, 'utf8')
-      dt += '<table bgcolor="#000000"><tr><td><b><pre style="font-size:200%">\n'
       blk ='</font>'
       col = '#ffffff'
       for j in range(15, -1, -1):
@@ -114,13 +117,12 @@ class View(webapp.RequestHandler):
             blk = ch + blk
       blk = '<font color="' + col + '">' + blk
 
-      dt += blk
-      dt += '</pre></b></td></tr></table>\n'
-      dt += '<b style="font-size:200%">' + str(b.index) + '</b><br><br>\n'
+      self.response.out.write(blk)
+      self.response.out.write('</pre></b></td></tr></table>\n')
+      self.response.out.write(
+          '<b style="font-size:200%">' + str(b.index) + '</b><br><br>\n')
 
-    self.response.headers['Content-Type'] = 'text/html'
-    self.response.out.write(dt)
-    dt += '</body></html>\n'
+    self.response.out.write('</body></html>\n')
 
 
 class Export(webapp.RequestHandler):
@@ -140,7 +142,8 @@ class Export(webapp.RequestHandler):
     query = Block.gql('WHERE index >= :start and index <= :end',
                       start=start, end=end)
 
-    dt = ''
+    self.response.headers['Content-Type'] = 'text/plain'
+
     blocks = query.fetch(1000)
     for b in blocks:
       data = unicode(b.data, 'utf8')
@@ -162,17 +165,14 @@ class Export(webapp.RequestHandler):
           blk = (COLOR_MAP[col] % word) + blk
           word = ''
 
-      dt += 'Block ' + str(b.index) + '\n'
-      dt += '-' * 64 + '\n'
-      dt += blk
-      dt += '\n\n'
+      blk = blk.replace(') ( ', '')
+      blk = blk.replace('} { ', '')
+      blk = blk.replace('] [ ', '')
 
-    dt = dt.replace(') ( ', '')
-    dt = dt.replace('} { ', '')
-    dt = dt.replace('] [ ', '')
-
-    self.response.headers['Content-Type'] = 'text/plain'
-    self.response.out.write(dt)
+      self.response.out.write('Block ' + str(b.index) + '\n')
+      self.response.out.write('-' * 64 + '\n')
+      self.response.out.write(blk)
+      self.response.out.write('\n\n')
 
 
 class Backup(webapp.RequestHandler):
