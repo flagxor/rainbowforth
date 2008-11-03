@@ -237,6 +237,7 @@ class Restore(webapp.RequestHandler):
       b.data = dt
       b.put()
 
+    fh.close()
     self.response.out.write('Done.')
 
 
