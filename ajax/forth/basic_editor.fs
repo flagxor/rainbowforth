@@ -1,4 +1,4 @@
-: load   raw-read push raw-load ;
+: load   raw-read drop push raw-load ;
 : nip   swap drop ;
 : ifskip,   ' ifskip [ literal ] , ;
 : push,   ' push [ literal ] , ;
@@ -36,10 +36,15 @@
 : width   [ sizexy drop literal ] ;
 : height   [ sizexy nip 2 - literal ] ;
 
+: no-own 32 ;
+: u-own 117 ;
+: o-own 111 ;
+
 variable cursor-pos
 variable cursor-pos-old
 variable cursor-mark
 variable cursor-block
+variable block-state [ no-own block-state ! ]
 variable cursor-color [ 32 cursor-color ! ]
 variable editor-dirty
 variable edit-buffer [ 20 allot  here 1024 allot edit-buffer !  20 allot ]
@@ -52,7 +57,10 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
      cursor-pos @ = if 777777h background else 0 background then ;
 : blanks    0 do 32 emit loop ;
 : show-page   0 17 setxy 777777h foreground
-                         0 background cursor-block @ . 10 blanks ;
+                         0 background cursor-block @ .
+                         4 blanks block-state @ emit
+                         3 blanks cursor-color @ color-ch 42 emit
+                         10 blanks ;
 : redraw-one   dup handle-cursor dup setraw edit-buffer @ + @ color-ch ;
 : redraw-range   -do i redraw-one drop -1 +loop ;
 : redraw-whole   -1 1023 redraw-range ;
@@ -70,26 +78,31 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
 : redraw-all   redraw-whole show-page ;
 : redraw-most   redraw-around-cursor redraw-around-old ;
 
-: type-one-raw   edit-buffer @ cursor-pos @ + !
+: type-one-raw   block-status @ u-own <> if ; then
+                 edit-buffer @ cursor-pos @ + !
                  1 editor-dirty !
                  1 cursor-pos +! ;
 : type-one   type-one-raw cursor-pos @ dup
-             edit-buffer @ + @ is-space if
+             edit-buffer @ is-space if
                      cursor-color @ type-one-raw then
              cursor-pos ! ;
 
 : editor-save-raw   cursor-block @ edit-buffer @ write redraw-whole ;
 : editor-save   editor-dirty @ if editor-save-raw 0 editor-dirty ! then ;
-: editor-load   cursor-block @ edit-buffer @ read
+: editor-load   cursor-block @ edit-buffer @ read block-state !
                                edit-buffer @ filter-null redraw-all ;
 : editor-delete   cursor-block @ delete  editor-load ;
 
 : editor-copy    cursor-pos @ 1+ cursor-mark @ -  0 max  grab-size !
                  edit-buffer @ cursor-mark @ +
                  grab-buffer @   grab-size @  copy ;
-: editor-paste   grab-buffer @
+: editor-paste   block-status @ u-own <> if ; then
+                 grab-buffer @
                  edit-buffer @ cursor-pos @ +
                  grab-size @  copy   1 editor-dirty !   redraw-all ;
+
+: editor-claim   block-status @ no-own <> if ; then
+                 1 editor-dirty !  editor-save editor-load ;
 
 : special-mode    begin key
      dup 114 = if 255 cursor-color ! ; then
@@ -106,7 +119,8 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
      dup 61 = if 20 font-size +! font-size @ set-font-size ; then
      dup 65 = if edit-buffer @ 1024 download ; then
      dup 68 = if editor-delete ; then
-     dup 32 = if editor-save cursor-block @ load ; then
+     dup 32 = if editor-claim 65 emit ; then
+     dup 13 = if editor-save cursor-block @ load ; then
      dup 108 = if cls redraw-all ; then
      dup 92 = if 92 type-one ; then
      clip-cursor
@@ -121,7 +135,7 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
      dup -33 = if cursor-block @ 0 > if
          editor-save -1 cursor-block +! editor-load then then
      dup -34 = if editor-save 1 cursor-block +! editor-load then
-     dup 92 = if special-mode else
+     dup 92 = if special-mode show-page else
         dup 33 >= if dup 126 <= if type-one then then then
      dup 32 = if cursor-color @ type-one then
      dup 13 = if cursor-pos @ 64 + 64 / 64 * cursor-pos ! then

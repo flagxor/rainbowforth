@@ -585,6 +585,7 @@ var dictionary = {
       for (var i = 0; i < 1024; i++) {
         heap[addr + i] = result.charCodeAt(i);
       }
+      c.dstack.push(result.charCodeAt(1024));
       return;
     }
     HTTP.post('/read', {'index': String(block)},
@@ -597,6 +598,7 @@ var dictionary = {
                 for (var i = 0; i < 1024; i++) {
                   heap[addr + i] = result.charCodeAt(i);
                 }
+                c.dstack.push(result.charCodeAt(1024));
                 c.yield = 0;
                 c.ip++;
                 runAll();
@@ -611,7 +613,9 @@ var dictionary = {
     }
     var block = c.dstack.pop();
     if (block_cache[block] != undefined) {
-      c.dstack.push(block_cache[block]);
+      var result = block_cache[block];
+      c.dstack.push(result.charCodeAt(1024));
+      c.dstack.push(result.substr(0, 1024));
       return;
     }
     HTTP.post('/read', {'index': String(block)},
@@ -621,7 +625,8 @@ var dictionary = {
                   return;
                 }
                 block_cache[block] = result;
-                c.dstack.push(result);
+                c.dstack.push(result.charCodeAt(1024));
+                c.dstack.push(result.substr(0, 1024));
                 c.yield = 0;
                 c.ip++;
                 runAll();
