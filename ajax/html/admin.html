@@ -1,4 +1,6 @@
-<html><body>
+<html>
+<title>RainbowForth Admin</title>
+<body>
 <form action="/read" method="post">
 index: <input name="index" type="text"><br>
 <input value="Read" type="submit"><br>
@@ -34,5 +36,10 @@ start: <input name="start" type="text"><br>
 end: <input name="end" type="text"><br>
 <input value="Backup" type="submit"><br>
 </form>
-</body></html>
+<form action="/restore" method="post" enctype="multipart/form-data"><br>
+<input type="file" name="datafile"><br>
+<input value="Restore" type="submit"><br>
+</form>
+</body>
+</html>
 

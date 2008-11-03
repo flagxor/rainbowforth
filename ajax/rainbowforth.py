@@ -1,6 +1,7 @@
 import re
 import os
 import sys
+import StringIO
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext import db
@@ -196,6 +197,48 @@ class Backup(webapp.RequestHandler):
       self.response.out.write(b.data)
 
 
+class Restore(webapp.RequestHandler):
+  def post(self):
+    user = users.get_current_user()
+    if not user:
+      self.redirect(users.create_login_url(self.request.uri))
+      return
+    if not users.is_current_user_admin():
+      self.redirect('/')
+      return
+
+    data = self.request.get('datafile')
+    fh = StringIO.StringIO(data)
+
+    self.response.headers['Content-Type'] = 'text/plain'
+
+    while True:
+      # Get description line.
+      line = fh.readline()
+      if not line: break
+      # Decide it
+      index, owner, sz = line.split(' ')
+      index = int(index)
+      owner = users.User(owner)
+      sz = int(sz)
+      self.response.out.write(line)
+      dt = fh.read(int(sz))
+      # Get existing block if any.
+      query = Block.gql('WHERE index = :index LIMIT 1', index=index)
+      block = query.fetch(1)
+      if block:
+        b = block[0]
+      else:
+        b = Block()
+      # Store data.
+      b.index = index
+      b.owner = owner
+      b.data = dt
+      b.put()
+
+    self.response.out.write('Done.')
+
+
 class Reflect(webapp.RequestHandler):
   def post(self):
     user = users.get_current_user()
@@ -207,11 +250,11 @@ class Reflect(webapp.RequestHandler):
       self.redirect(users.create_login_url(self.request.uri))
 
 
-class TestPage(webapp.RequestHandler):
+class AdminPage(webapp.RequestHandler):
   def get(self):
     user = users.get_current_user()
     if user:
-      path = os.path.join(os.path.dirname(__file__), 'html/blocktest.html')
+      path = os.path.join(os.path.dirname(__file__), 'html/admin.html')
       self.response.out.write(template.render(path, {}))
     else:
       self.redirect(users.create_login_url(self.request.uri))
@@ -263,10 +306,11 @@ def main():
         ('/write', WriteBlock),
         ('/delete', DeleteBlock),
         ('/reflect/.*', Reflect),
-        ('/test', TestPage),
+        ('/admin', AdminPage),
         ('/view', View),
         ('/export', Export),
         ('/backup', Backup),
+        ('/restore', Restore),
         ], debug=True)
   run_wsgi_app(application)
 
