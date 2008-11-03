@@ -1,3 +1,4 @@
+: load   raw-read push raw-load ;
 : nip   swap drop ;
 : ifskip,   ' ifskip [ literal ] , ;
 : push,   ' push [ literal ] , ;
@@ -49,7 +50,7 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
 : clip-cursor  cursor-pos @  0 max  width height * 1 - min  cursor-pos ! ;
 : handle-cursor
      cursor-pos @ = if 777777h background else 0 background then ;
-: blanks    begin 0 > while 32 emit 1 - repeat drop ;
+: blanks    0 do 32 emit loop ;
 : show-page   0 17 setxy 777777h foreground
                          0 background cursor-block @ . 10 blanks ;
 : redraw-one   dup handle-cursor dup setraw edit-buffer @ + @ color-ch ;
@@ -105,6 +106,8 @@ variable font-size [ 200 font-size !  font-size @ set-font-size ]
      dup 61 = if 20 font-size +! font-size @ set-font-size ; then
      dup 65 = if edit-buffer @ 1024 download ; then
      dup 68 = if editor-delete ; then
+     dup 32 = if editor-save cursor-block @ load ; then
+     dup 108 = if cls redraw-all ; then
      dup 92 = if 92 type-one ; then
      clip-cursor
      redraw-most drop again ;

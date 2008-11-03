@@ -74,6 +74,54 @@ class DeleteBlock(webapp.RequestHandler):
       self.redirect(users.create_login_url(self.request.uri))
 
 
+COLOR_MAP = {
+    u'\xff': '#ff0000',
+    u'\xfe': '#ffff00',
+    u'\xfd': '#00ff00',
+    u'\xfc': '#00ffff',
+    u'\xfb': '#0000ff',
+    u'\xfa': '#ff00ff',
+    u' ': '#ffffff',
+}
+
+
+class Export(webapp.RequestHandler):
+  def get(self):
+    start = int(self.request.get('start'))
+    end = int(self.request.get('end'))
+    query = Block.gql('WHERE index >= :start and index <= :end',
+                      start=start, end=end)
+
+    dt = '<html><body bgcolor="#ffffff">\n'
+    blocks = query.fetch(1000)
+    for b in blocks:
+      data = unicode(b.data, 'utf8')
+      dt += '<table bgcolor="#000000"><tr><td><pre>\n'
+      blk ='</font>'
+      col = '#ffffff'
+      for j in range(15, -1, -1):
+        blk = '\n' + blk
+        for i in range(63, -1, -1):
+          ch = data[i + j * 64]
+          if ch in COLOR_MAP:
+            if col != COLOR_MAP.get(ch, None):
+              blk = ' <font color="' + col + '">' + blk
+              col = COLOR_MAP[ch]
+            else:
+              blk = ' ' + blk
+          else:
+            blk = ch + blk
+      blk = '<font color="' + col + '">' + blk
+
+      dt += blk
+      dt += '</pre></td></tr></table>\n'
+      dt += str(b.index) + '<br><br>\n'
+
+    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.out.write(dt)
+    dt += '</body></html>\n'
+
+
 class Reflect(webapp.RequestHandler):
   def post(self):
     user = users.get_current_user()
@@ -111,8 +159,10 @@ class BasicEditor(webapp.RequestHandler):
       bootstrap += '""'
 
       # Add bootstrap into template.
+      signout = users.create_logout_url(users.create_login_url('/'))
       path = os.path.join(os.path.dirname(__file__), 'html/rainbowforth.html')
-      self.response.out.write(template.render(path, {'bootstrap': bootstrap}))
+      self.response.out.write(template.render(path, {'bootstrap': bootstrap,
+                                                     'signout': signout}))
     else:
       self.redirect(users.create_login_url(self.request.uri))
 
@@ -121,9 +171,11 @@ class MainPage(webapp.RequestHandler):
   def get(self):
     user = users.get_current_user()
     if user:
+      signout = users.create_logout_url(users.create_login_url('/'))
       bootstrap = '" [ 0 raw-read push raw-load ] "'
       path = os.path.join(os.path.dirname(__file__), 'html/rainbowforth.html')
-      self.response.out.write(template.render(path, {'bootstrap': bootstrap}))
+      self.response.out.write(template.render(path, {'bootstrap': bootstrap,
+                                                     'signout': signout}))
     else:
       self.redirect(users.create_login_url(self.request.uri))
 
@@ -138,6 +190,7 @@ def main():
         ('/delete', DeleteBlock),
         ('/reflect/.*', Reflect),
         ('/test', TestPage),
+        ('/export', Export),
         ], debug=True)
   run_wsgi_app(application)
 

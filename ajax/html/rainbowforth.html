@@ -4,6 +4,10 @@
 </head>
 <body bgcolor="#111111">
 
+<table align="right"><tr><td>
+      <a href="{{ signout }}">Sign out</a>
+</td></tr></table><br><br>
+
 <table align="center" bgcolor="#000000" border="0"
        cellpadding="0" cellspacing="0">
 <tr border="0" cellpadding="0" cellspacing="0">
@@ -14,6 +18,7 @@
 <p id="extra"></p>
 
 <script type="text/javascript">
+
 
 // -----------------------------------------------------------------
 
@@ -172,6 +177,7 @@ function consoleEmitString(c, str) {
 
 
 var heap = new Array();
+var block_cache = {};
 
 
 // -----------------------------------------------------------------
@@ -233,6 +239,14 @@ function setupEvents() {
     runAll();
     return true;
   }
+  /*
+  document.onkeyup = function(e) {
+    var e = window.event || e;
+    keyBuffer.unshift(-e.keyCode - 1000);
+    runAll();
+    return true;
+  }
+  */
   document.onkeypress = function(e) {
     var e = window.event || e;
     var ch = e.which;
@@ -241,6 +255,7 @@ function setupEvents() {
     runAll();
     return true;
   }
+//  setInterval('runAll()', 30);
 }
 
 
@@ -539,12 +554,20 @@ var dictionary = {
     }
     var addr = c.dstack.pop();
     var block = c.dstack.pop();
+    if (block_cache[block] != undefined) {
+      var result = block_cache[block];
+      for (var i = 0; i < 1024; i++) {
+        heap[addr + i] = result.charCodeAt(i);
+      }
+      return;
+    }
     HTTP.post('/read', {'index': String(block)},
               function(result) {
                 if (result == null) {
                   alert('READ ' + block + ' FAILED!');
                   return;
                 }
+                block_cache[block] = result;
                 for (var i = 0; i < 1024; i++) {
                   heap[addr + i] = result.charCodeAt(i);
                 }
@@ -561,12 +584,17 @@ var dictionary = {
       return;
     }
     var block = c.dstack.pop();
+    if (block_cache[block] != undefined) {
+      c.dstack.push(block_cache[block]);
+      return;
+    }
     HTTP.post('/read', {'index': String(block)},
               function(result) {
                 if (result == null) {
                   alert('RAW-READ ' + block + ' FAILED!');
                   return;
                 }
+                block_cache[block] = result;
                 c.dstack.push(result);
                 c.yield = 0;
                 c.ip++;
@@ -586,6 +614,7 @@ var dictionary = {
     for (var i = 0; i < 1024; i++) {
       dt += String.fromCharCode(heap[addr + i]);
     }
+    block_cache[block] = dt;
     HTTP.post('/write', {'index': String(block),
                          'data': dt},
               function(result) {
@@ -602,6 +631,7 @@ var dictionary = {
       return;
     }
     var block = c.dstack.pop();
+    block_cache[block] = undefined;
     HTTP.post('/delete', {'index': String(block)},
               function(result) {
                 c.yield = 0;
@@ -614,6 +644,14 @@ var dictionary = {
   'fork': function(c) {
     createThread(c.ip, 1);
     c.dstack.push(0);
+  },
+  'yield': function(c) {
+    if (c.yield) {
+      c.yield = 0;
+    } else {
+      c.yield = 1;
+      c.ip--;
+    }
   },
   'terminate': function(c) {
     c.yield = 1;
