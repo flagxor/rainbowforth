@@ -25,7 +25,7 @@ class ReadBlock(webapp.RequestHandler):
       if block:
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write(block[0].data)
-        if user == block[0].owner:
+        if user.email() == block[0].owner.email():
           self.response.out.write('u')
         else:
           self.response.out.write('o')
@@ -48,6 +48,8 @@ class WriteBlock(webapp.RequestHandler):
       query = Block.gql('WHERE index = :index LIMIT 1', index=index)
       block = query.fetch(1)
       if block:
+        # Enforce ownership.
+        if block[0].owner.email() != user.email(): return
         block[0].data = data
         block[0].put()
       else:
@@ -69,7 +71,7 @@ class DeleteBlock(webapp.RequestHandler):
       query = Block.gql('WHERE index = :index LIMIT 1', index=index)
       block = query.fetch(1)
       if block:
-        if user == block[0].owner:
+        if user.email() == block[0].owner.email():
           block[0].delete()
       self.response.headers['Content-Type'] = 'text/plain'
     else:
@@ -291,7 +293,7 @@ class MainPage(webapp.RequestHandler):
     user = users.get_current_user()
     if user:
       signout = users.create_logout_url(users.create_login_url('/'))
-      bootstrap = '" [ 0 raw-read push raw-load ] "'
+      bootstrap = '" : startup 0 raw-read push raw-load ; [ startup ] "'
       path = os.path.join(os.path.dirname(__file__), 'html/rainbowforth.html')
       self.response.out.write(template.render(path, {'bootstrap': bootstrap,
                                                      'signout': signout}))
