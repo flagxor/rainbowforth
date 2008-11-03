@@ -1,4 +1,4 @@
-: load   raw-read drop push raw-load ;
+: load   raw-read push drop raw-load ;
 : nip   swap drop ;
 : ifskip,   ' ifskip [ literal ] , ;
 : push,   ' push [ literal ] , ;
