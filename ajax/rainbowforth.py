@@ -193,7 +193,8 @@ class Backup(webapp.RequestHandler):
 
     self.response.headers['Content-Type'] = 'application/x-unknown'
     for b in blocks:
-      self.response.out.write('%d %s %d\n' % (b.index, b.owner, len(b.data)))
+      self.response.out.write('%d %s %d\n' %
+                              (b.index, b.owner.email(), len(b.data)))
       self.response.out.write(b.data)
 
 
