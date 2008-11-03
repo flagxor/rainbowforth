@@ -44,7 +44,7 @@ variable cursor-pos
 variable cursor-pos-old
 variable cursor-mark
 variable cursor-block
-variable block-state [ no-own block-state ! ]
+variable block-status [ no-own block-status ! ]
 variable cursor-color [ 32 cursor-color ! ]
 variable editor-dirty
 variable edit-buffer [ 20 allot  here 1024 allot edit-buffer !  20 allot ]
