@@ -74,19 +74,18 @@ class DeleteBlock(webapp.RequestHandler):
       self.redirect(users.create_login_url(self.request.uri))
 
 
-COLOR_MAP = {
-    u'\xff': '#ff0000',
-    u'\xfe': '#ffff00',
-    u'\xfd': '#00ff00',
-    u'\xfc': '#00ffff',
-    u'\xfb': '#0000ff',
-    u'\xfa': '#ff00ff',
-    u' ': '#ffffff',
-}
-
-
-class Export(webapp.RequestHandler):
+class View(webapp.RequestHandler):
   def get(self):
+    COLOR_MAP = {
+      u'\xff': '#ff0000',
+      u'\xfe': '#ffff00',
+      u'\xfd': '#00ff00',
+      u'\xfc': '#00ffff',
+      u'\xfb': '#0000ff',
+      u'\xfa': '#ff00ff',
+      u' ': '#ffffff',
+    }
+
     start = int(self.request.get('start'))
     end = int(self.request.get('end'))
     query = Block.gql('WHERE index >= :start and index <= :end',
@@ -120,6 +119,74 @@ class Export(webapp.RequestHandler):
     self.response.headers['Content-Type'] = 'text/html'
     self.response.out.write(dt)
     dt += '</body></html>\n'
+
+
+class Export(webapp.RequestHandler):
+  def get(self):
+    COLOR_MAP = {
+        u'\xff': ': %s ',
+        u'\xfe': '[ %s ] ',
+        u'\xfd': '%s ',
+        u'\xfc': "' %s ",
+        u'\xfb': '{ %s } ',
+        u'\xfa': 'variable %s ',
+        u' ': '( %s ) ',
+    }
+
+    start = int(self.request.get('start'))
+    end = int(self.request.get('end'))
+    query = Block.gql('WHERE index >= :start and index <= :end',
+                      start=start, end=end)
+
+    dt = ''
+    blocks = query.fetch(1000)
+    for b in blocks:
+      data = unicode(b.data, 'utf8')
+      blk =''
+      col = ' '
+      word = ''
+      for j in range(15, -1, -1):
+        blk = '\n' + blk
+        for i in range(63, -1, -1):
+          ch = data[i + j * 64]
+          if ch in COLOR_MAP:
+            if word:
+              blk = (COLOR_MAP[col] % word) + blk
+            word = ''
+            col = ch
+          else:
+            word = ch + word
+      if word:
+        blk = (COLOR_MAP[col] % word) + blk
+
+      dt += 'Block ' + str(b.index) + '\n'
+      dt += blk
+      dt += '\n\n'
+
+    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.out.write(dt)
+
+
+class Backup(webapp.RequestHandler):
+  def post(self):
+    user = users.get_current_user()
+    if not user:
+      self.redirect(users.create_login_url(self.request.uri))
+      return
+    if not users.is_current_user_admin():
+      self.redirect('/')
+      return
+
+    start = int(self.request.get('start'))
+    end = int(self.request.get('end'))
+    query = Block.gql('WHERE index >= :start and index <= :end',
+                      start=start, end=end)
+    blocks = query.fetch(1000)
+
+    self.response.headers['Content-Type'] = 'application/x-unknown'
+    for b in blocks:
+      self.response.out.write('%d %s %d\n' % (b.index, b.owner, len(b.data)))
+      self.response.out.write(b.data)
 
 
 class Reflect(webapp.RequestHandler):
@@ -190,7 +257,9 @@ def main():
         ('/delete', DeleteBlock),
         ('/reflect/.*', Reflect),
         ('/test', TestPage),
+        ('/view', View),
         ('/export', Export),
+        ('/backup', Backup),
         ], debug=True)
   run_wsgi_app(application)
 
