@@ -200,12 +200,18 @@ ThreadContext.prototype.run = function() {
   do {
     heap[this.ip++](this);
   } while(!this.yield);
+  return this.yield;
 }
 
 function runAll() {
-  var runSet = threads.slice();
-  for (var i = 0; i < runSet.length; i++) {
-    runSet[i].run();
+  var start_time = (new Date()).getTime();
+  for(;;) {
+    var runSet = threads.slice();
+    var any_active = false;
+    for (var i = 0; i < runSet.length; i++) {
+      if (runSet[i].run() < 2) any_active = true;
+    }
+    if (!any_active || (new Date()).getTime() - start_time > 10) break;
   }
 }
 
@@ -534,7 +540,7 @@ var dictionary = {
   },
   'key': function(c) {
     if (keyBuffer.length == 0) {
-      c.yield = 1;
+      c.yield = 2;
       c.ip--;
     } else {
       c.yield = 0;
@@ -581,7 +587,7 @@ var dictionary = {
                 c.ip++;
                 runAll();
               }, null);
-    c.yield = 1;
+    c.yield = 2;
     c.ip--;
   },
   'raw-read': function(c) {
@@ -609,7 +615,7 @@ var dictionary = {
                 c.ip++;
                 runAll();
               }, null);
-    c.yield = 1;
+    c.yield = 2;
     c.ip--;
   },
   'write': function(c) {
@@ -633,7 +639,7 @@ var dictionary = {
                 c.ip++;
                 runAll();
               }, null);
-    c.yield = 1;
+    c.yield = 2;
     c.ip--;
   },
   'delete': function(c) {
@@ -649,7 +655,7 @@ var dictionary = {
                 c.ip++;
                 runAll();
               }, null);
-    c.yield = 1;
+    c.yield = 2;
     c.ip--;
   },
   'fork': function(c) {
