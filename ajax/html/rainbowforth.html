@@ -394,6 +394,24 @@ var dictionary = {
     var tmp = c.dstack.pop();
     c.dstack.push(Math.floor(c.dstack.pop() / tmp));
   },
+  'f/': function(c) {
+    var tmp = c.dstack.pop();
+    c.dstack.push(c.dstack.pop() / tmp);
+  },
+  'pi': function(c) { c.dstack.push(Math.PI); },
+  'sqrt': function(c) { c.dstack.push(Math.sqrt(c.dstack.pop())); },
+  'floor': function(c) { c.dstack.push(Math.floor(c.dstack.pop())); },
+  'ceil': function(c) { c.dstack.push(Math.ceil(c.dstack.pop())); },
+  'sin': function(c) { c.dstack.push(Math.sin(c.dstack.pop())); },
+  'cos': function(c) { c.dstack.push(Math.cos(c.dstack.pop())); },
+  'atan2': function(c) {
+    var tmp = c.dstack.pop();
+    c.dstack.push(Math.atan2(c.dstack.pop(), tmp));
+  },
+  'pow': function(c) {
+    var tmp = c.dstack.pop();
+    c.dstack.push(Math.pow(c.dstack.pop(), tmp));
+  },
   '1+': function(c) {
     c.dstack[c.dstack.length - 1]++;
   },
