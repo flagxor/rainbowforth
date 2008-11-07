@@ -512,7 +512,7 @@ var dictionary = {
     consoleEmit(c, ch);
   },
   '.': function(c) {
-    var number = String(c.dstack.pop());
+    var number = c.dstack.pop().toString();
     consoleEmitString(c, number);
   },
   'set-font-size': function(c) {
