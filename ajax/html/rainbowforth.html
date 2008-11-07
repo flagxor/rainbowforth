@@ -464,6 +464,10 @@ var dictionary = {
     var addr = c.dstack.pop();
     heap[addr] += c.dstack.pop();
   },
+  '*!': function(c) {
+    var addr = c.dstack.pop();
+    heap[addr] *= c.dstack.pop();
+  },
   'fill': function(c) {
     var ch = c.dstack.pop();
     var count = c.dstack.pop();
