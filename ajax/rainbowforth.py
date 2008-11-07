@@ -280,9 +280,11 @@ class BasicEditor(webapp.RequestHandler):
       bootstrap += '""'
 
       # Add bootstrap into template.
+      email = user.email()
       signout = users.create_logout_url(users.create_login_url('/'))
       path = os.path.join(os.path.dirname(__file__), 'html/rainbowforth.html')
       self.response.out.write(template.render(path, {'bootstrap': bootstrap,
+                                                     'email': email,
                                                      'signout': signout}))
     else:
       self.redirect(users.create_login_url(self.request.uri))
@@ -292,10 +294,12 @@ class MainPage(webapp.RequestHandler):
   def get(self):
     user = users.get_current_user()
     if user:
+      email = user.email()
       signout = users.create_logout_url(users.create_login_url('/'))
       bootstrap = '" : startup 0 raw-read push raw-load ; [ startup ] "'
       path = os.path.join(os.path.dirname(__file__), 'html/rainbowforth.html')
       self.response.out.write(template.render(path, {'bootstrap': bootstrap,
+                                                     'email': email,
                                                      'signout': signout}))
     else:
       self.redirect(users.create_login_url(self.request.uri))
