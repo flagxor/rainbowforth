@@ -422,11 +422,15 @@ var dictionary = {
   },
   'mod': function(c) {
     var tmp = c.dstack.pop();
-    c.dstack.push(Math.mod(c.dstack.pop(), tmp));
+    c.dstack.push(Math.floor(c.dstack.pop() % tmp));
   },
   'f/': function(c) {
     var tmp = c.dstack.pop();
     c.dstack.push(c.dstack.pop() / tmp);
+  },
+  'fmod': function(c) {
+    var tmp = c.dstack.pop();
+    c.dstack.push(c.dstack.pop() % tmp);
   },
   'pi': function(c) { c.dstack.push(Math.PI); },
   'sqrt': function(c) { c.dstack.push(Math.sqrt(c.dstack.pop())); },
