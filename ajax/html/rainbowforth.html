@@ -343,6 +343,32 @@ var dictionary = {
   'dup': function(c) {
     c.dstack.push(c.dstack[c.dstack.length - 1]);
   },
+  '2dup': function(c) {
+    var tmp1 = c.dstack[c.dstack.length - 2];
+    var tmp2 = c.dstack[c.dstack.length - 1];
+    c.dstack.push(tmp1);
+    c.dstack.push(tmp2);
+  },
+  '3dup': function(c) {
+    var tmp1 = c.dstack[c.dstack.length - 3];
+    var tmp2 = c.dstack[c.dstack.length - 2];
+    var tmp3 = c.dstack[c.dstack.length - 1];
+    c.dstack.push(tmp1);
+    c.dstack.push(tmp2);
+    c.dstack.push(tmp3);
+  },
+  'nip': function(c) {
+    var tmp = c.dstack.pop();
+    c.dstack.pop();
+    c.dstack.push(tmp);
+  },
+  'tuck': function(c) {
+    var tmp1 = c.dstack.pop();
+    var tmp2 = c.dstack.pop();
+    c.dstack.push(tmp1);
+    c.dstack.push(tmp2);
+    c.dstack.push(tmp1);
+  },
   'push': function(c) {
     c.rstack.push(c.dstack.pop());
   },
