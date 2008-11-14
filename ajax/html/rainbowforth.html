@@ -420,6 +420,10 @@ var dictionary = {
     var tmp = c.dstack.pop();
     c.dstack.push(Math.floor(c.dstack.pop() / tmp));
   },
+  'mod': function(c) {
+    var tmp = c.dstack.pop();
+    c.dstack.push(Math.mod(c.dstack.pop(), tmp));
+  },
   'f/': function(c) {
     var tmp = c.dstack.pop();
     c.dstack.push(c.dstack.pop() / tmp);
@@ -489,6 +493,10 @@ var dictionary = {
   '+!': function(c) {
     var addr = c.dstack.pop();
     heap[addr] += c.dstack.pop();
+  },
+  '-!': function(c) {
+    var addr = c.dstack.pop();
+    heap[addr] -= c.dstack.pop();
   },
   '*!': function(c) {
     var addr = c.dstack.pop();
