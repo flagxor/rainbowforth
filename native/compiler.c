@@ -27,6 +27,11 @@
 #include <string.h>
 #include <assert.h>
 
+// Needed for linux.
+#ifndef _WIN32
+#include <sys/mman.h>
+#endif
+
 // data type of cell
 typedef int CELL;
 
@@ -505,8 +510,15 @@ void compiler_run(const char *block_filename, int extra_block,
   }
 
   // init code heap
+#ifdef _WIN32
   ctx.code_heap=malloc(CODE_HEAP_SIZE);
   assert(ctx.code_heap);
+#else
+  // Need to do this so memory has the execute/write/read on linux.
+  ctx.code_heap=valloc(CODE_HEAP_SIZE);
+  assert(ctx.code_heap);
+  mprotect(ctx.code_heap, CODE_HEAP_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
+#endif
   // point here at heap
   ctx.code_here=ctx.code_heap;
 

@@ -2,10 +2,10 @@
 
 TARGET=rainbowforth$(EXE)
 OBJECTS=main.o editor.o compiler.o console.o library.o
-CFLAGS=-g -Wall -Werror $(PLATFORM_CFLAGS)
+CFLAGS=-g -m32 -Wall -Werror $(PLATFORM_CFLAGS)
 
 $(TARGET): $(OBJECTS)
-	gcc $(OBJECTS) -o $(TARGET) $(LIBS)
+	gcc $(CFLAGS) $(OBJECTS) -o $(TARGET) $(LIBS)
 
 %.o: %.c
 	gcc $(CFLAGS) -c $<
@@ -23,6 +23,6 @@ ifeq ($(shell uname -o),Cygwin)
   LIBS=-mno-cygwin
   EXE=.exe
 else
-  LIBS=-lcurses
+  LIBS=-lncurses
   EXE=
 endif
