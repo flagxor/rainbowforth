@@ -377,14 +377,14 @@ static void execute_char(unsigned char ch) {
   // handle by type of space
   switch(ch) {
     // skip comments
-    case SPACE_WHITE: break; 
+    case SPACE_WHITE: break;
 
     // create new words
     case SPACE_RED: create(); break;
 
     // create new variable
-    case SPACE_MAGENTA: 
-      create(); 
+    case SPACE_MAGENTA:
+      create();
       execute_cstr(WORD_VARIABLE);
       break;
 
@@ -469,9 +469,9 @@ static void *util_functions[]={
   library_symbol,
 };
 
-void compiler_run(const char *block_filename, int extra_block, 
-                  COMPILER_WRITE write, COMPILER_READ read,   
-		  COMPILER_ERROR *err) {
+void compiler_run(const char *block_filename, int extra_block,
+                  COMPILER_WRITE write, COMPILER_READ read,
+                  COMPILER_ERROR *err) {
   int i;
 
   // init global context
@@ -529,5 +529,3 @@ void compiler_run(const char *block_filename, int extra_block,
   // close main file
   fclose(ctx.file);
 }
-
-
