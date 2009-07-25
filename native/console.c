@@ -35,7 +35,7 @@ void console_startup(void) {
   // give use a console
   AllocConsole();
   // get the screen buffer handle
-  console_sbuf=CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, 
+  console_sbuf=CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0,
                                          NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
   // make it active
   SetConsoleActiveScreenBuffer(console_sbuf);
@@ -58,7 +58,7 @@ void console_refresh(void) {
 
 void console_move(int x, int y) {
   COORD coord;
- 
+
   coord.X=x;
   coord.Y=y;
   SetConsoleCursorPosition(console_sbuf, coord);
@@ -93,7 +93,7 @@ void console_style(int attrib) {
     case CONSOLE_MAGENTA: t=t| r|  b; break;
     default: break;
   }
-  
+
   // set it
   SetConsoleTextAttribute(console_sbuf, t);
 }
@@ -149,7 +149,7 @@ next:
       if(ascii>0 && ascii<127) return ascii;
       break;
   }
-  
+
   // get another
   goto next;
 }
@@ -162,7 +162,7 @@ void console_clear(void) {
   int i;
 
   for(i=0;i<50;i++) {
-    console_write("\n"); 
+    console_write("\n");
   }
   console_move(0, 0);
 }
@@ -250,14 +250,14 @@ int console_read(void) {
       case KEY_DC: return CONSOLE_KEY_DEL;
       case KEY_BACKSPACE: return CONSOLE_KEY_BACKSPACE;
       case CONSOLE_KEY_CTRL('M'):
-      case KEY_ENTER: 
+      case KEY_ENTER:
         return CONSOLE_KEY_ENTER;
       default:
         // handle F1-F12 (assumes KEY_F(n) goes up by 1)
-	if(ch>=KEY_F(1) && ch<=KEY_F(12)) return ch-KEY_F(1)+CONSOLE_KEY_F(1);
-	// handle normal keys (including CTRL keys)
-	if(ch>=1 && ch<127) return ch;
-	break;
+        if(ch>=KEY_F(1) && ch<=KEY_F(12)) return ch-KEY_F(1)+CONSOLE_KEY_F(1);
+        // handle normal keys (including CTRL keys)
+        if(ch>=1 && ch<127) return ch;
+        break;
     }
   }
 }
@@ -306,5 +306,3 @@ void console_box(int x, int y, int w, int h) {
   for(i=0;i<w-2;i++) console_write_char(CONSOLE_HLINE);
   console_write_char(CONSOLE_LRCORNER);
 }
-
-

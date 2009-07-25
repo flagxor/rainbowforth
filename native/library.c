@@ -27,7 +27,7 @@
 #ifdef _WIN32
 
 #include <windows.h>
-  
+
 // mimic unix
 #define RTLD_LAZY 0
 static void *dlopen(const char *filename, int flag) {
@@ -100,6 +100,3 @@ void *library_symbol(const char *name) {
   // failure
   return 0;
 }
-
-
-

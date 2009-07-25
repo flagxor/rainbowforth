@@ -296,7 +296,7 @@ static void execute_word(void) {
   // do it if its there
   if(e) {
     // handle execute-forth word specially
-    if(counted_string_equal(e->name, e->name_len, 
+    if(counted_string_equal(e->name, e->name_len,
                             WORD_EXECUTE_FORTH_RAW, -1)) {
       // check dstack
       dstack_check();

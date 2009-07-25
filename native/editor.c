@@ -75,7 +75,7 @@ static void update_status(void) {
   // show status line on top
   console_style(CONSOLE_WHITE);
   console_move(OFFSET_X+1, 0);
-  sprintf(str, "block=%d        column=%d row=%d               ", 
+  sprintf(str, "block=%d        column=%d row=%d               ",
           ctx.block, ctx.cursor_pos%WIDTH, ctx.cursor_pos/WIDTH);
   console_write(str);
   // move to proper position
@@ -188,7 +188,7 @@ static void change_block(int i) {
   // clip to zero
   if(i<0) i=0;
   // save current block if needed
-  save(); 
+  save();
   // set new block
   ctx.block=i;
   // load it
@@ -313,7 +313,7 @@ static void update_key(void) {
   // add each in
   for(i=0;i<sizeof(key)/sizeof(key[0]);i++) {
     // red
-    console_style(key[i].color | 
+    console_style(key[i].color |
                   (ctx.space==key[i].ch?CONSOLE_UNDERLINE:0));
     console_write(key[i].name);
     console_style(CONSOLE_WHITE);
@@ -323,7 +323,7 @@ static void update_key(void) {
   cursor_adjust();
 }
 
-static int prompt(int x, int y, const char *prompt_text, 
+static int prompt(int x, int y, const char *prompt_text,
                   char *dst, int dst_limit) {
   int prompt_text_len;
   int pos;
@@ -396,45 +396,45 @@ static void editor(void) {
     // get a key
     key=console_read();
     // keep track of clipboard state
-    if(key!=CONSOLE_KEY_CTRL('C') && 
+    if(key!=CONSOLE_KEY_CTRL('C') &&
        key!=CONSOLE_KEY_CTRL('X')) ctx.clipboard_in_action=0;
     // handle key
     switch(key) {
       // handle arrow keys
       case CONSOLE_KEY_UP: ctx.cursor_pos-=WIDTH; update_cursor(); break;
-      case CONSOLE_KEY_DOWN: ctx.cursor_pos+=WIDTH; update_cursor(); break; 
-      case CONSOLE_KEY_LEFT: 
+      case CONSOLE_KEY_DOWN: ctx.cursor_pos+=WIDTH; update_cursor(); break;
+      case CONSOLE_KEY_LEFT:
         if(ctx.cursor_pos>0) {
-	  ctx.cursor_pos--; update_cursor(); 
-	}
-	break;
-      case CONSOLE_KEY_RIGHT: 
-        if(ctx.cursor_pos<BLOCK_SIZE-1) {
-          ctx.cursor_pos++; update_cursor(); 
+          ctx.cursor_pos--; update_cursor();
         }
-	break;
+        break;
+      case CONSOLE_KEY_RIGHT:
+        if(ctx.cursor_pos<BLOCK_SIZE-1) {
+          ctx.cursor_pos++; update_cursor();
+        }
+        break;
 
       // handle home and end
-      case CONSOLE_KEY_HOME: 
-        ctx.cursor_pos=ctx.cursor_pos/WIDTH*WIDTH; 
-	update_cursor(); 
-	break;
-      case CONSOLE_KEY_END: 
-        ctx.cursor_pos=ctx.cursor_pos/WIDTH*WIDTH+WIDTH-1; 
-	update_cursor(); 
-	break;
+      case CONSOLE_KEY_HOME:
+        ctx.cursor_pos=ctx.cursor_pos/WIDTH*WIDTH;
+        update_cursor();
+        break;
+      case CONSOLE_KEY_END:
+        ctx.cursor_pos=ctx.cursor_pos/WIDTH*WIDTH+WIDTH-1;
+        update_cursor();
+        break;
 
       // handle block movement
       case CONSOLE_KEY_PGUP: change_block(ctx.block-1); break;
       case CONSOLE_KEY_PGDN: change_block(ctx.block+1); break;
-      
+
       // handle enter
-      case CONSOLE_KEY_ENTER: 
-        ctx.cursor_pos+=WIDTH; 
-	ctx.cursor_pos=(ctx.cursor_pos/WIDTH*WIDTH);
-	update_cursor();
-	break;
-   
+      case CONSOLE_KEY_ENTER:
+        ctx.cursor_pos+=WIDTH;
+        ctx.cursor_pos=(ctx.cursor_pos/WIDTH*WIDTH);
+        update_cursor();
+        break;
+
       // handle backspace and delete
       case CONSOLE_KEY_BACKSPACE: backspace(); break;
       case CONSOLE_KEY_DEL: ctx.cursor_pos++; backspace(); break;
@@ -448,7 +448,7 @@ static void editor(void) {
 
       // run code on request
       case CONSOLE_KEY_CTRL('R'): run(); break;
-      
+
       // try to jump to a block
       case CONSOLE_KEY_CTRL('G'): goto_block(); break;
 
@@ -466,9 +466,9 @@ static void editor(void) {
 
       // handle quit
       case CONSOLE_KEY_ESCAPE:
-      case CONSOLE_KEY_CTRL('Q'): 
-        save(); 
-	return;
+      case CONSOLE_KEY_CTRL('Q'):
+        save();
+        return;
 
       // handle tab
       case CONSOLE_KEY_TAB: insert(); insert(); insert(); insert(); break;
@@ -479,7 +479,7 @@ static void editor(void) {
       // handle others
       default:
         if(key>' ' && key<127) write_normal_symbol(key);
-	break;
+        break;
     }
   }
 }
@@ -489,7 +489,7 @@ static void startup_layout(void) {
   console_clear();
   // draw white box around edit area
   console_style(CONSOLE_WHITE);
-  console_box(OFFSET_X-1, OFFSET_Y-1, WIDTH+2, HEIGHT+2); 
+  console_box(OFFSET_X-1, OFFSET_Y-1, WIDTH+2, HEIGHT+2);
   // draw color key
   update_key();
   // clipboard keys
@@ -529,7 +529,7 @@ static void run(void) {
   console_style(CONSOLE_WHITE);
 
   // run it
-  compiler_run(ctx.block_filename, ctx.block, 
+  compiler_run(ctx.block_filename, ctx.block,
                console_write, console_read, &err);
 
   // goto error if any
@@ -537,7 +537,7 @@ static void run(void) {
     // restore layout
     startup_layout();
     // draw block
-    redraw(); 
+    redraw();
     // goto error
     ctx.cursor_pos=err.offset;
     change_block(err.block);
@@ -551,7 +551,7 @@ static void run(void) {
     update_status();
     // get key
     console_read();
-    // blank it 
+    // blank it
     console_move(5, OFFSET_Y+HEIGHT+5);
     {
       int i;
@@ -568,7 +568,7 @@ static void run(void) {
 
   // refresh
   startup_layout();
-  redraw(); 
+  redraw();
   console_refresh();
 }
 
@@ -589,7 +589,7 @@ int editor_run(const char *block_filename) {
     fprintf(stderr, "ERROR: can't open '%s'\n", block_filename);
     return -2;
   }
- 
+
   // do display setup
   startup();
   // do main edit loop
@@ -602,5 +602,3 @@ int editor_run(const char *block_filename) {
 
   return 0;
 }
-
-

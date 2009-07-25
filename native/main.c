@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     // compile and run
     compiler_run(argv[1], -1, simple_write, simple_read, &err);
     if(err.is_error) {
-      fprintf(stderr, "ERROR at [%d]%d,%d: %s\n", 
+      fprintf(stderr, "ERROR at [%d]%d,%d: %s\n",
               err.block, err.offset%64, err.offset/64, err.message);
       return -1;
     }
@@ -59,5 +59,3 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 }
-
-
