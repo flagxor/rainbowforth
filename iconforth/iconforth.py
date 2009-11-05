@@ -82,6 +82,9 @@ class ReadIcon(webapp.RequestHandler):
       c.verticalGradient(0, 0, c.width-1, c.height-1,
                         [0xff,0,0,0xff],
                         [0x20,0,0xff,0x80])
+    del self.response.headers['Cache-Control']
+    self.response.headers['Expires'] = (datetime.datetime.utcnow() +
+                                        datetime.timedelta(1))
     self.response.out.write(c.dump())
 
 

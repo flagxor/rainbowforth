@@ -74,8 +74,6 @@ function plot(x, y, on) {
   ctx.rect(262+x, 6+y, 1, 1);
   ctx.closePath();
   ctx.fill();
-
-  update_form();
 }
 
 function blank() {
@@ -108,6 +106,7 @@ function mousedown(evt) {
 
 function mouseup(evt) {
   drawing = 0;
+  update_form();
 }
 
 function mousemove(evt) {
