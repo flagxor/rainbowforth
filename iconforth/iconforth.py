@@ -60,7 +60,7 @@ class Results(webapp.RequestHandler):
 class ReadIcon(webapp.RequestHandler):
   def get(self):
     self.response.headers['Content-Type'] = 'image/png'
-    c = pngcanvas.PNGCanvas(32, 32)
+    c = pngcanvas.PNGCanvas(16, 16)
     id = self.request.path[6:-4]
     try:
       w = Word.get(id)
@@ -70,9 +70,9 @@ class ReadIcon(webapp.RequestHandler):
       w.accessed = datetime.datetime.now()
       w.put()
       data = w.icon
-      for y in range(0, 32):
-        for x in range(0, 32):
-          z = x + y * 32
+      for y in range(0, 16):
+        for x in range(0, 16):
+          z = x + y * 16
           if z < len(data) and int(data[z]):
             c.color = [0x00, 0x00, 0x00, 0xff]
           else:
