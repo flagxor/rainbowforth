@@ -1,0 +1,65 @@
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<html>
+<head>
+<title>Icon Forth</title>
+</head>
+<body>
+
+<canvas id="canvas" width="257" height="257" border="0"></canvas>
+<script type="text/javascript">
+
+var cv = document.getElementsByTagName("canvas");
+var ctx = cv[0].getContext("2d");
+var grid = new Array();
+
+function plot(x, y, on) {
+  if (x < 0 || x > 31 || y < 0 || y > 31) return;
+  if (on < 0) {
+    on = !grid[x+y*32];
+  }
+  if (on) {
+    ctx.fillStyle = "#000000";
+  } else {
+    ctx.fillStyle = "#ffffff";
+  }
+  grid[x+y*32] = on;
+  ctx.beginPath();
+  ctx.rect(x*8+1, y*8+1, 7, 7);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function blank() {
+  ctx.clearRect(0, 0, 257, 257);
+
+  ctx.fillStyle = "#777777";
+  ctx.beginPath();
+  ctx.rect(0, 0, 257, 257);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function mouse(evt) {
+  var x = evt.pageX - 8;
+  var y = evt.pageY - 8;
+
+  x = Math.floor(x/8);
+  y = Math.floor(y/8);
+  plot(x, y, -1);
+}
+
+function init() {
+  blank();
+  for (var x = 0; x < 32; x++) {
+    for (var y = 0; y < 32; y++) {
+      plot(x, y, 0);
+    }
+  }
+  document.onmousedown = mouse;
+}
+
+init();
+
+</script>
+</body>
+</html>

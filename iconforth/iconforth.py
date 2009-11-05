@@ -81,9 +81,18 @@ class WriteWord(webapp.RequestHandler):
     self.redirect('/read/%s' % str(w.key()))
 
 
-class MainPage(webapp.RequestHandler):
+class RawEdit(webapp.RequestHandler):
   def get(self):
     path = os.path.join(os.path.dirname(__file__), 'html/raw.html')
+    self.response.out.write(template.render(path, {}))
+
+
+class MainPage(webapp.RequestHandler):
+  def get(self):
+    if self.request.headers.get('User-Agent', '').find('chromeframe') < 0:
+      path = os.path.join(os.path.dirname(__file__), 'html/editor.html')
+    else:
+      path = os.path.join(os.path.dirname(__file__), 'html/chrome_frame.html')
     self.response.out.write(template.render(path, {}))
 
 
@@ -93,6 +102,7 @@ def main():
       ('/read/.*', ReadWord),
       ('/icon/.*', ReadIcon),
       ('/write', WriteWord),
+      ('/raw', RawEdit),
   ], debug=True)
   run_wsgi_app(application)
 
