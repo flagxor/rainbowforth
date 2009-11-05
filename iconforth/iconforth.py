@@ -89,10 +89,11 @@ class RawEdit(webapp.RequestHandler):
 
 class MainPage(webapp.RequestHandler):
   def get(self):
-    if self.request.headers.get('User-Agent', '').find('chromeframe') < 0:
-      path = os.path.join(os.path.dirname(__file__), 'html/editor.html')
-    else:
+    agent = self.request.headers.get('User-Agent', '')
+    if agent.find('MSIE')>=0 and agent.find('chromeframe') < 0:
       path = os.path.join(os.path.dirname(__file__), 'html/chrome_frame.html')
+    else:
+      path = os.path.join(os.path.dirname(__file__), 'html/editor.html')
     self.response.out.write(template.render(path, {}))
 
 
