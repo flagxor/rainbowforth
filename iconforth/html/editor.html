@@ -5,13 +5,18 @@
 </head>
 <body>
 
-<canvas name="bigicon" width="300" height="257" border="0"></canvas>
+<canvas name="bigicon" width="300" height="257" border="0" style="cursor: crosshair;"></canvas>
 <form name="frm" action="/write" method="post">
+  <textarea name="description" cols="30" rows="8"></textarea><br>
+  <div name="deficons"></div>
+  <hidden name="definition" type="text">
   <input name="icon" type="hidden">
-  description:<input name="description" type="text"><br>
-  definition:<input name="definition" type="text"><br>
   <input name="g" type="submit" value="Add"><br>
 </form>
+
+<iframe src="http://localhost:8080/results"
+  width="300" height="400" frameborder="0">
+</iframe>
 
 <script type="text/javascript">
 
@@ -20,6 +25,29 @@ var color = 0;
 var cv = document.getElementsByName("bigicon");
 var ctx = cv[0].getContext("2d");
 var grid = new Array();
+
+function update_form() {
+  // update image
+  var str = "";
+  for (var y = 0; y < 32; y++) {
+    for (var x = 0; x < 32; x++) {
+      if (grid[x+y*32]) {
+        str += "1";
+      } else {
+        str += "0";
+      }
+    }
+  }
+  document.frm.icon.value = str;
+
+  // update definition
+  var d = document.getElementsByName("deficons");
+  var str = "";
+  for (ch in d) {
+    if (str.length) { str += " "; }
+    str += ch.alt
+  }
+}
 
 function getpixel(x, y) {
   if (x < 0 || x > 31 || y < 0 || y > 31) return;
@@ -46,17 +74,7 @@ function plot(x, y, on) {
   ctx.closePath();
   ctx.fill();
 
-  str = "";
-  for (var y = 0; y < 32; y++) {
-    for (var x = 0; x < 32; x++) {
-      if (grid[x+y*32]) {
-        str += "1";
-      } else {
-        str += "0";
-      }
-    }
-  }
-  document.frm.icon.value = str;
+  update_form();
 }
 
 function blank() {
@@ -97,6 +115,23 @@ function mousemove(evt) {
     var y = Math.floor((evt.pageY - 8) / 8);
     plot(x, y, color);
   }
+}
+
+function drop(e) {
+  var d = document.getElementsByName("deficons");
+  d[0].removeChild(e);
+  update_form();
+}
+
+function pick(id) {
+  var d = document.getElementsByName("deficons");
+  var im = document.createElement("img");
+  im.setAttribute("src", "/icon/" + id);
+  im.setAttribute("alt", id);
+  im.setAttribute("style", "cursor: hand;");
+  im.setAttribute("onclick", "drop(this)");
+  d[0].appendChild(im);
+  update_form();
 }
 
 function init() {

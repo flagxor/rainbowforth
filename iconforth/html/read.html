@@ -1,15 +1,24 @@
 <html>
   <head>
-    <title>IconForth</title>
+    <title>Icon Forth</title>
   </head>
-  <body>
-    icon: <img src="/icon/{{ id }}" border="1"><br>
-    description: {{ description }}<br>
-    definition: {% for word in definition %}<img src="/icon/{{ word }}" border="1">{% endfor %}<br>
-    created: {{ created }}<br>
-    author: {{ author }}<br>
-    total_users: {{ total_users }}<br>
-    outbound_users: {{ outbound_users }}<br>
+  <body bgcolor="#ccffff">
+    <form>
+      <input type="button" value="List"
+      onclick="window.location.href='/results'">
+    </form>
+    <img border="5" bordercolor="#cc0000"
+    style="border-color: #cc0000; cursor: hand;"
+    src="/icon/{{ id }}" width="32" height="32"
+    onclick="window.parent.pick('{{ id }}')">
+    {% for word in definition %}
+    <a href="/read/{{ word }}"><img src="/icon/{{ word }}" width="32" height="32" border="0"></a>
+    {% endfor %}<br>
+    <b>description:</b> {{ description }}<br>
+    <b>created:</b> {{ created }}<br>
+    <b>author:</b> {{ author }}<br>
+    <b>total_users:</b> {{ total_users }}<br>
+    <b>outbound_users:</b> {{ outbound_users }}<br>
   </body>
 </html>
 
