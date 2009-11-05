@@ -1,0 +1,15 @@
+<html>
+  <head>
+    <title>IconForth</title>
+  </head>
+  <body>
+    icon: <img src="/icon/{{ id }}" border="1"><br>
+    description: {{ description }}<br>
+    definition: {% for word in definition %}<img src="/icon/{{ word }}" border="1">{% endfor %}<br>
+    created: {{ created }}<br>
+    author: {{ author }}<br>
+    total_users: {{ total_users }}<br>
+    outbound_users: {{ outbound_users }}<br>
+  </body>
+</html>
+
