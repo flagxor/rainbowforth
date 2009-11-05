@@ -12,7 +12,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 
 
 class Word(db.Model):
-  icon = db.StringProperty()
+  icon = db.BlobProperty()
   description = db.StringProperty()
   definition = db.StringProperty()
   created = db.DateTimeProperty(auto_now_add=True)
@@ -71,7 +71,7 @@ class ReadIcon(webapp.RequestHandler):
 class WriteWord(webapp.RequestHandler):
   def post(self):
     w = Word()
-    w.icon = self.request.get('icon')
+    w.icon = str(self.request.get('icon'))
     w.description = self.request.get('description')
     w.definition = self.request.get('definition')
     w.author = self.request.remote_addr

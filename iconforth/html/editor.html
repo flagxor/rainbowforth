@@ -5,61 +5,110 @@
 </head>
 <body>
 
-<canvas id="canvas" width="257" height="257" border="0"></canvas>
+<canvas name="bigicon" width="300" height="257" border="0"></canvas>
+<form name="frm" action="/write" method="post">
+  <input name="icon" type="hidden">
+  description:<input name="description" type="text"><br>
+  definition:<input name="definition" type="text"><br>
+  <input name="g" type="submit" value="Add"><br>
+</form>
+
 <script type="text/javascript">
 
-var cv = document.getElementsByTagName("canvas");
+var drawing = 0;
+var color = 0;
+var cv = document.getElementsByName("bigicon");
 var ctx = cv[0].getContext("2d");
 var grid = new Array();
 
+function getpixel(x, y) {
+  if (x < 0 || x > 31 || y < 0 || y > 31) return;
+  return grid[x+y*32];
+}
+
 function plot(x, y, on) {
   if (x < 0 || x > 31 || y < 0 || y > 31) return;
-  if (on < 0) {
-    on = !grid[x+y*32];
-  }
+  if (getpixel(x, y) == on) return;
   if (on) {
     ctx.fillStyle = "#000000";
   } else {
     ctx.fillStyle = "#ffffff";
   }
   grid[x+y*32] = on;
+
   ctx.beginPath();
   ctx.rect(x*8+1, y*8+1, 7, 7);
   ctx.closePath();
   ctx.fill();
+
+  ctx.beginPath();
+  ctx.rect(262+x, 6+y, 1, 1);
+  ctx.closePath();
+  ctx.fill();
+
+  str = "";
+  for (var y = 0; y < 32; y++) {
+    for (var x = 0; x < 32; x++) {
+      if (grid[x+y*32]) {
+        str += "1";
+      } else {
+        str += "0";
+      }
+    }
+  }
+  document.frm.icon.value = str;
 }
 
 function blank() {
-  ctx.clearRect(0, 0, 257, 257);
+  ctx.clearRect(0, 0, 300, 257);
 
   ctx.fillStyle = "#777777";
   ctx.beginPath();
-  ctx.rect(0, 0, 257, 257);
+  ctx.rect(0, 0, 300, 257);
   ctx.closePath();
   ctx.fill();
-}
 
-function mouse(evt) {
-  var x = evt.pageX - 8;
-  var y = evt.pageY - 8;
+  for(var z = 0; z < 32 * 32;z++) {
+    grid[z] = -1;
+  }
 
-  x = Math.floor(x/8);
-  y = Math.floor(y/8);
-  plot(x, y, -1);
-}
-
-function init() {
-  blank();
   for (var x = 0; x < 32; x++) {
     for (var y = 0; y < 32; y++) {
       plot(x, y, 0);
     }
   }
-  document.onmousedown = mouse;
+}
+
+function mousedown(evt) {
+  var x = Math.floor((evt.pageX - 8) / 8);
+  var y = Math.floor((evt.pageY - 8) / 8);
+  color = !getpixel(x, y);
+  plot(x, y, color);
+  drawing = 1;
+}
+
+function mouseup(evt) {
+  drawing = 0;
+}
+
+function mousemove(evt) {
+  if (drawing) {
+    var x = Math.floor((evt.pageX - 8) / 8);
+    var y = Math.floor((evt.pageY - 8) / 8);
+    plot(x, y, color);
+  }
+}
+
+function init() {
+  blank();
+  document.onmousedown = mousedown;
+  document.onmouseup = mouseup;
+  document.onmousemove = mousemove;
 }
 
 init();
 
 </script>
+
 </body>
 </html>
