@@ -127,7 +127,7 @@ function drop(e) {
 function pick(id) {
   var d = document.getElementsByName("deficons")[0];
   var im = document.createElement("img");
-  im.setAttribute("src", "/icon/" + id);
+  im.setAttribute("src", "/icon/" + id + ".png");
   im.setAttribute("alt", id);
   im.setAttribute("style", "cursor: hand;");
   im.setAttribute("onclick", "drop(this)");

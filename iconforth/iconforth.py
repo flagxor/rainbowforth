@@ -61,7 +61,7 @@ class ReadIcon(webapp.RequestHandler):
   def get(self):
     self.response.headers['Content-Type'] = 'image/png'
     c = pngcanvas.PNGCanvas(32, 32)
-    id = self.request.path[6:]
+    id = self.request.path[6:-4]
     try:
       w = Word.get(id)
     except:
@@ -118,7 +118,7 @@ def main():
   application = webapp.WSGIApplication([
       ('/[0-9]*', MainPage),
       ('/read/.*', ReadWord),
-      ('/icon/.*', ReadIcon),
+      ('/icon/.*\\.png', ReadIcon),
       ('/write', WriteWord),
       ('/raw', RawEdit),
       ('/results', Results),

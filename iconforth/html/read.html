@@ -1,3 +1,4 @@
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
 <html>
   <head>
     <title>Icon Forth</title>
@@ -9,10 +10,10 @@
     </form>
     <img border="5" bordercolor="#cc0000"
     style="border-color: #cc0000; cursor: hand;"
-    src="/icon/{{ id }}" width="32" height="32"
+    src="/icon/{{ id }}.png" width="32" height="32"
     onclick="window.parent.pick('{{ id }}')">
     {% for word in definition %}
-    <a href="/read/{{ word }}"><img src="/icon/{{ word }}" width="32" height="32" border="0"></a>
+    <a href="/read/{{ word }}"><img src="/icon/{{ word }}.png" width="32" height="32" border="0"></a>
     {% endfor %}<br>
     <b>description:</b> {{ description }}<br>
     <b>created:</b> {{ created }}<br>
