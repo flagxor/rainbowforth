@@ -9,7 +9,7 @@
 <form name="frm" action="/write" method="post">
   <textarea name="description" cols="30" rows="8"></textarea><br>
   <div name="deficons"></div>
-  <hidden name="definition" type="text">
+  <input name="definition" type="hidden">
   <input name="icon" type="hidden">
   <input name="g" type="submit" value="Add"><br>
 </form>
@@ -41,12 +41,13 @@ function update_form() {
   document.frm.icon.value = str;
 
   // update definition
-  var d = document.getElementsByName("deficons");
+  var d = document.getElementsByName("deficons")[0];
   var str = "";
-  for (ch in d) {
+  for (var i = 0; i < d.children.length; i++) {
     if (str.length) { str += " "; }
-    str += ch.alt
+    str += d.children[i].alt
   }
+  document.frm.definition.value = str;
 }
 
 function getpixel(x, y) {
@@ -118,19 +119,19 @@ function mousemove(evt) {
 }
 
 function drop(e) {
-  var d = document.getElementsByName("deficons");
-  d[0].removeChild(e);
+  var d = document.getElementsByName("deficons")[0];
+  d.removeChild(e);
   update_form();
 }
 
 function pick(id) {
-  var d = document.getElementsByName("deficons");
+  var d = document.getElementsByName("deficons")[0];
   var im = document.createElement("img");
   im.setAttribute("src", "/icon/" + id);
   im.setAttribute("alt", id);
   im.setAttribute("style", "cursor: hand;");
   im.setAttribute("onclick", "drop(this)");
-  d[0].appendChild(im);
+  d.appendChild(im);
   update_form();
 }
 
