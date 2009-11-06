@@ -25,6 +25,9 @@ class Word(db.Model):
 
 class ReadWord(webapp.RequestHandler):
   def get(self):
+    del self.response.headers['Cache-Control']
+    self.response.headers['Expires'] = (datetime.datetime.utcnow() +
+                                        datetime.timedelta(1))
     id = self.request.path[6:]
     w = Word.get(id)
     if w:
@@ -59,6 +62,9 @@ class Results(webapp.RequestHandler):
 
 class ReadIcon(webapp.RequestHandler):
   def get(self):
+    del self.response.headers['Cache-Control']
+    self.response.headers['Expires'] = (datetime.datetime.utcnow() +
+                                        datetime.timedelta(1))
     self.response.headers['Content-Type'] = 'image/png'
     c = pngcanvas.PNGCanvas(16, 16)
     id = self.request.path[6:-4]
@@ -82,9 +88,6 @@ class ReadIcon(webapp.RequestHandler):
       c.verticalGradient(0, 0, c.width-1, c.height-1,
                         [0xff,0,0,0xff],
                         [0x20,0,0xff,0x80])
-    del self.response.headers['Cache-Control']
-    self.response.headers['Expires'] = (datetime.datetime.utcnow() +
-                                        datetime.timedelta(1))
     self.response.out.write(c.dump())
 
 
