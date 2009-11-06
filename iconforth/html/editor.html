@@ -1,20 +1,22 @@
-<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01/EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-<title>Icon Forth</title>
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <title>Icon Forth</title>
 </head>
 <body>
 
-<canvas name="bigicon" width="300" height="257" border="0" style="cursor: crosshair;"></canvas>
+<canvas id="bigicon" width="300" height="257" border="0" style="cursor: crosshair;"></canvas>
 <form name="frm" action="/write" method="post">
   <textarea name="description" cols="30" rows="8"></textarea><br>
-  <div name="deficons"></div>
+  <div id="deficons"></div>
   <input name="definition" type="hidden">
   <input name="icon" type="hidden">
   <input name="g" type="submit" value="Add"><br>
 </form>
 
-<iframe src="/results" name="frame1"
+<iframe src="/results" id="frame1"
   width="100%" height="250" frameborder="0">
 </iframe>
 
@@ -22,8 +24,8 @@
 
 var drawing = 0;
 var color = 0;
-var cv = document.getElementsByName("bigicon");
-var ctx = cv[0].getContext("2d");
+var cv = document.getElementById("bigicon");
+var ctx = cv.getContext("2d");
 var grid = new Array();
 
 function update_form() {
@@ -41,11 +43,11 @@ function update_form() {
   document.frm.icon.value = str;
 
   // update definition
-  var d = document.getElementsByName("deficons")[0];
+  var d = document.getElementById("deficons");
   var str = "";
-  for (var i = 0; i < d.children.length; i++) {
+  for (var i = 0; i < d.childNodes.length; i++) {
     if (str.length) { str += " "; }
-    str += d.children[i].alt
+    str += d.childNodes.item(i).alt
   }
   document.frm.definition.value = str;
 }
@@ -118,25 +120,25 @@ function mousemove(evt) {
 }
 
 function drop(e) {
-  var d = document.getElementsByName("deficons")[0];
+  var d = document.getElementById("deficons");
   d.removeChild(e);
   update_form();
 }
 
 function pick(id) {
-  var d = document.getElementsByName("deficons")[0];
+  var d = document.getElementById("deficons");
   var im = document.createElement("img");
   im.setAttribute("src", "/icon/" + id + ".png");
   im.setAttribute("alt", id);
   im.setAttribute("width", "32");
   im.setAttribute("height", "32");
-  im.setAttribute("style", "cursor: hand;");
+  im.setAttribute("style", "cursor: pointer;");
   im.setAttribute("onclick", "drop(this)");
   d.appendChild(im);
   update_form();
 
   // Go back to the list
-  var d = document.getElementsByName("frame1")[0];
+  var d = document.getElementById("frame1");
   d.src = "/results"
 }
 
