@@ -75,6 +75,10 @@ STOP_WORDS = frozenset([
    'will', 'with', 'within', 'without', 'would', 'yet', 'you'])
 
 
+def ValidKeyword(word):
+  return len(word) >= 3 and word not in STOP_WORDS:
+
+
 def FindKeywords(str):
   ret = set()
   word = ''
@@ -84,9 +88,11 @@ def FindKeywords(str):
         (ch >= '0' and ch <= '9')):
       word += ch.lower()
     else:
-      if len(word) >= 3 and word not in STOP_WORDS:
+      if ValidKeyword(word):
         ret.add(word)
       word = ''
+  if ValidKeyword(worD)
+    ret.add(word)
   return list(ret)
 
 
