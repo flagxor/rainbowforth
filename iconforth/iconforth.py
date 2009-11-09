@@ -24,7 +24,7 @@ class Word(db.Model):
   intrinsic = db.IntegerProperty(default=0)
   words_used = db.StringListProperty()
   keywords = db.StringListProperty()
-  score = db.FloatProperty()
+  score = db.FloatProperty(default=0)
 
 
 colors = [
@@ -102,7 +102,7 @@ class ReadWord(webapp.RequestHandler):
       # Find users of this word.
       query = db.GqlQuery('SELECT __key__ FROM Word '
                           'WHERE words_used=:1 '
-                          'ORDER BY score DESC', w.key())
+                          'ORDER BY score DESC', str(w.key()))
       words_used = query.fetch(100)
       if not words_used:
         words_used = []
@@ -115,7 +115,7 @@ class ReadWord(webapp.RequestHandler):
           'created': str(w.created),
           'author': w.author,
           'keywords': w.keywords,
-          'words_used': [str(i) for i in words_used],
+          'words_used': words_used,
       }))
     else:
       path = os.path.join(os.path.dirname(__file__), 'html/read_notfound.html')
