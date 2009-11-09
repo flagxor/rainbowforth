@@ -158,6 +158,7 @@ class DumpWord(webapp.RequestHandler):
             'id': id,
             'intrinsic': w.intrinsic,
             'definition': definition,
+            'description': w.description,
         })
         # Add new words needed.
         if w.definition:
