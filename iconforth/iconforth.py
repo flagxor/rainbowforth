@@ -111,12 +111,17 @@ class ReadWord(webapp.RequestHandler):
       words_used = query.fetch(1000)
       if not words_used:
         words_used = []
+      # Prepare definition.
+      if w.definition == '':
+        definition = []
+      else:
+        definition = w.definition.split(' ')
       # Output info on word.
       path = os.path.join(os.path.dirname(__file__), 'html/read.html')
       self.response.out.write(template.render(path, {
           'id': id,
           'description': w.description,
-          'definition': w.definition.split(' '),
+          'definition': definition,
           'created': str(w.created),
           'author': w.author,
           'words_used': words_used,
