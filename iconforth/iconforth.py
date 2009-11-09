@@ -133,6 +133,7 @@ class ReadWord(webapp.RequestHandler):
 
 class Results(webapp.RequestHandler):
   def get(self):
+    # Do a query.
     goal = self.request.get('q').lower()
     if goal:
       query = db.GqlQuery('SELECT __key__ FROM Word '
@@ -142,12 +143,14 @@ class Results(webapp.RequestHandler):
       query = db.GqlQuery('SELECT __key__ FROM Word '
                           'ORDER BY score DESC, created DESC')
     w = query.fetch(1000)
-    if w:
-      path = os.path.join(os.path.dirname(__file__), 'html/results.html')
-      self.response.out.write(template.render(path, {
-          'query': goal,
-          'results': [str(i) for i in w],
-      }))
+    if not w:
+      w = []
+    # Display results.
+    path = os.path.join(os.path.dirname(__file__), 'html/results.html')
+    self.response.out.write(template.render(path, {
+        'query': goal,
+        'results': [str(i) for i in w],
+    }))
 
 
 class ReadIcon(webapp.RequestHandler):

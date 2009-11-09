@@ -5,14 +5,16 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>Icon Forth</title>
   </head>
-  <body bgcolor="#777777">
+  <body bgcolor="#777777"><font color="#ffffff">
     <form action="/results">
       <input name="q" type="text" value="{{ query|escape }}">
       <input name="g" type="submit" value="Search">
+      <input type="button" value="All"
+      onclick="window.location.href='/results'">
     </form>
     {% for word in results %}
     <a href="/read/{{ word }}"><img src="/icon/{{ word }}.png" width="32" height="32" border="0"></a>
     {% endfor %}
-  </body>
+  </font></body>
 </html>
 
