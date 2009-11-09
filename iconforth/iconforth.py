@@ -216,7 +216,7 @@ class ReadIcon(webapp.RequestHandler):
   def get(self):
     self.response.headers['Cache-Control'] = 'public, max-age=86400'
     self.response.headers['Content-Type'] = 'image/png'
-    c = pngcanvas.PNGCanvas(16, 16)
+    c = pngcanvas.PNGCanvas(32, 32)
     id = self.request.path[6:-4]
     try:
       w = Word.get(id)
@@ -229,11 +229,11 @@ class ReadIcon(webapp.RequestHandler):
           z = x + y * 16
           if z < len(data):
             c.color = colors[int(data[z])]
-          c.rectangle(x, y, x+1, y+1)
+          c.rectangle(x*2, y*2, x*2+1, y*2+1)
     else:
       c.verticalGradient(0, 0, c.width-1, c.height-1,
-                        [0xff,0,0,0xff],
-                        [0x20,0,0xff,0x80])
+                         [0xff,0,0,0xff],
+                         [0x20,0,0xff,0x80])
     self.response.out.write(c.dump())
 
 
