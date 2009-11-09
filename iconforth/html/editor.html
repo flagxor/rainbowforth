@@ -10,7 +10,7 @@
 <canvas id="bigicon" width="300" height="257" border="0" style="cursor: crosshair;"></canvas>
 <form name="frm" action="/write" method="post">
   <textarea name="description" cols="30" rows="8"></textarea><br>
-  <div id="deficons"></div>
+  <div id="deficons"><div width="1" height="32"></div></div>
   <input name="definition" type="hidden">
   <input name="icon" type="hidden">
   <input name="g" type="submit" value="Add"><br>
@@ -52,7 +52,7 @@ function update_form() {
   // update definition
   var d = document.getElementById("deficons");
   var str = "";
-  for (var i = 0; i < d.childNodes.length; i++) {
+  for (var i = 1; i < d.childNodes.length; i++) {
     if (str.length) { str += " "; }
     str += d.childNodes.item(i).alt
   }

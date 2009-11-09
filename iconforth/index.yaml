@@ -6,10 +6,14 @@ indexes:
   - name: keywords
   - name: score
     direction: desc
+  - name: created
+    direction: desc
 
 # Used to find words that use given word.
 - kind: Word
   properties:
   - name: words_used
   - name: score
+    direction: desc
+  - name: created
     direction: desc

@@ -107,7 +107,7 @@ class ReadWord(webapp.RequestHandler):
       # Find users of this word.
       query = db.GqlQuery('SELECT __key__ FROM Word '
                           'WHERE words_used=:1 '
-                          'ORDER BY score DESC', str(w.key()))
+                          'ORDER BY score DESC, created DESC', str(w.key()))
       words_used = query.fetch(100)
       if not words_used:
         words_used = []
@@ -132,9 +132,10 @@ class Results(webapp.RequestHandler):
     if goal:
       query = db.GqlQuery('SELECT __key__ FROM Word '
                           'WHERE keywords = :1 '
-                          'ORDER BY score DESC', goal)
+                          'ORDER BY score DESC, created DESC', goal)
     else:
-      query = db.GqlQuery('SELECT __key__ FROM Word ORDER BY score DESC')
+      query = db.GqlQuery('SELECT __key__ FROM Word '
+                          'ORDER BY score DESC, created DESC')
     w = query.fetch(100)
     if w:
       path = os.path.join(os.path.dirname(__file__), 'html/results.html')
