@@ -145,6 +145,7 @@ class Results(webapp.RequestHandler):
     if w:
       path = os.path.join(os.path.dirname(__file__), 'html/results.html')
       self.response.out.write(template.render(path, {
+          'query': goal,
           'results': [str(i) for i in w],
       }))
 
