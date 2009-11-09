@@ -119,7 +119,6 @@ class ReadWord(webapp.RequestHandler):
           'definition': w.definition.split(' '),
           'created': str(w.created),
           'author': w.author,
-          'keywords': w.keywords,
           'words_used': words_used,
       }))
     else:
