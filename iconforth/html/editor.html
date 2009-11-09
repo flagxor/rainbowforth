@@ -23,21 +23,28 @@
 <script type="text/javascript">
 
 var drawing = 0;
-var color = 0;
+var palette_color = 1;
 var cv = document.getElementById("bigicon");
 var ctx = cv.getContext("2d");
 var grid = new Array();
+var colors = [
+  '#ffffff',
+  '#000000',
+  '#ff0000',
+  '#ffcc00',
+  '#ffff00',
+  '#00ff00',
+  '#00ffff',
+  '#0000ff',
+  '#ff00ff',
+];
 
 function update_form() {
   // update image
   var str = "";
   for (var y = 0; y < 16; y++) {
     for (var x = 0; x < 16; x++) {
-      if (grid[x+y*16]) {
-        str += "1";
-      } else {
-        str += "0";
-      }
+      str += "" + grid[x+y*16];
     }
   }
   document.frm.icon.value = str;
@@ -52,20 +59,12 @@ function update_form() {
   document.frm.definition.value = str;
 }
 
-function getpixel(x, y) {
+function plot(x, y, color) {
   if (x < 0 || x > 15 || y < 0 || y > 15) return;
-  return grid[x+y*16];
-}
+  if (grid[x+y*16] == color) return;
+  grid[x+y*16] = color;
 
-function plot(x, y, on) {
-  if (x < 0 || x > 15 || y < 0 || y > 15) return;
-  if (getpixel(x, y) == on) return;
-  if (on) {
-    ctx.fillStyle = "#000000";
-  } else {
-    ctx.fillStyle = "#ffffff";
-  }
-  grid[x+y*16] = on;
+  ctx.fillStyle = colors[color];
 
   ctx.beginPath();
   ctx.rect(x*16+1, y*16+1, 15, 15);
@@ -98,12 +97,50 @@ function blank() {
   }
 }
 
+function draw_palette() {
+  for (var i = 0; i < colors.length; i++) {
+    ctx.fillStyle = colors[i];
+    ctx.beginPath();
+    ctx.rect(262, i * 16 + (32 + 6*2), 32, 16);
+    ctx.closePath();
+    ctx.fill();
+  }
+  // Mark selection
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#000000";
+  ctx.beginPath();
+  ctx.arc(262 + 16 + 0.5, palette_color * 16 + (32 + 6*2) + 8 + 0.5,
+          6, 0, Math.PI * 2, true);
+  ctx.arc(262 + 16 + 0.5, palette_color * 16 + (32 + 6*2) + 8 + 0.5,
+          6, 0, Math.PI * 2, true);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.strokeStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(262 + 16 - 0.5, palette_color * 16 + (32 + 6*2) + 8 - 0.5,
+          6, 0, Math.PI * 2, true);
+  ctx.arc(262 + 16 - 0.5, palette_color * 16 + (32 + 6*2) + 8 - 0.5,
+          6, 0, Math.PI * 2, true);
+  ctx.closePath();
+  ctx.stroke();
+}
+
 function mousedown(evt) {
-  var x = Math.floor((evt.pageX - 8) / 16);
-  var y = Math.floor((evt.pageY - 8) / 16);
-  color = !getpixel(x, y);
-  plot(x, y, color);
-  drawing = 1;
+  var x = evt.pageX - 8;
+  var y = evt.pageY - 8;
+
+  if (x < 256) {
+    x = Math.floor(x / 16);
+    y = Math.floor(y / 16);
+    plot(x, y, palette_color);
+    drawing = 1;
+  } else {
+    y = Math.floor((y - (32 + 6*2)) / 16);
+    if (y >= 0 && y <9) {
+      palette_color = y;
+      draw_palette();
+    }
+  }
 }
 
 function mouseup(evt) {
@@ -115,7 +152,7 @@ function mousemove(evt) {
   if (drawing) {
     var x = Math.floor((evt.pageX - 8) / 16);
     var y = Math.floor((evt.pageY - 8) / 16);
-    plot(x, y, color);
+    plot(x, y, palette_color);
   }
 }
 
@@ -144,6 +181,7 @@ function pick(id) {
 
 function init() {
   blank();
+  draw_palette(0);
   document.onmousedown = mousedown;
   document.onmouseup = mouseup;
   document.onmousemove = mousemove;

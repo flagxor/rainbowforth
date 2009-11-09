@@ -18,9 +18,76 @@ class Word(db.Model):
   definition = db.StringProperty()
   created = db.DateTimeProperty(auto_now_add=True)
   accessed = db.DateTimeProperty(auto_now_add=True)
+  indexed = db.DateTimeProperty(auto_now_add=True)
   author = db.StringProperty()
-  total_users = db.IntegerProperty()
-  outbound_users = db.IntegerProperty()
+  version = db.IntegerProperty(default=1)
+  intrinsic = db.IntegerProperty(default=0)
+  words_used = db.StringListProperty()
+  keywords = db.StringListProperty()
+  score = db.FloatProperty()
+
+
+colors = [
+  [0xff, 0xff, 0xff, 0xff],
+  [0x00, 0x00, 0x00, 0xff],
+  [0xff, 0x00, 0x00, 0xff],
+  [0xff, 0xcc, 0x00, 0xff],
+  [0xff, 0xff, 0x00, 0xff],
+  [0x00, 0xff, 0x00, 0xff],
+  [0x00, 0xff, 0xff, 0xff],
+  [0x00, 0x00, 0xff, 0xff],
+  [0xff, 0x00, 0xff, 0xff],
+];
+
+
+# From http://github.com/DocSavage/bloog/blob/master/models/search.py
+# Apache license.
+STOP_WORDS = frozenset([
+   'a', 'about', 'according', 'accordingly', 'affected', 'affecting', 'after',
+   'again', 'against', 'all', 'almost', 'already', 'also', 'although',
+   'always', 'am', 'among', 'an', 'and', 'any', 'anyone', 'apparently', 'are',
+   'arise', 'as', 'aside', 'at', 'away', 'be', 'became', 'because', 'become',
+   'becomes', 'been', 'before', 'being', 'between', 'both', 'briefly', 'but',
+   'by', 'came', 'can', 'cannot', 'certain', 'certainly', 'could', 'did', 'do',
+   'does', 'done', 'during', 'each', 'either', 'else', 'etc', 'ever', 'every',
+   'following', 'for', 'found', 'from', 'further', 'gave', 'gets', 'give',
+   'given', 'giving', 'gone', 'got', 'had', 'hardly', 'has', 'have', 'having',
+   'here', 'how', 'however', 'i', 'if', 'in', 'into', 'is', 'it', 'itself',
+   'just', 'keep', 'kept', 'knowledge', 'largely', 'like', 'made', 'mainly',
+   'make', 'many', 'might', 'more', 'most', 'mostly', 'much', 'must', 'nearly',
+   'necessarily', 'neither', 'next', 'no', 'none', 'nor', 'normally', 'not',
+   'noted', 'now', 'obtain', 'obtained', 'of', 'often', 'on', 'only', 'or',
+   'other', 'our', 'out', 'owing', 'particularly', 'past', 'perhaps', 'please',
+   'poorly', 'possible', 'possibly', 'potentially', 'predominantly', 'present',
+   'previously', 'primarily', 'probably', 'prompt', 'promptly', 'put',
+   'quickly', 'quite', 'rather', 'readily', 'really', 'recently', 'regarding',
+   'regardless', 'relatively', 'respectively', 'resulted', 'resulting',
+   'results', 'said', 'same', 'seem', 'seen', 'several', 'shall', 'should',
+   'show', 'showed', 'shown', 'shows', 'significantly', 'similar', 'similarly',
+   'since', 'slightly', 'so', 'some', 'sometime', 'somewhat', 'soon',
+   'specifically', 'state', 'states', 'strongly', 'substantially',
+   'successfully', 'such', 'sufficiently', 'than', 'that', 'the', 'their',
+   'theirs', 'them', 'then', 'there', 'therefore', 'these', 'they', 'this',
+   'those', 'though', 'through', 'throughout', 'to', 'too', 'toward', 'under',
+   'unless', 'until', 'up', 'upon', 'use', 'used', 'usefully', 'usefulness',
+   'using', 'usually', 'various', 'very', 'was', 'we', 'were', 'what', 'when',
+   'where', 'whether', 'which', 'while', 'who', 'whose', 'why', 'widely',
+   'will', 'with', 'within', 'without', 'would', 'yet', 'you'])
+
+
+def FindKeywords(str):
+  ret = set()
+  word = ''
+  for ch in str:
+    if ((ch >= 'A' and ch <= 'Z') or
+        (ch >= 'a' and ch <= 'z') or
+        (ch >= '0' and ch <= '9')):
+      word += ch.lower()
+    else:
+      if len(word) > 3 and word not in STOP_WORDS:
+        ret.add(word)
+      word = ''
+  return list(ret)
 
 
 class ReadWord(webapp.RequestHandler):
@@ -38,8 +105,6 @@ class ReadWord(webapp.RequestHandler):
           'definition': w.definition.split(' '),
           'created': str(w.created),
           'author': w.author,
-          'total_users': w.total_users,
-          'outbound_users': w.outbound_users,
       }))
     else:
       path = os.path.join(os.path.dirname(__file__), 'html/read_notfound.html')
@@ -48,9 +113,14 @@ class ReadWord(webapp.RequestHandler):
 
 class Results(webapp.RequestHandler):
   def get(self):
-    id = self.request.get('q')
-    query = Word.all()
-    w = query.fetch(1000)
+    goal = self.request.get('q').lower()
+    if goal:
+      query = db.GqlQuery('SELECT __key__ FROM Word '
+                          'WHERE keyword = :1 '
+                          'ORDER BY score DESC', goal)
+    else:
+      query = db.GqlQuery('SELECT __key__ FROM Word ORDER BY score DESC')
+      w = query.fetch(100)
     if w:
       path = os.path.join(os.path.dirname(__file__), 'html/results.html')
       self.response.out.write(template.render(path, {
@@ -69,16 +139,12 @@ class ReadIcon(webapp.RequestHandler):
     except:
       w = None
     if w:
-      w.accessed = datetime.datetime.now()
-      w.put()
       data = w.icon
       for y in range(0, 16):
         for x in range(0, 16):
           z = x + y * 16
-          if z < len(data) and int(data[z]):
-            c.color = [0x00, 0x00, 0x00, 0xff]
-          else:
-            c.color = [0xff, 0xff, 0xff, 0xff]
+          if z < len(data):
+            c.color = colors[int(data[z])]
           c.rectangle(x, y, x+1, y+1)
     else:
       c.verticalGradient(0, 0, c.width-1, c.height-1,
@@ -89,14 +155,25 @@ class ReadIcon(webapp.RequestHandler):
 
 class WriteWord(webapp.RequestHandler):
   def post(self):
+    # Extract description + intrinsic.
+    description = self.request.get('description')
+    m = re.match('^~~~intrinsic: ([0-9]+)~~~(.*)$', description)
+    if m:
+      intrinsic = int(m.group(1))
+      description = m.group(2)
+    else:
+      intrinsic = 0
+    # Add word to the editor.
     w = Word()
     w.icon = str(self.request.get('icon'))
-    w.description = self.request.get('description')
+    w.description = description
     w.definition = self.request.get('definition')
+    w.intrinsic = intrinsic
     w.author = self.request.remote_addr
-    w.total_users = 0
-    w.outbound_users = 1
+    w.words_used = list(set(self.request.get('definition').split(' ')))
+    w.keywords = FindKeywords(description)
     w.put()
+    # Go back to the editor.
     self.redirect('/')
 
 
