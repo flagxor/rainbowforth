@@ -6,16 +6,27 @@
     <title>Icon Forth</title>
   </head>
   <body bgcolor="#777777"><font color="#ffffff">
-    <form>
-      <img border="5" bordercolor="#cc0000"
-      style="cursor: pointer; border-color: #cc0000;"
-      src="/icon/{{ id }}.png" width="32" height="32"
-      onclick="window.parent.pick('{{ id }}')">
-      <input type="button" value="Back" onclick="window.history.back(-1)">
-      <input type="button" value="Dump"
-      onclick="window.open('/dump/{{ id }}')">
-      <input type="button" value="Run"
-      onclick="window.open('/run/{{ id }}')">
+      <form>
+        <table><tr>
+            <td>
+              <img border="5" bordercolor="#cc0000"
+              style="cursor: pointer; border-color: #cc0000;"
+              src="/icon/{{ id }}.png" width="32" height="32"
+              onclick="window.parent.pick('{{ id }}')">
+            </td>
+            <td>
+              <input type="button" value="Back"
+              onclick="window.history.back(-1)">
+            </td>
+            <td>
+              <input type="button" value="Dump"
+              onclick="window.open('/dump/{{ id }}')">
+            </td>
+            <td>
+              <input type="button" value="Run"
+              onclick="window.open('/run/{{ id }}')">
+            </td>
+        </tr></table>
     </form>
     <img width="1" height="32">
     {% for word in definition %}

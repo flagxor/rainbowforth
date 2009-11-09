@@ -7,13 +7,103 @@
 </head>
 <body>
 
-<canvas id="canvas" width="300" height="300" border="0" style="cursor: pointer;"></canvas>
+<div id="canvas_div" style="display: none;">
+  <canvas id="canvas" width="300" height="300"
+  border="0" style="cursor: pointer;"></canvas><br>
+</div>
+<div id="console">Loading...</div>
 
 <script type="text/javascript">
+
+// -----------------------------------------------------------------
+
+var HTTP = {};
+
+HTTP._factories = [
+  function() { return new XMLHttpRequest(); },
+  function() { return new ActiveXObject('Msxml2.XMLHTTP'); },
+  function() { return new ActiveXObject('Microsoft.XMLHTTP'); },
+];
+
+HTTP._factory = null;
+
+HTTP.newRequest = function() {
+  if (HTTP._factory != null) return HTTP._factory();
+  for(var i = 0; i < HTTP._factories.length; i++) {
+    try {
+      var factory = HTTP._factories[i];
+      var request = factory();
+      if (request != null) {
+        HTTP._factory = factory;
+        return request;
+      }
+    } catch(e) {
+      continue;
+    }
+  }
+  HTTP._factory = function() {
+    throw new Error('XMLHttpRequest not supported');
+  }
+  HTTP._factory();
+};
+
+HTTP.encodeFormData = function(data) {
+  var pairs = [];
+  var regexp = /%20/g;
+
+  for (var name in data) {
+    var value = data[name].toString();
+    var pair = encodeURIComponent(name).replace(regexp, '+') + '=' +
+               encodeURIComponent(value).replace(regexp, '+');
+    pairs.push(pair);
+  }
+
+  return pairs.join('&');
+};
+
+HTTP.post = function(url, values, callback, errorHandler) {
+  var request = HTTP.newRequest();
+  request.onreadystatechange = function() {
+    if (request.readyState == 4) {
+      if (request.status == 200) {
+        callback(request.responseText);
+      } else {
+        if (errorHandler != null) {
+          errorHandler(request.status, request.statusText);
+        } else {
+          callback(null);
+        }
+      }
+    }
+  };
+  request.open('POST', url);
+  request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  request.send(HTTP.encodeFormData(values));
+};
+
+HTTP.getText = function(url, callback) {
+  var request = HTTP.newRequest();
+  request.onreadystatechange = function() {
+    if (request.readyState == 4) {
+      if (request.status == 200) {
+        callback(request.responseText);
+      } else {
+        callback(null);
+      }
+    }
+  }
+  request.open('GET', url);
+  request.send(null);
+};
+
+// -----------------------------------------------------------------
+
 
 var cv = document.getElementById("canvas");
 var ctx = cv.getContext("2d");
 var id = "{{ id }}";
+var console = document.getElementById("console");
+var dict = {};
 
 function blank() {
   ctx.clearRect(0, 0, 300, 300);
@@ -25,26 +115,122 @@ function blank() {
   ctx.fill();
 }
 
+var events = [];
+
+function GetEvent() {
+  if (events.length) {
+    var e = events.shift();
+    return e;
+  } else {
+    return {'code': 0, 'x': 0, 'y': 0};
+  }
+}
+
+var memory = Array();
+var rstack = Array();
+var dstack = Array();
+var ip = 0;
+
+function run() {
+  while(True) {
+    var ir = memory[ip++];
+    switch (ir) {
+      case : dstack.push(0); break; // number
+      case : dstack.push(dstack.pop() * 10 + 0); break; // 0
+      case : dstack.push(dstack.pop() * 10 + 1); break; // 1
+      case : dstack.push(dstack.pop() * 10 + 2); break; // 2
+      case : dstack.push(dstack.pop() * 10 + 3); break; // 3
+      case : dstack.push(dstack.pop() * 10 + 4); break; // 4
+      case : dstack.push(dstack.pop() * 10 + 5); break; // 5
+      case : dstack.push(dstack.pop() * 10 + 6); break; // 6
+      case : dstack.push(dstack.pop() * 10 + 7); break; // 7
+      case : dstack.push(dstack.pop() * 10 + 8); break; // 8
+      case : dstack.push(dstack.pop() * 10 + 9); break; // 9
+      case : rstack.push(dstack.pop()); break; // >r
+      case : dstack.push(rstack.pop()); break; // r>
+      case : dstack.push(dstack.pop() + dstack.pop()); break; // +
+      case : dstack.push(-dstack.pop() + dstack.pop()); break; // -
+      case : dstack.push(dstack.pop() * dstack.pop()); break; // *
+      case : dstack.push(dstack.pop()*2); break; // 2*
+      case : dstack.push(Math.floor(dstack.pop()/2)); break; // 2/
+      case : dstack.push(-dstack.pop()); break; // negate
+      case : dstack.push(dstack.pop() & dstack.pop()); break; // and
+      case : dstack.push(dstack.pop() | dstack.pop()); break; // or
+      case : ip = rstack.pop(); break; // ret
+      case : var a = dstack.pop(); var b = dstack.pop();
+             dstack.push(a); dstack.push(b); break; // swap
+      case : dstack.pop(); break; // drop
+      case : dstack.push(dstack[dstack.length-1]); break; // dup
+      case : dstack.push(memory[dstack.pop()]); break; // @
+      case : var a = dstack.pop(); memory[a] = dstack.pop(); break; // !
+      case : console.innerHTML += String.fromCharCode(dstack.pop());
+             break; // emit
+      case : var e = GetEvent();
+             dstack.push(e.x);
+             dstack.push(e.y);
+             dstack.push(e.code); break; // event
+      case : return; // sleep
+      default: rstack.push(ip); ip = ir; break; // call
+    }
+  }
+}
+
+function loading(result) {
+  var lines = result.split('\n');
+  for (var line in lines) {
+    var words = line.split(' ');
+    dict[words[0]] = words.slice(2);
+  }
+  console.innerHTML = '';
+  setInterval('run()', 30);
+}
+
 function mousedown(evt) {
   var x = evt.pageX - 8;
   var y = evt.pageY - 8;
+  events.push({'code': 1, 'x': x, 'y': y});
+  run();
 }
 
 function mouseup(evt) {
   var x = evt.pageX - 8;
   var y = evt.pageY - 8;
+  events.push({'code': 2, 'x': x, 'y': y});
+  run();
 }
 
 function mousemove(evt) {
   var x = evt.pageX - 8;
   var y = evt.pageY - 8;
+  events.push({'code': 3, 'x': x, 'y': y});
+  run();
 }
+
+function keypress(evt) {
+  events.push({'code': 4, 'x': evt.keyCode, 'y': 0});
+  run();
+}
+
+function keydown(evt) {
+  events.push({'code': 5, 'x': evt.keyCode, 'y': 0});
+  run();
+}
+
+function keyup(evt) {
+  events.push({'code': 6, 'x': evt.keyCode, 'y': 0});
+  run();
+}
+
 
 function init() {
   blank();
+  HTTP.getText('/dump/' + id + '?raw=1', loading);
   document.onmousedown = mousedown;
   document.onmouseup = mouseup;
   document.onmousemove = mousemove;
+  document.onkeypress = keypress;
+  document.onkeydown = keydown;
+  document.onkeyup = keyup;
 }
 
 init();
