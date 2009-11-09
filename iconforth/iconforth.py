@@ -154,11 +154,11 @@ class DumpWord(webapp.RequestHandler):
         else:
           definition = []
         # Collect each word.
-        results += {
+        results.append({
             'id': id,
             'intrinsic': w.intrinsic,
-            'definition': definition
-        }
+            'definition': definition,
+        })
         # Add new words needed.
         if w.definition:
           for cw in definition:
