@@ -1,5 +1,13 @@
 indexes:
 
+# Used for the main word list.
+- kind: Word
+  properties:
+  - name: score
+    direction: desc
+  - name: created
+    direction: desc
+
 # Used to search by keyword for a word.
 - kind: Word
   properties:

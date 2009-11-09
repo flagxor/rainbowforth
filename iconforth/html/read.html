@@ -17,8 +17,8 @@
     {% for word in definition %}
     <a href="/read/{{ word }}"><img src="/icon/{{ word }}.png" width="32" height="32" border="0"></a>
     {% endfor %}<br>
-    {{ description }}<br>
-    <br><b>Used by:</b><br>
+    {{ description }}
+    <br><b>Used by:</b>
     {% for word in words_used %}
     <a href="/read/{{ word }}"><img src="/icon/{{ word }}.png" width="32" height="32" border="0"></a>
     {% endfor %}<br>
