@@ -14,7 +14,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 
 class Word(db.Model):
   icon = db.BlobProperty()
-  description = db.StringProperty()
+  description = db.StringProperty(multiline=True)
   definition = db.StringProperty()
   created = db.DateTimeProperty(auto_now_add=True)
   accessed = db.DateTimeProperty(auto_now_add=True)
@@ -98,7 +98,6 @@ def FindKeywords(str):
 
 class ReadWord(webapp.RequestHandler):
   def get(self):
-    self.response.headers['Cache-Control'] = 'public, max-age=86400'
     id = self.request.path[6:]
     w = Word.get(id)
     if w:
