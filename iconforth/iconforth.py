@@ -24,7 +24,7 @@ class Word(db.Model):
   intrinsic = db.IntegerProperty(default=0)
   words_used = db.StringListProperty()
   keywords = db.StringListProperty()
-  score = db.FloatProperty(default=0)
+  score = db.FloatProperty(default=0.0)
 
 
 colors = [
@@ -76,7 +76,7 @@ STOP_WORDS = frozenset([
 
 
 def ValidKeyword(word):
-  return len(word) >= 3 and word not in STOP_WORDS:
+  return len(word) >= 3 and word not in STOP_WORDS
 
 
 def FindKeywords(str):
@@ -91,7 +91,7 @@ def FindKeywords(str):
       if ValidKeyword(word):
         ret.add(word)
       word = ''
-  if ValidKeyword(worD)
+  if ValidKeyword(word):
     ret.add(word)
   return list(ret)
 
