@@ -202,12 +202,6 @@ class WriteWord(webapp.RequestHandler):
     self.redirect('/')
 
 
-class RawEdit(webapp.RequestHandler):
-  def get(self):
-    path = os.path.join(os.path.dirname(__file__), 'html/raw.html')
-    self.response.out.write(template.render(path, {}))
-
-
 class MainPage(webapp.RequestHandler):
   def get(self):
     agent = self.request.headers.get('USER_AGENT', '')
@@ -224,7 +218,6 @@ def main():
       ('/read/.*', ReadWord),
       ('/icon/.*\\.png', ReadIcon),
       ('/write', WriteWord),
-      ('/raw', RawEdit),
       ('/results', Results),
   ], debug=True)
   run_wsgi_app(application)
