@@ -18,7 +18,12 @@
     <a href="/read/{{ word }}"><img src="/icon/{{ word }}.png" width="32" height="32" border="0"></a>
     {% endfor %}<br>
     {{ description }}<br>
-    <i>{{ created }}</i><br>
+    <br><b>Used by:</b><br>
+    {% for word in words_used %}
+    <a href="/read/{{ word }}"><img src="/icon/{{ word }}.png" width="32" height="32" border="0"></a>
+    {% endfor %}<br>
+    <br><i>{{ created }}</i><br>
+    {% for word in keywords %}{{ word}} {% endfor%}
   </body>
 </html>
 

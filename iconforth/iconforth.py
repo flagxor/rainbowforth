@@ -84,7 +84,7 @@ def FindKeywords(str):
         (ch >= '0' and ch <= '9')):
       word += ch.lower()
     else:
-      if len(word) > 3 and word not in STOP_WORDS:
+      if len(word) >= 3 and word not in STOP_WORDS:
         ret.add(word)
       word = ''
   return list(ret)
@@ -96,8 +96,17 @@ class ReadWord(webapp.RequestHandler):
     id = self.request.path[6:]
     w = Word.get(id)
     if w:
+      # Update access time.
       w.accessed = datetime.datetime.now()
       w.put()
+      # Find users of this word.
+      query = db.GqlQuery('SELECT __key__ FROM Word '
+                          'WHERE words_used=:1 '
+                          'ORDER BY score DESC', w.key())
+      words_used = query.fetch(100)
+      if not words_used:
+        words_used = []
+      # Output info on word.
       path = os.path.join(os.path.dirname(__file__), 'html/read.html')
       self.response.out.write(template.render(path, {
           'id': id,
@@ -105,6 +114,8 @@ class ReadWord(webapp.RequestHandler):
           'definition': w.definition.split(' '),
           'created': str(w.created),
           'author': w.author,
+          'keywords': w.keywords,
+          'words_used': [str(i) for i in words_used],
       }))
     else:
       path = os.path.join(os.path.dirname(__file__), 'html/read_notfound.html')
@@ -116,15 +127,15 @@ class Results(webapp.RequestHandler):
     goal = self.request.get('q').lower()
     if goal:
       query = db.GqlQuery('SELECT __key__ FROM Word '
-                          'WHERE keyword = :1 '
+                          'WHERE keywords = :1 '
                           'ORDER BY score DESC', goal)
     else:
       query = db.GqlQuery('SELECT __key__ FROM Word ORDER BY score DESC')
-      w = query.fetch(100)
+    w = query.fetch(100)
     if w:
       path = os.path.join(os.path.dirname(__file__), 'html/results.html')
       self.response.out.write(template.render(path, {
-          'results': [i.key() for i in w],
+          'results': [str(i) for i in w],
       }))
 
 
