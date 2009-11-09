@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01/EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <title>Icon Forth</title>
+</head>
+<body>
+
+<canvas id="canvas" width="300" height="300" border="0" style="cursor: pointer;"></canvas>
+
+<script type="text/javascript">
+
+var cv = document.getElementById("canvas");
+var ctx = cv.getContext("2d");
+var id = "{{ id }}";
+
+function blank() {
+  ctx.clearRect(0, 0, 300, 300);
+
+  ctx.fillStyle = "#777777";
+  ctx.beginPath();
+  ctx.rect(0, 0, 300, 300);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function mousedown(evt) {
+  var x = evt.pageX - 8;
+  var y = evt.pageY - 8;
+}
+
+function mouseup(evt) {
+  var x = evt.pageX - 8;
+  var y = evt.pageY - 8;
+}
+
+function mousemove(evt) {
+  var x = evt.pageX - 8;
+  var y = evt.pageY - 8;
+}
+
+function init() {
+  blank();
+  document.onmousedown = mousedown;
+  document.onmouseup = mouseup;
+  document.onmousemove = mousemove;
+}
+
+init();
+
+</script>
+
+</body>
+</html>

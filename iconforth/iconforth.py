@@ -180,6 +180,15 @@ class DumpWord(webapp.RequestHandler):
       }))
 
 
+class RunWord(webapp.RequestHandler):
+  def get(self):
+    id = self.request.path[5:]
+    path = os.path.join(os.path.dirname(__file__), 'html/run.html')
+    self.response.out.write(template.render(path, {
+        'id': id,
+    }))
+
+
 class Results(webapp.RequestHandler):
   def get(self):
     # Do a query.
@@ -263,9 +272,10 @@ class MainPage(webapp.RequestHandler):
 
 def main():
   application = webapp.WSGIApplication([
-      ('/[0-9]*', MainPage),
+      ('/', MainPage),
       ('/read/.*', ReadWord),
       ('/dump/.*', DumpWord),
+      ('/run/.*', RunWord),
       ('/icon/.*\\.png', ReadIcon),
       ('/write', WriteWord),
       ('/results', Results),

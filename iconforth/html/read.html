@@ -11,8 +11,11 @@
       style="cursor: pointer; border-color: #cc0000;"
       src="/icon/{{ id }}.png" width="32" height="32"
       onclick="window.parent.pick('{{ id }}')">
-      <input type="button" value="List"
-      onclick="window.location.href='/results'">
+      <input type="button" value="Back" onclick="window.history.back(-1)">
+      <input type="button" value="Dump"
+      onclick="window.open('/dump/{{ id }}')">
+      <input type="button" value="Run"
+      onclick="window.open('/run/{{ id }}')">
     </form>
     <img width="1" height="32">
     {% for word in definition %}
