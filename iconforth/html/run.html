@@ -132,7 +132,7 @@ var dstack = Array();
 var ip = 0;
 
 function run() {
-  while(True) {
+  while(1) {
     var ir = memory[ip++];
     switch (ir) {
       case -1: dstack.push(0); break; // number
