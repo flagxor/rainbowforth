@@ -108,7 +108,7 @@ class ReadWord(webapp.RequestHandler):
       query = db.GqlQuery('SELECT __key__ FROM Word '
                           'WHERE words_used=:1 '
                           'ORDER BY score DESC, created DESC', str(w.key()))
-      words_used = query.fetch(100)
+      words_used = query.fetch(1000)
       if not words_used:
         words_used = []
       # Output info on word.
@@ -136,7 +136,7 @@ class Results(webapp.RequestHandler):
     else:
       query = db.GqlQuery('SELECT __key__ FROM Word '
                           'ORDER BY score DESC, created DESC')
-    w = query.fetch(100)
+    w = query.fetch(1000)
     if w:
       path = os.path.join(os.path.dirname(__file__), 'html/results.html')
       self.response.out.write(template.render(path, {
