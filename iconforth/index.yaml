@@ -1,0 +1,15 @@
+indexes:
+
+# Used to search by keyword for a word.
+- kind: Word
+  properties:
+  - name: keywords
+  - name: score
+    direction: desc
+
+# Used to find words that use given word.
+- kind: Word
+  properties:
+  - name: words_used
+  - name: score
+    direction: desc
