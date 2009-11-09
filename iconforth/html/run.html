@@ -135,41 +135,41 @@ function run() {
   while(True) {
     var ir = memory[ip++];
     switch (ir) {
-      case : dstack.push(0); break; // number
-      case : dstack.push(dstack.pop() * 10 + 0); break; // 0
-      case : dstack.push(dstack.pop() * 10 + 1); break; // 1
-      case : dstack.push(dstack.pop() * 10 + 2); break; // 2
-      case : dstack.push(dstack.pop() * 10 + 3); break; // 3
-      case : dstack.push(dstack.pop() * 10 + 4); break; // 4
-      case : dstack.push(dstack.pop() * 10 + 5); break; // 5
-      case : dstack.push(dstack.pop() * 10 + 6); break; // 6
-      case : dstack.push(dstack.pop() * 10 + 7); break; // 7
-      case : dstack.push(dstack.pop() * 10 + 8); break; // 8
-      case : dstack.push(dstack.pop() * 10 + 9); break; // 9
-      case : rstack.push(dstack.pop()); break; // >r
-      case : dstack.push(rstack.pop()); break; // r>
-      case : dstack.push(dstack.pop() + dstack.pop()); break; // +
-      case : dstack.push(-dstack.pop() + dstack.pop()); break; // -
-      case : dstack.push(dstack.pop() * dstack.pop()); break; // *
-      case : dstack.push(dstack.pop()*2); break; // 2*
-      case : dstack.push(Math.floor(dstack.pop()/2)); break; // 2/
-      case : dstack.push(-dstack.pop()); break; // negate
-      case : dstack.push(dstack.pop() & dstack.pop()); break; // and
-      case : dstack.push(dstack.pop() | dstack.pop()); break; // or
-      case : ip = rstack.pop(); break; // ret
-      case : var a = dstack.pop(); var b = dstack.pop();
+      case -1: dstack.push(0); break; // number
+      case -2: dstack.push(dstack.pop() * 10 + 0); break; // 0
+      case -3: dstack.push(dstack.pop() * 10 + 1); break; // 1
+      case -4: dstack.push(dstack.pop() * 10 + 2); break; // 2
+      case -5: dstack.push(dstack.pop() * 10 + 3); break; // 3
+      case -6: dstack.push(dstack.pop() * 10 + 4); break; // 4
+      case -7: dstack.push(dstack.pop() * 10 + 5); break; // 5
+      case -8: dstack.push(dstack.pop() * 10 + 6); break; // 6
+      case -9: dstack.push(dstack.pop() * 10 + 7); break; // 7
+      case -10: dstack.push(dstack.pop() * 10 + 8); break; // 8
+      case -11: dstack.push(dstack.pop() * 10 + 9); break; // 9
+      case -12: rstack.push(dstack.pop()); break; // >r
+      case -13: dstack.push(rstack.pop()); break; // r>
+      case -14: dstack.push(dstack.pop() + dstack.pop()); break; // +
+      case -15: dstack.push(-dstack.pop() + dstack.pop()); break; // -
+      case -16: dstack.push(dstack.pop() * dstack.pop()); break; // *
+      case -17: dstack.push(dstack.pop()*2); break; // 2*
+      case -18: dstack.push(Math.floor(dstack.pop()/2)); break; // 2/
+      case -19: dstack.push(-dstack.pop()); break; // negate
+      case -20: dstack.push(dstack.pop() & dstack.pop()); break; // and
+      case -21: dstack.push(dstack.pop() | dstack.pop()); break; // or
+      case -22: ip = rstack.pop(); break; // ret
+      case -23: var a = dstack.pop(); var b = dstack.pop();
              dstack.push(a); dstack.push(b); break; // swap
-      case : dstack.pop(); break; // drop
-      case : dstack.push(dstack[dstack.length-1]); break; // dup
-      case : dstack.push(memory[dstack.pop()]); break; // @
-      case : var a = dstack.pop(); memory[a] = dstack.pop(); break; // !
-      case : console.innerHTML += String.fromCharCode(dstack.pop());
+      case -24: dstack.pop(); break; // drop
+      case -25: dstack.push(dstack[dstack.length-1]); break; // dup
+      case -26: dstack.push(memory[dstack.pop()]); break; // @
+      case -27: var a = dstack.pop(); memory[a] = dstack.pop(); break; // !
+      case -28: console.innerHTML += String.fromCharCode(dstack.pop());
              break; // emit
-      case : var e = GetEvent();
+      case -29: var e = GetEvent();
              dstack.push(e.x);
              dstack.push(e.y);
              dstack.push(e.code); break; // event
-      case : return; // sleep
+      case -30: return; // sleep
       default: rstack.push(ip); ip = ir; break; // call
     }
   }
