@@ -29,9 +29,10 @@ var ctx = cv.getContext("2d");
 var grid = new Array();
 var colors = [
   '#ffffff',
+  '#c0c0c0',
   '#000000',
   '#ff0000',
-  '#ffcc00',
+  '#ffc000',
   '#ffff00',
   '#00ff00',
   '#00ffff',
@@ -136,7 +137,7 @@ function mousedown(evt) {
     drawing = 1;
   } else {
     y = Math.floor((y - (32 + 6*2)) / 16);
-    if (y >= 0 && y <9) {
+    if (y >= 0 && y < 10) {
       palette_color = y;
       draw_palette();
     }
