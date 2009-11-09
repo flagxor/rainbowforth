@@ -1,0 +1,17 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01/EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Icon Forth</title>
+  </head>
+  <body bgcolor="#777777"><font color="#ffffff">
+    {% for r in result %}
+    <a href="/read/{{ id }}"><img src="/icon/{{ id }}.png" width="32" height="32" border="0"></a>
+    :
+    {% for word in definition %}
+    <a href="/read/{{ word }}"><img src="/icon/{{ word }}.png" width="32" height="32" border="0"></a>
+    {% endfor %}<br>
+</font></body>
+</html>
+

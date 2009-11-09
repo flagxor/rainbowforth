@@ -131,6 +131,54 @@ class ReadWord(webapp.RequestHandler):
       self.response.out.write(template.render(path, {}))
 
 
+class DumpWord(webapp.RequestHandler):
+  def get(self):
+    lookup_id = self.request.path[6:]
+    results = []
+    pending_ids = [lookup_id]
+    needed_ids = set([lookup_id])
+    emitted_ids = 0
+    while pending_ids and emitted_ids < 100:
+      # Pick one.
+      id = pending_ids[0]
+      pending_ids = pending_ids[1:]
+      # Fetch it.
+      w = Word.get(id)
+      if w:
+        # Update access time.
+        w.accessed = datetime.datetime.now()
+        w.put()
+        # Convert definition to a list.
+        if w.definition:
+          definition = w.definition.split(' ')
+        else:
+          definition = []
+        # Collect each word.
+        results += {
+            'id': id,
+            'intrinsic': w.intrinsic,
+            'definition': definition
+        }
+        # Add new words needed.
+        if w.definition:
+          for cw in definition:
+            if cw not in needed_ids:
+              needed_ids.add(cw)
+              pending_ids.append(cw)
+      # Count how many we've emitted.
+      emitted_ids += 1
+    if self.request.get('raw'):
+      self.response.headers['Content-Type'] = 'text/plain'
+      for r in results:
+        self.response.out.write('%s %d %s\n' % (
+            r['id'], r['intrinsic'], ' '.join(r['definition'])))
+    else:
+      path = os.path.join(os.path.dirname(__file__), 'html/dump.html')
+      self.response.out.write(template.render(path, {
+          'results': results,
+      }))
+
+
 class Results(webapp.RequestHandler):
   def get(self):
     # Do a query.
@@ -216,6 +264,7 @@ def main():
   application = webapp.WSGIApplication([
       ('/[0-9]*', MainPage),
       ('/read/.*', ReadWord),
+      ('/dump/.*', DumpWord),
       ('/icon/.*\\.png', ReadIcon),
       ('/write', WriteWord),
       ('/results', Results),
