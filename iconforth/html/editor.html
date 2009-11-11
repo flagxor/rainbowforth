@@ -185,6 +185,18 @@ function init() {
   document.onmousedown = mousedown;
   document.onmouseup = mouseup;
   document.onmousemove = mousemove;
+  document.addEventListener('touchstart', function(event) {
+      event.preventDefault();
+      mousedown(event.touches[0]);
+  }, false);
+  document.addEventListener('touchend', function(event) {
+      event.preventDefault();
+      mouseup(event.touches[0]);
+  }, false);
+  document.addEventListener('touchmove', function(event) {
+      event.preventDefault();
+      mousemove(event.touches[0]);
+  }, false);
 }
 
 init();
