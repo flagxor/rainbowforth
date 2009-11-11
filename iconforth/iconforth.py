@@ -224,7 +224,7 @@ class Results(webapp.RequestHandler):
                           'ORDER BY score DESC, last_used DESC')
       w1 = query.fetch(1000)
       if w1:
-        w += w1
+        w += [i for i in w1 if i not in w]
     # Display results.
     path = os.path.join(os.path.dirname(__file__), 'html/results.html')
     self.response.out.write(template.render(path, {
