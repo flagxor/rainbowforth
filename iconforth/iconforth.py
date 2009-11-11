@@ -261,7 +261,7 @@ class ReadIcon(webapp.RequestHandler):
 class WriteWord(webapp.RequestHandler):
   def post(self):
     # Extract description + intrinsic.
-    description = self.request.get('description')
+    description = str(self.request.get('description'))
     m = re.match('^~~~intrinsic: ([0-9]+)~~~(.*)$', description)
     if m:
       intrinsic = int(m.group(1))
@@ -269,7 +269,7 @@ class WriteWord(webapp.RequestHandler):
     else:
       intrinsic = 0
     # Pick out definition
-    definition = self.request.get('definition')
+    definition = str(self.request.get('definition'))
     # Add word to the editor.
     w = Word()
     w.icon = str(self.request.get('icon'))
