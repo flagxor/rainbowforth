@@ -1,11 +1,18 @@
 indexes:
 
-# Used for the main word list.
+# Used for top part of the main word list (last 8 you created).
+- kind: Word
+  properties:
+  - name: author
+  - name: created
+    direction: desc
+
+# Used for second part of the main word list (highest score, then last_used).
 - kind: Word
   properties:
   - name: score
     direction: desc
-  - name: created
+  - name: last_used
     direction: desc
 
 # Used to search by keyword for a word.
@@ -14,7 +21,7 @@ indexes:
   - name: keywords
   - name: score
     direction: desc
-  - name: created
+  - name: last_used
     direction: desc
 
 # Used to find words that use given word.
@@ -23,5 +30,5 @@ indexes:
   - name: words_used
   - name: score
     direction: desc
-  - name: created
+  - name: last_used
     direction: desc

@@ -14,11 +14,10 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 
 class Word(db.Model):
   icon = db.BlobProperty()
-  description = db.StringProperty(multiline=True)
-  definition = db.StringProperty()
+  description = db.BlobProperty()
+  definition = db.BlobProperty()
   created = db.DateTimeProperty(auto_now_add=True)
-  accessed = db.DateTimeProperty(auto_now_add=True)
-  indexed = db.DateTimeProperty(auto_now_add=True)
+  last_used = db.DateTimeProperty(auto_now_add=True)
   author = db.StringProperty()
   version = db.IntegerProperty(default=1)
   intrinsic = db.IntegerProperty(default=0)
@@ -97,18 +96,29 @@ def FindKeywords(str):
   return list(ret)
 
 
+def UpdateScore(key):
+  # Fetch it.
+  w = Word.get(key)
+  if w:
+    # Find users of this word.
+    query = db.GqlQuery('SELECT __key__ FROM Word '
+                        'WHERE words_used=:1', key)
+    use_count = query.count(1000)
+    # Update score and last used.
+    w.score = float(use_count)
+    w.last_used = datetime.datetime.now()
+    w.put()
+
+
 class ReadWord(webapp.RequestHandler):
   def get(self):
     id = self.request.path[6:]
     w = Word.get(id)
     if w:
-      # Update access time.
-      w.accessed = datetime.datetime.now()
-      w.put()
       # Find users of this word.
       query = db.GqlQuery('SELECT __key__ FROM Word '
                           'WHERE words_used=:1 '
-                          'ORDER BY score DESC, created DESC', str(w.key()))
+                          'ORDER BY score DESC, last_used DESC', str(w.key()))
       words_used = query.fetch(1000)
       if not words_used:
         words_used = []
@@ -124,6 +134,7 @@ class ReadWord(webapp.RequestHandler):
           'description': w.description,
           'definition': definition,
           'created': str(w.created),
+          'last_used': str(w.last_used),
           'author': w.author,
           'words_used': words_used,
       }))
@@ -146,9 +157,6 @@ class DumpWord(webapp.RequestHandler):
       # Fetch it.
       w = Word.get(id)
       if w:
-        # Update access time.
-        w.accessed = datetime.datetime.now()
-        w.put()
         # Convert definition to a list.
         if w.definition:
           definition = w.definition.split(' ')
@@ -194,16 +202,29 @@ class Results(webapp.RequestHandler):
   def get(self):
     # Do a query.
     goal = self.request.get('q').lower()
+    w = []
     if goal:
+      # Show search results ordered by score then last_used.
       query = db.GqlQuery('SELECT __key__ FROM Word '
                           'WHERE keywords = :1 '
-                          'ORDER BY score DESC, created DESC', goal)
+                          'ORDER BY score DESC, last_used DESC', goal)
+      w1 = query.fetch(1000)
+      if w1:
+        w = w1
     else:
+      # First list up to the last 8 created by this author.
       query = db.GqlQuery('SELECT __key__ FROM Word '
-                          'ORDER BY score DESC, created DESC')
-    w = query.fetch(1000)
-    if not w:
-      w = []
+                          'WHERE author = :1 '
+                          'ORDER BY created DESC', self.request.remote_addr)
+      w1 = query.fetch(8)
+      if w1:
+        w = w1
+      # Then add in the more order by score then last_used.
+      query = db.GqlQuery('SELECT __key__ FROM Word '
+                          'ORDER BY score DESC, last_used DESC')
+      w1 = query.fetch(1000)
+      if w1:
+        w += w1
     # Display results.
     path = os.path.join(os.path.dirname(__file__), 'html/results.html')
     self.response.out.write(template.render(path, {
@@ -247,16 +268,22 @@ class WriteWord(webapp.RequestHandler):
       description = m.group(2)
     else:
       intrinsic = 0
+    # Pick out definition
+    definition = self.request.get('definition')
     # Add word to the editor.
     w = Word()
     w.icon = str(self.request.get('icon'))
     w.description = description
-    w.definition = self.request.get('definition')
+    w.definition = definition
     w.intrinsic = intrinsic
     w.author = self.request.remote_addr
     w.words_used = list(set(self.request.get('definition').split(' ')))
     w.keywords = FindKeywords(description)
     w.put()
+    # Update score of each word used.
+    if definition:
+      for w in definition:
+        UpdateScore(w)
     # Go back to the editor.
     self.redirect('/')
 
