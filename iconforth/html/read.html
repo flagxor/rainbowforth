@@ -1,5 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01/EN"
-   "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01/EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
   <head>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
@@ -8,36 +7,38 @@
   <body bgcolor="#777777"><font color="#ffffff">
       <form>
         <table><tr>
-            <td>
+            <td valign="middle">
               <img border="5" bordercolor="#cc0000"
               style="cursor: pointer; border-color: #cc0000;"
               src="/icon/{{ id }}.png" width="32" height="32"
               onclick="window.parent.pick('{{ id }}')">
             </td>
-            <td>
+            <td valign="middle">
               <input type="button" value="Back"
               onclick="window.history.back(-1)">
             </td>
-            <td>
+            <td valign="middle">
               <input type="button" value="Dump"
               onclick="window.open('/dump/{{ id }}')">
             </td>
-            <td>
+            <td valign="middle">
               <input type="button" value="Run"
               onclick="window.open('/run/{{ id }}')">
             </td>
         </tr></table>
     </form>
     <img width="1" height="32">
-    {% for word in definition %}
-    <a href="/read/{{ word }}"><img src="/icon/{{ word }}.png" width="32" height="32" border="0"></a>
-    {% endfor %}<br>
-    {{ description }}
-    <br><b>Used by:</b>
-    {% for word in words_used %}
-    <a href="/read/{{ word }}"><img src="/icon/{{ word }}.png" width="32" height="32" border="0"></a>
-    {% endfor %}<br>
-    <br><i>{{ created }}</i><br>
+    {% for word in definition %}<a href="/read/{{ word }}"><img src="/icon/{{ word }}.png" width="32" height="32" border="0"></a>{% endfor %}<br>
+    {{ description }}<br>
+    <table><tr>
+        <td valign="middle"><b>Used by:</b></td>
+        <td valign="middle">
+          {% for word in words_used %}
+          <a href="/read/{{ word }}"><img src="/icon/{{ word }}.png" width="32" height="32" border="0"></a>
+          {% endfor %}
+        </td>
+    </tr></table>
+    <i>{{ created }}</i>
 </font></body>
 </html>
 
