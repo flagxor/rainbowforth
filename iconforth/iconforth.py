@@ -110,8 +110,19 @@ def UpdateScore(key):
     w.put()
 
 
+def ChromeFrameMe(handler):
+  agent = handler.request.headers.get('USER_AGENT', '')
+  if agent.find('MSIE') >= 0 and agent.find('chromeframe') < 0:
+    path = os.path.join(os.path.dirname(__file__), 'html/chrome_frame.html')
+    handler.response.out.write(template.render(path, {}))
+    return True
+  return False
+
+
+
 class ReadWord(webapp.RequestHandler):
   def get(self):
+    if ChromeFrameMe(self): return
     id = self.request.path[6:]
     w = Word.get(id)
     if w:
@@ -145,6 +156,7 @@ class ReadWord(webapp.RequestHandler):
 
 class DumpWord(webapp.RequestHandler):
   def get(self):
+    if ChromeFrameMe(self): return
     lookup_id = self.request.path[6:]
     results = []
     pending_ids = [lookup_id]
@@ -191,6 +203,7 @@ class DumpWord(webapp.RequestHandler):
 
 class RunWord(webapp.RequestHandler):
   def get(self):
+    if ChromeFrameMe(self): return
     id = self.request.path[5:]
     path = os.path.join(os.path.dirname(__file__), 'html/run.html')
     self.response.out.write(template.render(path, {
@@ -200,6 +213,7 @@ class RunWord(webapp.RequestHandler):
 
 class Results(webapp.RequestHandler):
   def get(self):
+    if ChromeFrameMe(self): return
     # Do a query.
     goal = self.request.get('q').lower()
     w = []
@@ -260,6 +274,7 @@ class ReadIcon(webapp.RequestHandler):
 
 class WriteWord(webapp.RequestHandler):
   def post(self):
+    if ChromeFrameMe(self): return
     # Extract description + intrinsic.
     description = str(self.request.get('description'))
     m = re.match('^~~~intrinsic: ([0-9]+)~~~(.*)$', description)
@@ -285,22 +300,43 @@ class WriteWord(webapp.RequestHandler):
       for w in set(definition.split(' ')):
         UpdateScore(w)
     # Go back to the editor.
-    self.redirect('/')
+    self.redirect('/editor')
+
+
+class EditorPage(webapp.RequestHandler):
+  def get(self):
+    if ChromeFrameMe(self): return
+    path = os.path.join(os.path.dirname(__file__), 'html/editor.html')
+    self.response.out.write(template.render(path, {}))
+
+
+class AboutPage(webapp.RequestHandler):
+  def get(self):
+    if ChromeFrameMe(self): return
+    path = os.path.join(os.path.dirname(__file__), 'html/about.html')
+    self.response.out.write(template.render(path, {}))
+
+
+class GuidePage(webapp.RequestHandler):
+  def get(self):
+    if ChromeFrameMe(self): return
+    path = os.path.join(os.path.dirname(__file__), 'html/guide.html')
+    self.response.out.write(template.render(path, {}))
 
 
 class MainPage(webapp.RequestHandler):
   def get(self):
-    agent = self.request.headers.get('USER_AGENT', '')
-    if agent.find('MSIE') >= 0 and agent.find('chromeframe') < 0:
-      path = os.path.join(os.path.dirname(__file__), 'html/chrome_frame.html')
-    else:
-      path = os.path.join(os.path.dirname(__file__), 'html/editor.html')
+    if ChromeFrameMe(self): return
+    path = os.path.join(os.path.dirname(__file__), 'html/main.html')
     self.response.out.write(template.render(path, {}))
 
 
 def main():
   application = webapp.WSGIApplication([
       ('/', MainPage),
+      ('/about', EditorPage),
+      ('/guide', EditorPage),
+      ('/editor', EditorPage),
       ('/read/.*', ReadWord),
       ('/dump/.*', DumpWord),
       ('/run/.*', RunWord),
