@@ -3,6 +3,8 @@ version: 1
 runtime: python
 api_version: 1
 
+default_expiration: "1h"
+
 handlers:
 - url: /js
   static_dir: js

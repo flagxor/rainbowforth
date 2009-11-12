@@ -6,23 +6,227 @@
 </head>
 <body>
 
-  <iframe src="/core_editor" id="frame0"
-    width="100%" height="440" frameborder="0">
-  </iframe>
-  <iframe src="/results" id="frame1"
-    width="100%" height="350" frameborder="0">
-  </iframe>
+<canvas id="iconeditor" width="300" height="257" border="0" style="cursor: crosshair;"></canvas><br>
+<textarea id="description" cols="25" rows="8"></textarea>
+<div id="deficons"><img width="1" height="32"></div>
+<input id="searchprompt" type="text" value="{{ query|escape }}"
+onchange="search()">
+<input type="button" value="Search" onclick="search()">
+<input type="button" value="All" onclick="search_all()">
+<input type="button" value="Add" onclick="submit()"><br>
+<iframe src="/results" id="frame1" width="100%" height="350" frameborder="0">
+</iframe>
 
-  <script type="text/javascript">
-    function pick(id) {
-      // Pick it in the core editor.
-      var f0 = document.getElementById('frame0');
-      f0.contentWindow.pick(id);
-      // Go back to the full list.
-      var f1 = document.getElementById('frame1');
-      f1.contentWindow.location.replace('/results');
+
+<script type="text/javascript" src="/js/http.js"></script>
+
+<script type="text/javascript">
+
+var drawing = 0;
+var palette_color = 2;
+var cv = document.getElementById("iconeditor");
+var ctx = cv.getContext("2d");
+var grid = new Array();
+var colors = [
+  '#ffffff',
+  '#c0c0c0',
+  '#000000',
+  '#ff0000',
+  '#ffc000',
+  '#ffff00',
+  '#00ff00',
+  '#00ffff',
+  '#0000ff',
+  '#ff00ff',
+];
+
+function icon_string() {
+  var str = "";
+  for (var y = 0; y < 16; y++) {
+    for (var x = 0; x < 16; x++) {
+      str += "" + grid[x+y*16];
     }
-  </script>
+  }
+  return str;
+}
+
+function definition_string() {
+  var d = document.getElementById("deficons");
+  var str = "";
+  for (var i = 1; i < d.childNodes.length; i++) {
+    if (str.length) { str += " "; }
+    str += d.childNodes.item(i).alt
+  }
+  return str;
+}
+
+function submit() {
+  HTTP.post('/write', {
+      'icon': icon_string(),
+      'definition': definition_string(),
+      'description': document.getElementById("description").value,
+      }, function(result) {});
+  // Reset form.
+  blank();
+  document.getElementById("description").value = "";
+  var d = document.getElementById("deficons");
+  while (d.childNodes.length > 1) {
+    d.removeChild(d.childNodes.item(1));
+  }
+  search_all();
+}
+
+function search() {
+  var query = document.getElementById("searchprompt").value;
+  var f1 = document.getElementById('frame1');
+  f1.contentWindow.location.replace('/results?q=' + escape(query));
+}
+
+function search_all() {
+  document.getElementById("searchprompt").value = "";
+  search();
+}
+
+function plot(x, y, color) {
+  if (x < 0 || x > 15 || y < 0 || y > 15) return;
+  if (grid[x+y*16] == color) return;
+
+  grid[x+y*16] = color;
+
+  ctx.fillStyle = colors[color];
+
+  ctx.beginPath();
+  ctx.rect(x*16+1, y*16+1, 15, 15);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.rect(262+x*2, 6+y*2, 2, 2);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function blank() {
+  ctx.clearRect(0, 0, 300, 257);
+
+  ctx.fillStyle = "#777777";
+  ctx.beginPath();
+  ctx.rect(0, 0, 300, 257);
+  ctx.closePath();
+  ctx.fill();
+
+  for(var z = 0; z < 16 * 16; z++) {
+    grid[z] = -1;
+  }
+
+  for (var x = 0; x < 16; x++) {
+    for (var y = 0; y < 16; y++) {
+      plot(x, y, 0);
+    }
+  }
+}
+
+function draw_palette() {
+  for (var i = 0; i < colors.length; i++) {
+    ctx.fillStyle = colors[i];
+    ctx.beginPath();
+    ctx.rect(262, i * 16 + (32 + 6*2), 32, 16);
+    ctx.closePath();
+    ctx.fill();
+  }
+  // Mark selection
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#000000";
+  ctx.beginPath();
+  ctx.arc(262 + 16 + 0.5, palette_color * 16 + (32 + 6*2) + 8 + 0.5,
+          6, 0, Math.PI * 2, true);
+  ctx.arc(262 + 16 + 0.5, palette_color * 16 + (32 + 6*2) + 8 + 0.5,
+          6, 0, Math.PI * 2, true);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.strokeStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(262 + 16 - 0.5, palette_color * 16 + (32 + 6*2) + 8 - 0.5,
+          6, 0, Math.PI * 2, true);
+  ctx.arc(262 + 16 - 0.5, palette_color * 16 + (32 + 6*2) + 8 - 0.5,
+          6, 0, Math.PI * 2, true);
+  ctx.closePath();
+  ctx.stroke();
+}
+
+function mousedown(evt) {
+  var x = evt.clientX - cv.offsetLeft;
+  var y = evt.clientY - cv.offsetTop;
+
+  if (x < 256) {
+    x = Math.floor(x / 16);
+    y = Math.floor(y / 16);
+    plot(x, y, palette_color);
+    drawing = 1;
+  } else {
+    y = Math.floor((y - (32 + 6*2)) / 16);
+    if (y >= 0 && y < 10) {
+      palette_color = y;
+      draw_palette();
+    }
+  }
+}
+
+function mouseup(evt) {
+  drawing = 0;
+}
+
+function mousemove(evt) {
+  if (drawing) {
+    var x = Math.floor((evt.clientX - cv.offsetLeft) / 16);
+    var y = Math.floor((evt.clientY - cv.offsetTop) / 16);
+    plot(x, y, palette_color);
+  }
+}
+
+function drop(e) {
+  var d = document.getElementById("deficons");
+  d.removeChild(e);
+}
+
+function pick(id) {
+  var d = document.getElementById("deficons");
+  var im = document.createElement("img");
+  im.setAttribute("src", "/icon/" + id + ".png");
+  im.setAttribute("alt", id);
+  im.setAttribute("width", "32");
+  im.setAttribute("height", "32");
+  im.setAttribute("style", "cursor: pointer;");
+  im.setAttribute("onclick", "drop(this)");
+  d.appendChild(im);
+  // Go back to the full list.
+  var f1 = document.getElementById('frame1');
+  f1.contentWindow.location.replace('/results');
+}
+
+function init() {
+  blank();
+  draw_palette(0);
+  cv.onmousedown = mousedown;
+  cv.onmouseup = mouseup;
+  cv.onmousemove = mousemove;
+  cv.addEventListener('touchstart', function(event) {
+      event.preventDefault();
+      mousedown(event.touches[0]);
+  }, false);
+  cv.addEventListener('touchend', function(event) {
+      event.preventDefault();
+      mouseup(event.touches[0]);
+  }, false);
+  cv.addEventListener('touchmove', function(event) {
+      event.preventDefault();
+      mousemove(event.touches[0]);
+  }, false);
+}
+
+init();
+
+</script>
 
 </body>
 </html>

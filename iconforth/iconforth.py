@@ -148,6 +148,7 @@ class ReadWord(webapp.RequestHandler):
           'last_used': str(w.last_used),
           'author': w.author,
           'words_used': words_used,
+          'backquery': self.request.get('backquery', ''),
       }))
     else:
       path = os.path.join(os.path.dirname(__file__), 'html/read_notfound.html')
@@ -308,13 +309,6 @@ class EditorPage(webapp.RequestHandler):
     self.response.out.write(template.render(path, {}))
 
 
-class CoreEditorPage(webapp.RequestHandler):
-  def get(self):
-    if ChromeFrameMe(self): return
-    path = os.path.join(os.path.dirname(__file__), 'html/core_editor.html')
-    self.response.out.write(template.render(path, {}))
-
-
 class AboutPage(webapp.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
@@ -342,7 +336,6 @@ def main():
       ('/about', AboutPage),
       ('/guide', GuidePage),
       ('/editor', EditorPage),
-      ('/core_editor', CoreEditorPage),
       ('/read/.*', ReadWord),
       ('/dump/.*', DumpWord),
       ('/run/.*', RunWord),

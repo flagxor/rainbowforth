@@ -5,16 +5,10 @@
     <title>Icon Forth</title>
   </head>
   <body bgcolor="#777777"><font color="#ffffff">
-    <form action="/results">
-      <input name="q" type="text" value="{{ query|escape }}">
-      <input name="g" type="submit" value="Search">
-      <input type="button" value="All"
-      onclick="window.location.replace('/results')">
-    </form>
     {% for word in results %}
     <img src="/icon/{{ word }}.png" width="32" height="32" border="0"
     style="cursor: pointer;"
-    onclick="window.location.replace('/read/{{ word }}')">
+    onclick="window.location.replace('/read/{{ word }}?backquery={{ backquery|escape }}')">
     {% endfor %}
   </font></body>
 </html>
