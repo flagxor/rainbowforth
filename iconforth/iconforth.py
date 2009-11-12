@@ -315,20 +315,6 @@ class EditorPage(webapp.RequestHandler):
     self.response.out.write(template.render(path, {}))
 
 
-class AboutPage(webapp.RequestHandler):
-  def get(self):
-    if ChromeFrameMe(self): return
-    path = os.path.join(os.path.dirname(__file__), 'templates/about.html')
-    self.response.out.write(template.render(path, {}))
-
-
-class GuidePage(webapp.RequestHandler):
-  def get(self):
-    if ChromeFrameMe(self): return
-    path = os.path.join(os.path.dirname(__file__), 'templates/guide.html')
-    self.response.out.write(template.render(path, {}))
-
-
 class MainPage(webapp.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
@@ -338,6 +324,7 @@ class MainPage(webapp.RequestHandler):
 
 def main():
   application = webapp.WSGIApplication([
+      ('/', MainPage),
       ('/editor', EditorPage),
       ('/read/.*', ReadWord),
       ('/dump/.*', DumpWord),
