@@ -334,8 +334,8 @@ class MainPage(webapp.RequestHandler):
 def main():
   application = webapp.WSGIApplication([
       ('/', MainPage),
-      ('/about', EditorPage),
-      ('/guide', EditorPage),
+      ('/about', AboutPage),
+      ('/guide', GuidePage),
       ('/editor', EditorPage),
       ('/read/.*', ReadWord),
       ('/dump/.*', DumpWord),
