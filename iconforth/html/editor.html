@@ -26,6 +26,7 @@ var palette_color = 2;
 var cv = document.getElementById("iconeditor");
 var ctx = cv.getContext("2d");
 var grid = new Array();
+var form_dirty = 0;
 var colors = [
   '#ffffff',
   '#c0c0c0',
@@ -39,7 +40,11 @@ var colors = [
   '#ff00ff',
 ];
 
-function update_form() {
+function update_icon() {
+  // only do things when dirty
+  if (!form_dirty) return;
+  form_dirty = 0;
+
   // update image
   var str = "";
   for (var y = 0; y < 16; y++) {
@@ -48,7 +53,9 @@ function update_form() {
     }
   }
   document.frm.icon.value = str;
+}
 
+function update_definition() {
   // update definition
   var d = document.getElementById("deficons");
   var str = "";
@@ -62,6 +69,8 @@ function update_form() {
 function plot(x, y, color) {
   if (x < 0 || x > 15 || y < 0 || y > 15) return;
   if (grid[x+y*16] == color) return;
+  form_dirty = 1;
+
   grid[x+y*16] = color;
 
   ctx.fillStyle = colors[color];
@@ -145,7 +154,7 @@ function mousedown(evt) {
 
 function mouseup(evt) {
   drawing = 0;
-  update_form();
+  update_icon();
 }
 
 function mousemove(evt) {
@@ -159,7 +168,7 @@ function mousemove(evt) {
 function drop(e) {
   var d = document.getElementById("deficons");
   d.removeChild(e);
-  update_form();
+  update_definition();
 }
 
 function pick(id) {
@@ -172,7 +181,7 @@ function pick(id) {
   im.setAttribute("style", "cursor: pointer;");
   im.setAttribute("onclick", "drop(this)");
   d.appendChild(im);
-  update_form();
+  update_definition();
 
   // Go back to the list
   var d = document.getElementById("frame1");
