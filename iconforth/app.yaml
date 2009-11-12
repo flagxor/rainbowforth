@@ -6,6 +6,10 @@ api_version: 1
 default_expiration: "1h"
 
 handlers:
+- url: /
+  static_files: html/index.html
+- url: /html
+  static_dir: html
 - url: /js
   static_dir: js
 - url: /.*
