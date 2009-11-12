@@ -113,7 +113,8 @@ def UpdateScore(key):
 def ChromeFrameMe(handler):
   agent = handler.request.headers.get('USER_AGENT', '')
   if agent.find('MSIE') >= 0 and agent.find('chromeframe') < 0:
-    path = os.path.join(os.path.dirname(__file__), 'html/chrome_frame.html')
+    path = os.path.join(os.path.dirname(__file__),
+                        'templates/chrome_frame.html')
     handler.response.out.write(template.render(path, {}))
     return True
   return False
@@ -139,7 +140,8 @@ class ReadWord(webapp.RequestHandler):
       else:
         definition = w.definition.split(' ')
       # Output info on word.
-      path = os.path.join(os.path.dirname(__file__), 'html/read.html')
+      path = os.path.join(os.path.dirname(__file__),
+                          'templates/read.html')
       self.response.out.write(template.render(path, {
           'id': id,
           'description': w.description,
@@ -151,7 +153,8 @@ class ReadWord(webapp.RequestHandler):
           'backquery': self.request.get('backquery', ''),
       }))
     else:
-      path = os.path.join(os.path.dirname(__file__), 'html/read_notfound.html')
+      path = os.path.join(os.path.dirname(__file__),
+                          'templates/read_notfound.html')
       self.response.out.write(template.render(path, {}))
 
 
@@ -196,7 +199,8 @@ class DumpWord(webapp.RequestHandler):
         self.response.out.write('%s %d %s\n' % (
             r['id'], r['intrinsic'], ' '.join(r['definition'])))
     else:
-      path = os.path.join(os.path.dirname(__file__), 'html/dump.html')
+      path = os.path.join(os.path.dirname(__file__),
+                          'templates/dump.html')
       self.response.out.write(template.render(path, {
           'results': results,
       }))
@@ -206,7 +210,8 @@ class RunWord(webapp.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
     id = self.request.path[5:]
-    path = os.path.join(os.path.dirname(__file__), 'html/run.html')
+    path = os.path.join(os.path.dirname(__file__),
+                        'templates/run.html')
     self.response.out.write(template.render(path, {
         'id': id,
     }))
@@ -241,7 +246,8 @@ class Results(webapp.RequestHandler):
       if w1:
         w += [i for i in w1 if i not in w]
     # Display results.
-    path = os.path.join(os.path.dirname(__file__), 'html/results.html')
+    path = os.path.join(os.path.dirname(__file__),
+                        'templates/results.html')
     self.response.out.write(template.render(path, {
         'query': goal,
         'results': [str(i) for i in w],
@@ -305,28 +311,28 @@ class WriteWord(webapp.RequestHandler):
 class EditorPage(webapp.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
-    path = os.path.join(os.path.dirname(__file__), 'html/editor.html')
+    path = os.path.join(os.path.dirname(__file__), 'templates/editor.html')
     self.response.out.write(template.render(path, {}))
 
 
 class AboutPage(webapp.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
-    path = os.path.join(os.path.dirname(__file__), 'html/about.html')
+    path = os.path.join(os.path.dirname(__file__), 'templates/about.html')
     self.response.out.write(template.render(path, {}))
 
 
 class GuidePage(webapp.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
-    path = os.path.join(os.path.dirname(__file__), 'html/guide.html')
+    path = os.path.join(os.path.dirname(__file__), 'templates/guide.html')
     self.response.out.write(template.render(path, {}))
 
 
 class MainPage(webapp.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
-    path = os.path.join(os.path.dirname(__file__), 'html/main.html')
+    path = os.path.join(os.path.dirname(__file__), 'templates/main.html')
     self.response.out.write(template.render(path, {}))
 
 
