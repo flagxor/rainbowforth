@@ -299,8 +299,6 @@ class WriteWord(webapp.RequestHandler):
     if definition:
       for w in set(definition.split(' ')):
         UpdateScore(w)
-    # Go back to the editor.
-    self.redirect('/editor')
 
 
 class EditorPage(webapp.RequestHandler):

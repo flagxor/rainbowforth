@@ -13,6 +13,7 @@
     </form>
     {% for word in results %}
     <img src="/icon/{{ word }}.png" width="32" height="32" border="0"
+    style="cursor: pointer;"
     onclick="window.location.replace('/read/{{ word }}')">
     {% endfor %}
   </font></body>
