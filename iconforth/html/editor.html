@@ -126,8 +126,8 @@ function draw_palette() {
 }
 
 function mousedown(evt) {
-  var x = evt.pageX - 8;
-  var y = evt.pageY - 8;
+  var x = evt.clientX - cv.offsetLeft;
+  var y = evt.clientY - cv.offsetTop;
 
   if (x < 256) {
     x = Math.floor(x / 16);
@@ -150,8 +150,8 @@ function mouseup(evt) {
 
 function mousemove(evt) {
   if (drawing) {
-    var x = Math.floor((evt.pageX - 8) / 16);
-    var y = Math.floor((evt.pageY - 8) / 16);
+    var x = Math.floor((evt.clientX - cv.offsetLeft) / 16);
+    var y = Math.floor((evt.clientY - cv.offsetTop) / 16);
     plot(x, y, palette_color);
   }
 }
