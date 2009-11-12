@@ -282,7 +282,7 @@ class WriteWord(webapp.RequestHandler):
     w.put()
     # Update score of each word used.
     if definition:
-      for w in definition.split(' '):
+      for w in set(definition.split(' ')):
         UpdateScore(w)
     # Go back to the editor.
     self.redirect('/')

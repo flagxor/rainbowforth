@@ -6,7 +6,7 @@
 </head>
 <body>
 
-<canvas id="bigicon" width="300" height="257" border="0" style="cursor: crosshair;"></canvas>
+<canvas id="iconeditor" width="300" height="257" border="0" style="cursor: crosshair;"></canvas>
 <form name="frm" action="/write" method="post">
   <textarea name="description" cols="25" rows="8"></textarea>
   <input name="g" type="submit" value="Add"><br>
@@ -23,7 +23,7 @@
 
 var drawing = 0;
 var palette_color = 2;
-var cv = document.getElementById("bigicon");
+var cv = document.getElementById("iconeditor");
 var ctx = cv.getContext("2d");
 var grid = new Array();
 var colors = [
@@ -182,18 +182,18 @@ function pick(id) {
 function init() {
   blank();
   draw_palette(0);
-  document.onmousedown = mousedown;
-  document.onmouseup = mouseup;
-  document.onmousemove = mousemove;
-  document.addEventListener('touchstart', function(event) {
+  cv.onmousedown = mousedown;
+  cv.onmouseup = mouseup;
+  cv.onmousemove = mousemove;
+  cv.addEventListener('touchstart', function(event) {
       event.preventDefault();
       mousedown(event.touches[0]);
   }, false);
-  document.addEventListener('touchend', function(event) {
+  cv.addEventListener('touchend', function(event) {
       event.preventDefault();
       mouseup(event.touches[0]);
   }, false);
-  document.addEventListener('touchmove', function(event) {
+  cv.addEventListener('touchmove', function(event) {
       event.preventDefault();
       mousemove(event.touches[0]);
   }, false);
