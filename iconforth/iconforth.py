@@ -15,13 +15,12 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 class Word(db.Model):
   icon = db.BlobProperty()
   description = db.BlobProperty()
-  definition = db.BlobProperty()
   created = db.DateTimeProperty(auto_now_add=True)
   last_used = db.DateTimeProperty(auto_now_add=True)
   author = db.StringProperty()
   version = db.IntegerProperty(default=1)
   intrinsic = db.IntegerProperty(default=0)
-  words_used = db.StringListProperty()
+  definition = db.StringListProperty()
   keywords = db.StringListProperty()
   score = db.FloatProperty(default=0.0)
 
@@ -102,7 +101,7 @@ def UpdateScore(key):
   if w:
     # Find users of this word.
     query = db.GqlQuery('SELECT __key__ FROM Word '
-                        'WHERE words_used=:1', key)
+                        'WHERE definition=:1', key)
     use_count = query.count(1000)
     # Update score and last used.
     w.score = float(use_count)
@@ -129,23 +128,18 @@ class ReadWord(webapp.RequestHandler):
     if w:
       # Find users of this word.
       query = db.GqlQuery('SELECT __key__ FROM Word '
-                          'WHERE words_used=:1 '
+                          'WHERE definition=:1 '
                           'ORDER BY score DESC, last_used DESC', str(w.key()))
       words_used = query.fetch(1000)
       if not words_used:
         words_used = []
-      # Prepare definition.
-      if w.definition == '':
-        definition = []
-      else:
-        definition = w.definition.split(' ')
       # Output info on word.
       path = os.path.join(os.path.dirname(__file__),
                           'templates/read.html')
       self.response.out.write(template.render(path, {
           'id': id,
           'description': w.description,
-          'definition': definition,
+          'definition': w.definition,
           'created': str(w.created),
           'last_used': str(w.last_used),
           'author': w.author,
@@ -173,24 +167,18 @@ class DumpWord(webapp.RequestHandler):
       # Fetch it.
       w = Word.get(id)
       if w:
-        # Convert definition to a list.
-        if w.definition:
-          definition = w.definition.split(' ')
-        else:
-          definition = []
         # Collect each word.
         results.append({
             'id': id,
             'intrinsic': w.intrinsic,
-            'definition': definition,
+            'definition': w.definition,
             'description': w.description,
         })
         # Add new words needed.
-        if w.definition:
-          for cw in definition:
-            if cw not in needed_ids:
-              needed_ids.add(cw)
-              pending_ids.append(cw)
+        for cw in w.definition:
+          if cw not in needed_ids:
+            needed_ids.add(cw)
+            pending_ids.append(cw)
       # Count how many we've emitted.
       emitted_ids += 1
     if self.request.get('raw'):
@@ -292,6 +280,10 @@ class WriteWord(webapp.RequestHandler):
       intrinsic = 0
     # Pick out definition
     definition = str(self.request.get('definition'))
+    if definition:
+      definition = definition.split(' ')
+    else:
+      definition = []
     # Add word to the editor.
     w = Word()
     w.icon = str(self.request.get('icon'))
@@ -299,13 +291,11 @@ class WriteWord(webapp.RequestHandler):
     w.definition = definition
     w.intrinsic = intrinsic
     w.author = self.request.remote_addr
-    w.words_used = list(set(self.request.get('definition').split(' ')))
     w.keywords = FindKeywords(description)
     w.put()
     # Update score of each word used.
-    if definition:
-      for w in set(definition.split(' ')):
-        UpdateScore(w)
+    for w in set(w.definition):
+      UpdateScore(w)
 
 
 class EditorPage(webapp.RequestHandler):

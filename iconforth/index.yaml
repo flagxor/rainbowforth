@@ -27,7 +27,7 @@ indexes:
 # Used to find words that use given word.
 - kind: Word
   properties:
-  - name: words_used
+  - name: definition
   - name: score
     direction: desc
   - name: last_used
