@@ -27,6 +27,7 @@ var palette_color = 2;
 var cv = document.getElementById("iconeditor");
 var ctx = cv.getContext("2d");
 var grid = new Array();
+var submitting = 0;
 var colors = [
   '#ffffff',
   '#c0c0c0',
@@ -60,12 +61,7 @@ function definition_string() {
   return str;
 }
 
-function submit() {
-  HTTP.post('/write', {
-      'icon': icon_string(),
-      'definition': definition_string(),
-      'description': document.getElementById("description").value,
-      }, function(result) {});
+function submit_cleanup() {
   // Reset form.
   blank();
   document.getElementById("description").value = "";
@@ -74,6 +70,17 @@ function submit() {
     d.removeChild(d.childNodes.item(1));
   }
   search_all();
+  submitting = 0;
+}
+
+function submit() {
+  if (submitting) return;
+  submitting = 1;
+  HTTP.post('/write', {
+      'icon': icon_string(),
+      'definition': definition_string(),
+      'description': document.getElementById("description").value,
+      }, submit_cleanup);
 }
 
 function search() {
@@ -124,6 +131,8 @@ function blank() {
       plot(x, y, 0);
     }
   }
+
+  draw_palette();
 }
 
 function draw_palette() {
@@ -206,7 +215,6 @@ function pick(id) {
 
 function init() {
   blank();
-  draw_palette(0);
   cv.onmousedown = mousedown;
   cv.onmouseup = mouseup;
   cv.onmousemove = mousemove;

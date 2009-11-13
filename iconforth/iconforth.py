@@ -13,16 +13,20 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 
 
 class Word(db.Model):
-  icon = db.BlobProperty()
   description = db.BlobProperty()
   created = db.DateTimeProperty(auto_now_add=True)
   last_used = db.DateTimeProperty(auto_now_add=True)
   author = db.StringProperty()
+  user_agent = db.StringProperty()
   version = db.IntegerProperty(default=1)
   intrinsic = db.IntegerProperty(default=0)
   definition = db.StringListProperty()
   keywords = db.StringListProperty()
   score = db.FloatProperty(default=0.0)
+
+
+class WordIcon(db.Model):
+  icon = db.BlobProperty()
 
 
 colors = [
@@ -248,12 +252,10 @@ class ReadIcon(webapp.RequestHandler):
     self.response.headers['Content-Type'] = 'image/png'
     c = pngcanvas.PNGCanvas(32, 32)
     id = self.request.path[6:-4]
-    try:
-      w = Word.get(id)
-    except:
-      w = None
+    query = db.GqlQuery('SELECT * FROM WordIcon WHERE ANCESTOR is :1', id)
+    w = query.fetch(1)
     if w:
-      data = w.icon
+      data = w[0].icon
       for y in range(0, 16):
         for x in range(0, 16):
           z = x + y * 16
@@ -265,6 +267,23 @@ class ReadIcon(webapp.RequestHandler):
                          [0xff,0,0,0xff],
                          [0x20,0,0xff,0x80])
     self.response.out.write(c.dump())
+
+
+def AddWordAndIcon(description, definition, intrinsic,
+                   author, user_agent, keywords, icon):
+  # Prepare word to add to database.
+  word = Word()
+  word.description = description
+  word.definition = definition
+  word.intrinsic = intrinsic
+  word.author = author
+  word.user_agent = user_agent
+  word.keywords = keywords
+  word.put()
+  # Prepare icon to add to database.
+  wicon = WordIcon(parent=word)
+  wicon.icon = icon
+  wicon.put()
 
 
 class WriteWord(webapp.RequestHandler):
@@ -284,15 +303,19 @@ class WriteWord(webapp.RequestHandler):
       definition = definition.split(' ')
     else:
       definition = []
-    # Add word to the editor.
-    w = Word()
-    w.icon = str(self.request.get('icon'))
-    w.description = description
-    w.definition = definition
-    w.intrinsic = intrinsic
-    w.author = self.request.remote_addr
-    w.keywords = FindKeywords(description)
-    w.put()
+    # Get user agent string.
+    user_agent = self.request.headers.get('USER_AGENT', '')
+    # Get out icon.
+    icon = str(self.request.get('icon', ''))
+    # Transactionally add word and icon.
+    db.run_in_transaction(AddWordAndIcon,
+                          description=description,
+                          definition=definition,
+                          intrinsic=intrinsic,
+                          author=self.request.remote_addr,
+                          user_agent=user_agent,
+                          keywords=FindKeywords(description),
+                          icon=icon)
     # Update score of each word used.
     for w in set(w.definition):
       UpdateScore(w)
