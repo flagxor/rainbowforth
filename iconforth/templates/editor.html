@@ -14,8 +14,7 @@ onchange="search()">
 <input type="button" value="Search" onclick="search()">
 <input type="button" value="All" onclick="search_all()">
 <input type="button" value="Add" onclick="submit()"><br>
-<iframe src="/results" id="frame1" width="100%" height="350" frameborder="0">
-</iframe>
+<div id="view" bgcolor="#777777"></div>
 
 
 <script type="text/javascript" src="/js/http.js"></script>
@@ -83,10 +82,15 @@ function submit() {
       }, submit_cleanup);
 }
 
+function view(url) {
+  HTTP.getText(url, function(val) {
+      document.getElementById('view').innerHTML = val;
+      });
+}
+
 function search() {
   var query = document.getElementById("searchprompt").value;
-  var f1 = document.getElementById('frame1');
-  f1.contentWindow.location.replace('/results?q=' + escape(query));
+  view('/results?q=' + escape(query));
 }
 
 function search_all() {
@@ -209,8 +213,7 @@ function pick(id) {
   im.setAttribute("onclick", "drop(this)");
   d.appendChild(im);
   // Go back to the full list.
-  var f1 = document.getElementById('frame1');
-  f1.contentWindow.location.replace('/results');
+  view('/results');
 }
 
 function init() {
@@ -229,7 +232,11 @@ function init() {
   cv.addEventListener('touchmove', function(event) {
       event.preventDefault();
       mousemove(event.touches[0]);
-  }, false);
+      }, false);
+
+  HTTP.getText('/results', function(val) {
+      document.getElementById('view').innerHTML = val;
+      });
 }
 
 init();

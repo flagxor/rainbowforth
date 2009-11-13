@@ -6,6 +6,12 @@ api_version: 1
 default_expiration: "1h"
 
 handlers:
+- url: /
+  static_files: html/main.html
+  upload: html/main.html
+- url: /favicon.ico
+  static_files: images/favicon.ico
+  upload: images/favicon.ico
 - url: /html
   static_dir: html
 - url: /js

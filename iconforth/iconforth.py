@@ -377,16 +377,8 @@ class EditorPage(webapp.RequestHandler):
     self.response.out.write(template.render(path, {}))
 
 
-class MainPage(webapp.RequestHandler):
-  def get(self):
-    if ChromeFrameMe(self): return
-    path = os.path.join(os.path.dirname(__file__), 'templates/main.html')
-    self.response.out.write(template.render(path, {}))
-
-
 def main():
   application = webapp.WSGIApplication([
-      ('/', MainPage),
       ('/editor', EditorPage),
       ('/read/.*', ReadWord),
       ('/dump/.*', DumpWord),
