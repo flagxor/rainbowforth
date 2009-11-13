@@ -19,6 +19,7 @@
 var cv = document.getElementById("canvas");
 var ctx = cv.getContext("2d");
 var id = "{{ id }}";
+var exe = "{{ exe }}";
 var console = document.getElementById("console");
 var dict = {};
 
@@ -92,16 +93,6 @@ function run() {
   }
 }
 
-function loading(result) {
-  var lines = result.split('\n');
-  for (var line in lines) {
-    var words = line.split(' ');
-    dict[words[0]] = words.slice(2);
-  }
-  console.innerHTML = '';
-  setInterval('run()', 30);
-}
-
 function mousedown(evt) {
   var x = evt.pageX - 8;
   var y = evt.pageY - 8;
@@ -141,13 +132,13 @@ function keyup(evt) {
 
 function init() {
   blank();
-  HTTP.getText('/dump/' + id + '?raw=1', loading);
   document.onmousedown = mousedown;
   document.onmouseup = mouseup;
   document.onmousemove = mousemove;
   document.onkeypress = keypress;
   document.onkeydown = keydown;
   document.onkeyup = keyup;
+  setInterval('run()', 30);
 }
 
 init();

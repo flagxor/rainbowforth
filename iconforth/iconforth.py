@@ -213,11 +213,21 @@ class RunWord(webapp.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
     id = self.request.path[5:]
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates/run.html')
-    self.response.out.write(template.render(path, {
-        'id': id,
-    }))
+    # Get the executable.
+    query = db.GqlQuery('SELECT * FROM WordExecutable WHERE ANCESTOR is :1',
+                        lookup_id)
+    exe = query.fetch(1)
+    if exe:
+      path = os.path.join(os.path.dirname(__file__),
+                          'templates/run.html')
+      self.response.out.write(template.render(path, {
+          'id': id,
+          'exe': exe,
+      }))
+    else:
+      path = os.path.join(os.path.dirname(__file__),
+                          'templates/read_notfound.html')
+      self.response.out.write(template.render(path, {}))
 
 
 class Results(webapp.RequestHandler):
