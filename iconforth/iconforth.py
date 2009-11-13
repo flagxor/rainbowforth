@@ -148,7 +148,6 @@ class ReadWord(webapp.RequestHandler):
           'last_used': str(w.last_used),
           'author': w.author,
           'words_used': words_used,
-          'backquery': self.request.get('backquery', ''),
       }))
     else:
       path = os.path.join(os.path.dirname(__file__),

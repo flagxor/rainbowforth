@@ -24,13 +24,13 @@
         </tr></table>
     </form>
     <img width="1" height="32">
-    {% for word in definition %}<a href="/read/{{ word }}?backquery={{ backquery|escape }}"><img src="/icon/{{ word }}.png" width="32" height="32" border="0"></a>{% endfor %}<br>
+    {% for word in definition %}<img src="/icon/{{ word }}.png" width="32" height="32" border="0" style="cursor: pointer;" onclick="window.location.replace('/read/{{ word }}')">% endfor %}<br>
     {{ description }}<br>
     <table><tr>
         <td valign="middle"><b>Used by:</b></td>
         <td valign="middle">
           {% for word in words_used %}
-          <a href="/read/{{ word }}?backquery={{ backquery|escape }}"><img src="/icon/{{ word }}.png" width="32" height="32" border="0"></a>
+          <img src="/icon/{{ word }}.png" width="32" height="32" border="0" style="cursor: pointer;" onclick="window.location.replace('/read/{{ word }}')">
           {% endfor %}
         </td>
     </tr></table>
