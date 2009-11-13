@@ -1,10 +1,11 @@
 import datetime
-import re
 import os
-import sys
-import StringIO
+import pickle
 import pngcanvas
 import random
+import re
+import sys
+import zlib
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext import db
@@ -24,9 +25,14 @@ class Word(db.Model):
   keywords = db.StringListProperty()
   score = db.FloatProperty(default=0.0)
 
-
 class WordIcon(db.Model):
   icon = db.BlobProperty()
+
+class WordSource(db.Model):
+  source = db.BlobProperty()
+
+class WordExecutable(db.Model):
+  executable = db.BlobProperty()
 
 
 colors = [
@@ -268,9 +274,21 @@ class ReadIcon(webapp.RequestHandler):
     self.response.out.write(c.dump())
 
 
-def AddWordAndIcon(description, definition, intrinsic,
-                   author, user_agent, keywords, icon):
-  # Prepare word to add to database.
+def EncodeSource(source):
+  return zlib.compress(pickle.dumps(source))
+
+
+def DecodeSource(data):
+  return pickle.loads(zlib.decompress(data))
+
+
+def CompileSource(source):
+  return ''
+
+
+def AddFullWord(description, definition, intrinsic,
+                author, user_agent, keywords, icon, source, executable):
+  # Add word to database.
   word = Word()
   word.description = description
   word.definition = definition
@@ -279,10 +297,18 @@ def AddWordAndIcon(description, definition, intrinsic,
   word.user_agent = user_agent
   word.keywords = keywords
   word.put()
-  # Prepare icon to add to database.
+  # Add icon to database.
   wicon = WordIcon(parent=word)
   wicon.icon = icon
   wicon.put()
+  # Add source to database.
+  wsource = WordSource(parent=word)
+  wsource.source = source
+  wsource.put()
+  # Add executable to database.
+  wexe = WordExecutable(parent=word)
+  wexe.executable = executable
+  wexe.put()
 
 
 class WriteWord(webapp.RequestHandler):
@@ -306,15 +332,29 @@ class WriteWord(webapp.RequestHandler):
     user_agent = self.request.headers.get('USER_AGENT', '')
     # Get out icon.
     icon = str(self.request.get('icon', ''))
+    # Get source for each word that goes into this one.
+    sources = {}
+    for w in set(w.definition):
+      query = db.GqlQuery('SELECT * FROM WordSource WHERE ANCESTOR is :1', w)
+      src = query.fetch(1)
+      dsource = DecodeSource(src.source)
+      for cw in dsource:
+        if cw not in sources:
+          sources[cw] = dsource[cw]
+    my_source = EncodeSource(sources)
+    # Compile it.
+    my_executable = CompileSource(my_source)
     # Transactionally add word and icon.
-    db.run_in_transaction(AddWordAndIcon,
+    db.run_in_transaction(AddFullWord,
                           description=description,
                           definition=definition,
                           intrinsic=intrinsic,
                           author=self.request.remote_addr,
                           user_agent=user_agent,
                           keywords=FindKeywords(description),
-                          icon=icon)
+                          icon=icon,
+                          source=source,
+                          executable=my_executable)
     # Update score of each word used.
     for w in set(w.definition):
       UpdateScore(w)
