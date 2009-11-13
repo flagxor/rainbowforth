@@ -163,38 +163,44 @@ class ReadWord(webapp.RequestHandler):
 
 class DumpWord(webapp.RequestHandler):
   def get(self):
-    if ChromeFrameMe(self): return
+    # Get the source.
     lookup_id = self.request.path[6:]
+    query = db.GqlQuery('SELECT * FROM WordSource WHERE ANCESTOR is :1',
+                        lookup_id)
+    src = query.fetch(1)
+    if src:
+      source = DecodeSource(lookup_id, src[0].source)
+    else:
+      source = {}
+    # Handle raw output more directly.
+    if self.request.get('raw'):
+      self.response.headers['Content-Type'] = 'text/plain'
+      for w, d in source.iteritems():
+        dfn = ' '.join((str(i) for i in d))
+        self.response.out.write('%s %s\n' % (w, dfn))
+      return
+    # Display it in a sensible order.
     results = []
     pending_ids = [lookup_id]
     needed_ids = set([lookup_id])
-    emitted_ids = 0
-    while pending_ids and emitted_ids < 100:
+    while pending_ids:
       # Pick one.
       id = pending_ids[0]
       pending_ids = pending_ids[1:]
-      # Fetch it.
-      w = Word.get(id)
-      if w:
-        # Collect each word.
-        results.append({
-            'id': id,
-            'intrinsic': w.intrinsic,
-            'definition': w.definition,
-            'description': w.description,
-        })
-        # Add new words needed.
-        for cw in w.definition:
-          if cw not in needed_ids:
-            needed_ids.add(cw)
-            pending_ids.append(cw)
-      # Count how many we've emitted.
-      emitted_ids += 1
-    if self.request.get('raw'):
-      self.response.headers['Content-Type'] = 'text/plain'
-      for r in results:
-        self.response.out.write('%s %d %s\n' % (
-            r['id'], r['intrinsic'], ' '.join(r['definition'])))
+      # Grab out its parts.
+      intrinsic = source[id][0]
+      definition = source[id][1:]
+      # Collect each word.
+      results.append({
+          'id': id,
+          'intrinsic': intrinsic,
+          'definition': definition,
+      })
+      # Add new words needed.
+      for w in definition:
+        if w not in needed_ids:
+          needed_ids.add(w)
+          pending_ids.append(w)
     else:
       path = os.path.join(os.path.dirname(__file__),
                           'templates/dump.html')
@@ -278,8 +284,12 @@ def EncodeSource(source):
   return zlib.compress(pickle.dumps(source))
 
 
-def DecodeSource(data):
-  return pickle.loads(zlib.decompress(data))
+def DecodeSource(key, data):
+  source = pickle.loads(zlib.decompress(data))
+  if source.get('this'):
+    source[key] = source['this']
+    del source['this']
+  return source
 
 
 def CompileSource(source):
@@ -334,13 +344,13 @@ class WriteWord(webapp.RequestHandler):
     icon = str(self.request.get('icon', ''))
     # Get source for each word that goes into this one.
     sources = {}
-    for w in set(w.definition):
+    for w in set(definition):
       query = db.GqlQuery('SELECT * FROM WordSource WHERE ANCESTOR is :1', w)
       src = query.fetch(1)
-      dsource = DecodeSource(src.source)
-      for cw in dsource:
-        if cw not in sources:
-          sources[cw] = dsource[cw]
+      if src:
+        dsource = DecodeSource(w, src[0].source)
+        sources.update(dsource)
+    sources['this'] = [intrinsic] + definition
     my_source = EncodeSource(sources)
     # Compile it.
     my_executable = CompileSource(my_source)
@@ -353,7 +363,7 @@ class WriteWord(webapp.RequestHandler):
                           user_agent=user_agent,
                           keywords=FindKeywords(description),
                           icon=icon,
-                          source=source,
+                          source=my_source,
                           executable=my_executable)
     # Update score of each word used.
     for w in set(w.definition):
