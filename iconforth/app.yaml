@@ -16,6 +16,8 @@ handlers:
   static_dir: html
 - url: /js
   static_dir: js
+- url: /images
+  static_dir: images
 - url: /.*
   script: iconforth.py
 
