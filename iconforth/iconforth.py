@@ -329,7 +329,7 @@ def CompileSource(key, source):
     pending.pop()
     # Handle intrinsics specially.
     if not defn and intrinsic:
-      sym_table[focus] = 'op(' + intrinsic +')'
+      sym_table[focus] = 'op(%d)' % intrinsic
       continue
     # Add a RET instruction.
     heap.append('RET')
@@ -341,7 +341,7 @@ def CompileSource(key, source):
       else:
         heap.append(str(len(heap) - op))
     # Add to symbol table.
-    sym_table[focus] = len(heap)-1
+    sym_table[focus] = len(heap)
   # Reverse things and convert to a string.
   heap.reverse()
   heap = ','.join(heap)

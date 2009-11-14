@@ -21,9 +21,11 @@ var ctx = cv.getContext("2d");
 var id = "{{ id }}";
 var console = document.getElementById("console");
 
-function op(x) { return 0x7fffffff - x; }
+function op(x) { return 0x7ffff00 + x; }
 var RET = op(1);
 var exe = [
+1, // call exe
+op(31), // halt
 {{ exe }}
 ];
 
@@ -54,46 +56,78 @@ var dstack = Array();
 var ip = 0;
 
 function run() {
-  return;
   while(1) {
     var ir = memory[ip++];
     switch (ir) {
-      case -1: dstack.push(0); break; // number
-      case -2: dstack.push(dstack.pop() * 10 + 0); break; // 0
-      case -3: dstack.push(dstack.pop() * 10 + 1); break; // 1
-      case -4: dstack.push(dstack.pop() * 10 + 2); break; // 2
-      case -5: dstack.push(dstack.pop() * 10 + 3); break; // 3
-      case -6: dstack.push(dstack.pop() * 10 + 4); break; // 4
-      case -7: dstack.push(dstack.pop() * 10 + 5); break; // 5
-      case -8: dstack.push(dstack.pop() * 10 + 6); break; // 6
-      case -9: dstack.push(dstack.pop() * 10 + 7); break; // 7
-      case -10: dstack.push(dstack.pop() * 10 + 8); break; // 8
-      case -11: dstack.push(dstack.pop() * 10 + 9); break; // 9
-      case -12: rstack.push(dstack.pop()); break; // >r
-      case -13: dstack.push(rstack.pop()); break; // r>
-      case -14: dstack.push(dstack.pop() + dstack.pop()); break; // +
-      case -15: dstack.push(-dstack.pop() + dstack.pop()); break; // -
-      case -16: dstack.push(dstack.pop() * dstack.pop()); break; // *
-      case -17: dstack.push(dstack.pop()*2); break; // 2*
-      case -18: dstack.push(Math.floor(dstack.pop()/2)); break; // 2/
-      case -19: dstack.push(-dstack.pop()); break; // negate
-      case -20: dstack.push(dstack.pop() & dstack.pop()); break; // and
-      case -21: dstack.push(dstack.pop() | dstack.pop()); break; // or
-      case -22: ip = rstack.pop(); break; // ret
-      case -23: var a = dstack.pop(); var b = dstack.pop();
-             dstack.push(a); dstack.push(b); break; // swap
-      case -24: dstack.pop(); break; // drop
-      case -25: dstack.push(dstack[dstack.length-1]); break; // dup
-      case -26: dstack.push(memory[dstack.pop()]); break; // @
-      case -27: var a = dstack.pop(); memory[a] = dstack.pop(); break; // !
-      case -28: console.innerHTML += String.fromCharCode(dstack.pop());
-             break; // emit
-      case -29: var e = GetEvent();
-             dstack.push(e.x);
-             dstack.push(e.y);
-             dstack.push(e.code); break; // event
-      case -30: return; // sleep
-      default: rstack.push(ip); ip = ir; break; // call
+      case 0x7fffff01: // op(1)
+        ip = rstack.pop(); break; // ret
+      case 0x7fffff02: // op(2)
+        dstack.push(0); break; // number (zero)
+      case 0x7fffff03: // op(3)
+        dstack.push(dstack.pop() * 10 + 0); break; // 0
+      case 0x7fffff04: // op(4)
+        dstack.push(dstack.pop() * 10 + 1); break; // 1
+      case 0x7fffff05: // op(5)
+        dstack.push(dstack.pop() * 10 + 2); break; // 2
+      case 0x7fffff06: // op(6)
+        dstack.push(dstack.pop() * 10 + 3); break; // 3
+      case 0x7fffff07: // op(7)
+        dstack.push(dstack.pop() * 10 + 4); break; // 4
+      case 0x7fffff08: // op(8)
+        dstack.push(dstack.pop() * 10 + 5); break; // 5
+      case 0x7fffff09: // op(9)
+        dstack.push(dstack.pop() * 10 + 6); break; // 6
+      case 0x7fffff0a: // op(10)
+        dstack.push(dstack.pop() * 10 + 7); break; // 7
+      case 0x7fffff0b: // op(11)
+        dstack.push(dstack.pop() * 10 + 8); break; // 8
+      case 0x7fffff0c: // op(12)
+        dstack.push(dstack.pop() * 10 + 9); break; // 9
+      case 0x7fffff0d: // op(13)
+        rstack.push(dstack.pop()); break; // >r
+      case 0x7fffff0e: // op(14)
+        dstack.push(rstack.pop()); break; // r>
+      case 0x7fffff0f: // op(15)
+        dstack.push(dstack.pop() + dstack.pop()); break; // +
+      case 0x7fffff10: // op(16)
+        dstack.push(-dstack.pop() + dstack.pop()); break; // -
+      case 0x7fffff11: // op(17)
+        dstack.push(dstack.pop() * dstack.pop()); break; // *
+      case 0x7fffff12: // op(18)
+        dstack.push(dstack.pop()*2); break; // 2*
+      case 0x7fffff13: // op(19)
+        dstack.push(Math.floor(dstack.pop()/2)); break; // 2/
+      case 0x7fffff14: // op(20)
+        dstack.push(-dstack.pop()); break; // negate
+      case 0x7fffff15: // op(21)
+        dstack.push(dstack.pop() & dstack.pop()); break; // and
+      case 0x7fffff16: // op(22)
+        dstack.push(dstack.pop() | dstack.pop()); break; // or
+      case 0x7fffff17: // op(23)
+        var a = dstack.pop(); var b = dstack.pop();
+        dstack.push(a); dstack.push(b); break; // swap
+      case 0x7fffff18: // op(24)
+        dstack.pop(); break; // drop
+      case 0x7fffff19: // op(25)
+        dstack.push(dstack[dstack.length-1]); break; // dup
+      case 0x7fffff1a: // op(26)
+        dstack.push(memory[dstack.pop()]); break; // @
+      case 0x7fffff1b: // op(27)
+        var a = dstack.pop();
+        memory[a] = dstack.pop(); break; // !
+      case 0x7fffff1c: // op(28)
+        console.innerHTML += String.fromCharCode(dstack.pop()); break; // emit
+      case 0x7fffff1d: // op(29)
+        var e = GetEvent();
+        dstack.push(e.x);
+        dstack.push(e.y);
+        dstack.push(e.code); break; // event
+      case 0x7fffff1e: // op(30)
+        return; // sleep
+      case 0x7fffff1f: // op(31)
+        ip--; return; // halt
+      default:
+        rstack.push(ip); ip += ir; break; // call
     }
   }
 }
@@ -144,6 +178,7 @@ function init() {
   document.onkeydown = keydown;
   document.onkeyup = keyup;
   setInterval('run()', 30);
+  run();
 }
 
 init();
