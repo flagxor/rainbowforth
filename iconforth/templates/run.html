@@ -10,7 +10,7 @@
   <canvas id="canvas" width="300" height="300"
   border="0" style="cursor: pointer;"></canvas><br>
 </div>
-<div id="console">Loading...</div>
+<div id="console"></div>
 
 <script type="text/javascript" src="/js/http.js"></script>
 
@@ -19,9 +19,13 @@
 var cv = document.getElementById("canvas");
 var ctx = cv.getContext("2d");
 var id = "{{ id }}";
-var exe = "{{ exe }}";
 var console = document.getElementById("console");
-var dict = {};
+
+function op(x) { return 0x7fffffff - x; }
+var OP_RET = 1;
+var exe = [
+{{ exe }}
+];
 
 function blank() {
   ctx.clearRect(0, 0, 300, 300);
@@ -50,6 +54,7 @@ var dstack = Array();
 var ip = 0;
 
 function run() {
+  return;
   while(1) {
     var ir = memory[ip++];
     switch (ir) {

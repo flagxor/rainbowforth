@@ -15,22 +15,22 @@
             </td>
             <td valign="middle">
               <input type="button" value="Dump"
-              onclick="window.open('/dump/{{ id }}')">
+              onclick="window.open('/dump?id={{ id }}')">
             </td>
             <td valign="middle">
               <input type="button" value="Run"
-              onclick="window.open('/run/{{ id }}')">
+              onclick="window.open('/run?id={{ id }}')">
             </td>
         </tr></table>
     </form>
     <img width="1" height="32">
-    {% for word in definition %}<img src="/icon/{{ word }}.png" width="32" height="32" border="0" style="cursor: pointer;" onclick="view('/read/{{ word }}')">{% endfor %}<br>
+    {% for word in definition %}<img src="/icon/{{ word }}.png" width="32" height="32" border="0" style="cursor: pointer;" onclick="view('/read?id={{ word }}')">{% endfor %}<br>
     {{ description }}<br>
     <table><tr>
         <td valign="middle"><b>Used by:</b></td>
         <td valign="middle">
           {% for word in words_used %}
-          <img src="/icon/{{ word }}.png" width="32" height="32" border="0" style="cursor: pointer;" onclick="view('/read/{{ word }}')">
+          <img src="/icon/{{ word }}.png" width="32" height="32" border="0" style="cursor: pointer;" onclick="view('/read?id={{ word }}')">
           {% endfor %}
         </td>
     </tr></table>

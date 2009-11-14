@@ -133,7 +133,7 @@ def ChromeFrameMe(handler):
 class ReadWord(webapp.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
-    id = self.request.path[6:]
+    id = self.request.get('id', '')
     w = Word.get(id)
     if w:
       # Find users of this word.
@@ -164,7 +164,7 @@ class ReadWord(webapp.RequestHandler):
 class DumpWord(webapp.RequestHandler):
   def get(self):
     # Get the source.
-    lookup_id = self.request.path[6:]
+    lookup_id = self.request.get('id', '')
     query = db.GqlQuery('SELECT * FROM WordSource WHERE ANCESTOR is :1',
                         lookup_id)
     src = query.fetch(1)
@@ -212,17 +212,16 @@ class DumpWord(webapp.RequestHandler):
 class RunWord(webapp.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
-    id = self.request.path[5:]
+    id = self.request.get('id', '')
     # Get the executable.
-    query = db.GqlQuery('SELECT * FROM WordExecutable WHERE ANCESTOR is :1',
-                        lookup_id)
+    query = db.GqlQuery('SELECT * FROM WordExecutable WHERE ANCESTOR is :1', id)
     exe = query.fetch(1)
     if exe:
       path = os.path.join(os.path.dirname(__file__),
                           'templates/run.html')
       self.response.out.write(template.render(path, {
           'id': id,
-          'exe': exe,
+          'exe': exe[0].executable,
       }))
     else:
       path = os.path.join(os.path.dirname(__file__),
@@ -330,22 +329,21 @@ def CompileSource(key, source):
     pending.pop()
     # Handle intrinsics specially.
     if not defn and intrinsic:
-      sym_table[focus] = 0x40000000 + intrinsic
+      sym_table[focus] = 'op(' + intrinsic +')'
       continue
     # Add to symbol table.
     sym_table[focus] = len(heap)
     # Encode it (in anticipation of reverse).
     for w in defn:
       op = sym_table[w]
-      if op >= 0x40000000 and op <=0x400000FF:
+      if type(op) == str:
         heap.append(op)
       else:
-        heap.append(len(heap) - op)
+        heap.append(str(len(heap) - op))
     # Add a RET instruction.
-    heap.append(0x40000000)
+    heap.append('op(OP_RET)')
   # Reverse things and convert to a string.
   heap.reverse()
-  heap = [str(i) for i in heap]
   heap = ','.join(heap)
   return heap
 
@@ -434,9 +432,9 @@ class EditorPage(webapp.RequestHandler):
 def main():
   application = webapp.WSGIApplication([
       ('/editor', EditorPage),
-      ('/read/.*', ReadWord),
-      ('/dump/.*', DumpWord),
-      ('/run/.*', RunWord),
+      ('/read', ReadWord),
+      ('/dump', DumpWord),
+      ('/run', RunWord),
       ('/icon/.*\\.png', ReadIcon),
       ('/write', WriteWord),
       ('/results', Results),
