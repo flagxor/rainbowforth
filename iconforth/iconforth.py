@@ -302,8 +302,33 @@ def DecodeSource(key, data):
   return source
 
 
-def CompileSource(source):
-  return ''
+def CompileSource(key, source):
+  heap = []
+  sym_table = {}
+  pending = [key]
+  while pending:
+    focus = pending[-1]
+    if sym_table.get(focus):
+      continue
+    intrinsic = source[focus][1:]
+    defn = source[focus][1:]
+    ready = True
+    for w in defn:
+      if not sym_table.get(focus):
+        ready = False
+        pending.append(w)
+    if ready:
+      pending.pop()
+      sym_table[focus] = len(heap)
+      for w in defn:
+        heap.append(len(heap) - sym_table[w])
+      heap.append(0x40000000)  # ret
+      if not defn:
+        heap.append(0x40000000 + intrinsic)
+  heap = heap.reverse()
+  heap = [str(i) for i in heap]
+  heap = ','.join(heap)
+  return heap
 
 
 def AddFullWord(description, definition, intrinsic,
