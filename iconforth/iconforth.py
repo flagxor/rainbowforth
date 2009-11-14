@@ -331,17 +331,17 @@ def CompileSource(key, source):
     if not defn and intrinsic:
       sym_table[focus] = 'op(' + intrinsic +')'
       continue
-    # Add to symbol table.
-    sym_table[focus] = len(heap)
+    # Add a RET instruction.
+    heap.append('RET')
     # Encode it (in anticipation of reverse).
-    for w in defn:
+    for w in reversed(defn):
       op = sym_table[w]
       if type(op) == str:
         heap.append(op)
       else:
         heap.append(str(len(heap) - op))
-    # Add a RET instruction.
-    heap.append('op(OP_RET)')
+    # Add to symbol table.
+    sym_table[focus] = len(heap)-1
   # Reverse things and convert to a string.
   heap.reverse()
   heap = ','.join(heap)
