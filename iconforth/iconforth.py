@@ -271,7 +271,7 @@ class ReadIcon(webapp.RequestHandler):
     self.response.headers['Cache-Control'] = 'public, max-age=86400'
     self.response.headers['Content-Type'] = 'image/png'
     c = pngcanvas.PNGCanvas(32, 32)
-    id = self.request.path[6:-4]
+    id = self.request.get('id', '.png')[:-4]
     query = db.GqlQuery('SELECT * FROM WordIcon WHERE ANCESTOR is :1', id)
     w = query.fetch(1)
     if w:
@@ -435,7 +435,7 @@ def main():
       ('/read', ReadWord),
       ('/dump', DumpWord),
       ('/run', RunWord),
-      ('/icon/.*\\.png', ReadIcon),
+      ('/icon', ReadIcon),
       ('/write', WriteWord),
       ('/results', Results),
   ], debug=True)

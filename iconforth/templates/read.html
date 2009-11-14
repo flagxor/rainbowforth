@@ -10,7 +10,7 @@
             <td valign="middle">
               <img border="5" bordercolor="#cc0000"
               style="cursor: pointer; border-color: #cc0000;"
-              src="/icon/{{ id }}.png" width="32" height="32"
+              src="/icon?id={{ id }}.png" width="32" height="32"
               onclick="pick('{{ id }}')">
             </td>
             <td valign="middle">
@@ -24,13 +24,13 @@
         </tr></table>
     </form>
     <img width="1" height="32">
-    {% for word in definition %}<img src="/icon/{{ word }}.png" width="32" height="32" border="0" style="cursor: pointer;" onclick="view('/read?id={{ word }}')">{% endfor %}<br>
+    {% for word in definition %}<img src="/icon?id={{ word }}.png" width="32" height="32" border="0" style="cursor: pointer;" onclick="view('/read?id={{ word }}')">{% endfor %}<br>
     {{ description }}<br>
     <table><tr>
         <td valign="middle"><b>Used by:</b></td>
         <td valign="middle">
           {% for word in words_used %}
-          <img src="/icon/{{ word }}.png" width="32" height="32" border="0" style="cursor: pointer;" onclick="view('/read?id={{ word }}')">
+          <img src="/icon?id={{ word }}.png" width="32" height="32" border="0" style="cursor: pointer;" onclick="view('/read?id={{ word }}')">
           {% endfor %}
         </td>
     </tr></table>

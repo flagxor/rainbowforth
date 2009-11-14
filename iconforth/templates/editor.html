@@ -203,7 +203,7 @@ function drop(e) {
 function pick(id) {
   var d = document.getElementById("deficons");
   var im = document.createElement("img");
-  im.setAttribute("src", "/icon/" + id + ".png");
+  im.setAttribute("src", "/icon?id=" + id + ".png");
   im.setAttribute("alt", id);
   im.setAttribute("width", "32");
   im.setAttribute("height", "32");
