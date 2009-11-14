@@ -306,26 +306,45 @@ def CompileSource(key, source):
   heap = []
   sym_table = {}
   pending = [key]
+  # Process until nothing is pending.
   while pending:
+    # Consider the last on on the stack.
     focus = pending[-1]
+    # If we've handled it drop it and continue.
     if sym_table.get(focus):
+      pending.pop()
       continue
-    intrinsic = source[focus][1:]
+    # Pull out intrinsic / definition.
+    intrinsic = source[focus][0]
     defn = source[focus][1:]
+    # Check if we've handled the children, or add them.
     ready = True
     for w in defn:
-      if not sym_table.get(focus):
+      if not sym_table.get(w):
         ready = False
         pending.append(w)
-    if ready:
-      pending.pop()
-      sym_table[focus] = len(heap)
-      for w in defn:
-        heap.append(len(heap) - sym_table[w])
-      heap.append(0x40000000)  # ret
-      if not defn:
-        heap.append(0x40000000 + intrinsic)
-  heap = heap.reverse()
+    # Repeat recursively if not everything has been handled.
+    if not ready:
+      continue
+    # Take this one out.
+    pending.pop()
+    # Handle intrinsics specially.
+    if not defn and intrinsic:
+      sym_table[focus] = 0x40000000 + intrinsic
+      continue
+    # Add to symbol table.
+    sym_table[focus] = len(heap)
+    # Encode it (in anticipation of reverse).
+    for w in defn:
+      op = sym_table[w]
+      if op >= 0x40000000 and op <=0x400000FF:
+        heap.append(op)
+      else:
+        heap.append(len(heap) - op)
+    # Add a RET instruction.
+    heap.append(0x40000000)
+  # Reverse things and convert to a string.
+  heap.reverse()
   heap = [str(i) for i in heap]
   heap = ','.join(heap)
   return heap
@@ -388,7 +407,7 @@ class WriteWord(webapp.RequestHandler):
     sources['this'] = [intrinsic] + definition
     my_source = EncodeSource(sources)
     # Compile it.
-    my_executable = CompileSource(my_source)
+    my_executable = CompileSource('this', sources)
     # Transactionally add word and icon.
     db.run_in_transaction(AddFullWord,
                           description=description,
@@ -401,7 +420,7 @@ class WriteWord(webapp.RequestHandler):
                           source=my_source,
                           executable=my_executable)
     # Update score of each word used.
-    for w in set(w.definition):
+    for w in set(definition):
       UpdateScore(w)
 
 
