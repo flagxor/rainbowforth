@@ -404,7 +404,7 @@ class DeleteWord(webapp.RequestHandler):
     word = Word.get(id)
     # Decide if they can delete this.
     can_delete = (users.is_current_user_admin() or
-                  users.get_current_user() == w.author)
+                  users.get_current_user() == word.author)
     if not can_delete: return
     # Get other child entries.
     query = db.GqlQuery('SELECT * FROM WordIcon WHERE ANCESTOR is :1', id)
