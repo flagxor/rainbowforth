@@ -21,7 +21,7 @@ var ctx = cv.getContext("2d");
 var id = "{{ id }}";
 var console = document.getElementById("console");
 
-function op(x) { return 0x7ffff00 + x; }
+function op(x) { return 0x7fffff00 + x; }
 var RET = op(1);
 var exe = [
 1, // call exe
@@ -50,7 +50,7 @@ function GetEvent() {
   }
 }
 
-var memory = Array();
+var memory = exe.slice(0);
 var rstack = Array();
 var dstack = Array();
 var ip = 0;
@@ -125,7 +125,7 @@ function run() {
       case 0x7fffff1e: // op(30)
         return; // sleep
       case 0x7fffff1f: // op(31)
-        ip--; return; // halt
+        events = []; ip--; return; // halt
       default:
         rstack.push(ip); ip += ir; break; // call
     }
@@ -171,13 +171,13 @@ function keyup(evt) {
 
 function init() {
   blank();
-  document.onmousedown = mousedown;
-  document.onmouseup = mouseup;
-  document.onmousemove = mousemove;
-  document.onkeypress = keypress;
-  document.onkeydown = keydown;
-  document.onkeyup = keyup;
-  setInterval('run()', 30);
+  //document.onmousedown = mousedown;
+  //document.onmouseup = mouseup;
+  //document.onmousemove = mousemove;
+  //document.onkeypress = keypress;
+  //document.onkeydown = keydown;
+  //document.onkeyup = keyup;
+  //setInterval('run()', 30);
   run();
 }
 

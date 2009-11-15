@@ -154,6 +154,7 @@ class ReadWord(webapp.RequestHandler):
           'last_used': str(w.last_used),
           'author': w.author,
           'words_used': words_used,
+          'admin': users.is_current_user_admin(),
       }))
     else:
       path = os.path.join(os.path.dirname(__file__),
@@ -373,9 +374,28 @@ def AddFullWord(description, definition, intrinsic,
   wexe.put()
 
 
+def DeleteFullWord(word, icon, source, exe):
+  word.delete()
+  icon.delete()
+  source.delete()
+  exe.delete()
+
+
+class DeleteWord(webapp.RequestHandler):
+  def post(self):
+    id = self.request.get('id', '')
+    word = Word.get(id)
+    query = db.GqlQuery('SELECT * FROM WordIcon WHERE ANCESTOR is :1', id)
+    icon = query.fetch(1)[0]
+    query = db.GqlQuery('SELECT * FROM WordSource WHERE ANCESTOR is :1', id)
+    source = query.fetch(1)[0]
+    query = db.GqlQuery('SELECT * FROM WordExecutable WHERE ANCESTOR is :1', id)
+    exe = query.fetch(1)[0]
+    db.run_in_transaction(DeleteFullWord, word, icon, source, exe)
+
+
 class WriteWord(webapp.RequestHandler):
   def post(self):
-    if ChromeFrameMe(self): return
     # Extract description + intrinsic.
     description = str(self.request.get('description'))
     m = re.match('^~~~intrinsic: ([0-9]+)~~~(.*)$', description)
@@ -425,19 +445,29 @@ class WriteWord(webapp.RequestHandler):
 class EditorPage(webapp.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
+    user = users.get_current_user()
+    if user:
+      greeting = ('Welcome, %s! (<a href="%s">sign out</a>)' %
+                  (user.nickname(), users.create_logout_url('/editor')))
+    else:
+      greeting = ('<a href="%s">Sign in or register</a>.' %
+                  users.create_login_url('/editor'))
     path = os.path.join(os.path.dirname(__file__), 'templates/editor.html')
-    self.response.out.write(template.render(path, {}))
+    self.response.out.write(template.render(path, {
+        'greeting': greeting,
+    }))
 
 
 def main():
   application = webapp.WSGIApplication([
-      ('/editor', EditorPage),
-      ('/read', ReadWord),
+      ('/delete', DeleteWord),
       ('/dump', DumpWord),
-      ('/run', RunWord),
+      ('/editor', EditorPage),
       ('/icon', ReadIcon),
-      ('/write', WriteWord),
+      ('/read', ReadWord),
       ('/results', Results),
+      ('/run', RunWord),
+      ('/write', WriteWord),
   ], debug=True)
   run_wsgi_app(application)
 

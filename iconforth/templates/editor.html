@@ -15,12 +15,13 @@ onchange="search()">
 <input type="button" value="All" onclick="search_all()">
 <input type="button" value="Add" onclick="submit()"><br>
 <div id="view" style="border: 5px #777777 solid; background-color:#777777; layer-background-color:#777777;"></div>
+{{ greeting }}
 
 <script type="text/javascript" src="/js/http.js"></script>
 <script type="text/javascript">
 
 var drawing = 0;
-var palette_color = 2;
+var palette_color;
 var cv = document.getElementById("iconeditor");
 var ctx = cv.getContext("2d");
 var grid = new Array();
@@ -134,6 +135,7 @@ function blank() {
     }
   }
 
+  palette_color = 2;
   draw_palette();
 }
 
@@ -212,6 +214,16 @@ function pick(id) {
   d.appendChild(im);
   // Go back to the full list.
   view('/results');
+}
+
+function deleteword(id) {
+  submitting = 0;
+  HTTP.post('/delete', {
+      'id': id,
+      }, function() {
+        search_all();
+        submitting = 0;
+      });
 }
 
 function init() {
