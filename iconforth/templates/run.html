@@ -126,6 +126,10 @@ function run() {
         return; // sleep
       case 0x7fffff1f: // op(31)
         events = []; ip--; return; // halt
+      case 0x7fffff20: // op(32)
+        rstack.push(ip-1); ip += (memory[ip]+1); break; // forever
+      case 0x7fffff21: // op(33)
+        rstack.pop(); ip = rstack.pop(); break; // loop stop
       default:
         rstack.push(ip); ip += ir; break; // call
     }
