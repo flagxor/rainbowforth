@@ -162,7 +162,7 @@ class ReadWord(webapp.RequestHandler):
       self.response.out.write(template.render(path, {}))
 
 
-class DumpWord(webapp.RequestHandler):
+class ListWord(webapp.RequestHandler):
   def get(self):
     # Get the source.
     lookup_id = self.request.get('id', '')
@@ -204,7 +204,7 @@ class DumpWord(webapp.RequestHandler):
           pending_ids.append(w)
     else:
       path = os.path.join(os.path.dirname(__file__),
-                          'templates/dump.html')
+                          'templates/list.html')
       self.response.out.write(template.render(path, {
           'results': results,
       }))
@@ -461,7 +461,7 @@ class EditorPage(webapp.RequestHandler):
 def main():
   application = webapp.WSGIApplication([
       ('/delete', DeleteWord),
-      ('/dump', DumpWord),
+      ('/list', ListWord),
       ('/editor', EditorPage),
       ('/icon', ReadIcon),
       ('/read', ReadWord),

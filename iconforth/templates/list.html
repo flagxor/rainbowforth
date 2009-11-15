@@ -9,7 +9,7 @@
         {% for r in results %}
         <tr>
           <td valign="middle">
-            <a href="/dump?id={{ r.id }}"><img src="/icon?id={{ r.id }}.png" width="32" height="32" border="0"></a>
+            <a href="/list?id={{ r.id }}"><img src="/icon?id={{ r.id }}.png" width="32" height="32" border="0"></a>
           </td>
           <td valign="middle">
             :
@@ -18,7 +18,7 @@
             {% endif %}
           </td>
           <td valign="middle">
-            {% for word in r.definition %}<a href="/dump?id={{ word }}"><img src="/icon?id={{ word }}.png" width="32" height="32" border="0"></a>{% endfor %}
+            {% for word in r.definition %}<a href="/list?id={{ word }}"><img src="/icon?id={{ word }}.png" width="32" height="32" border="0"></a>{% endfor %}
           </td>
         </tr>
         {% endfor %}
