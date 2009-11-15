@@ -1,5 +1,12 @@
 indexes:
 
+# Used for top part of the main word list (last 8 from this addr).
+- kind: Word
+  properties:
+  - name: remote_addr
+  - name: created
+    direction: desc
+
 # Used for top part of the main word list (last 8 you created).
 - kind: Word
   properties:

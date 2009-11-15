@@ -21,7 +21,7 @@
               <input type="button" value="Run"
               onclick="window.open('/run?id={{ id }}')">
             </td>
-            {% if admin %}
+            {% if can_delete %}
             <td valign="middle">
               <input type="button" value="Delete"
               onclick="deleteword('{{ id }}')">

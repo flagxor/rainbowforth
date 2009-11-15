@@ -17,7 +17,8 @@ class Word(db.Model):
   description = db.BlobProperty()
   created = db.DateTimeProperty(auto_now_add=True)
   last_used = db.DateTimeProperty(auto_now_add=True)
-  author = db.StringProperty()
+  author = db.UserProperty()
+  remote_addr = db.StringProperty()
   user_agent = db.StringProperty()
   version = db.IntegerProperty(default=1)
   intrinsic = db.IntegerProperty(default=0)
@@ -143,6 +144,9 @@ class ReadWord(webapp.RequestHandler):
       words_used = query.fetch(1000)
       if not words_used:
         words_used = []
+      # Decide if they can delete this.
+      can_delete = (users.is_current_user_admin() or
+                    users.get_current_user() == w.author)
       # Output info on word.
       path = os.path.join(os.path.dirname(__file__),
                           'templates/read.html')
@@ -152,9 +156,8 @@ class ReadWord(webapp.RequestHandler):
           'definition': w.definition,
           'created': str(w.created),
           'last_used': str(w.last_used),
-          'author': w.author,
           'words_used': words_used,
-          'admin': users.is_current_user_admin(),
+          'can_delete': can_delete,
       }))
     else:
       path = os.path.join(os.path.dirname(__file__),
@@ -245,13 +248,24 @@ class Results(webapp.RequestHandler):
       if w1:
         w = w1
     else:
-      # First list up to the last 8 created by this author.
-      query = db.GqlQuery('SELECT __key__ FROM Word '
-                          'WHERE author = :1 '
-                          'ORDER BY created DESC', self.request.remote_addr)
-      w1 = query.fetch(8)
-      if w1:
-        w = w1
+      w = []
+      user = users.get_current_user()
+      if user:
+        # List up to the last 8 created by this remote_addr.
+        query = db.GqlQuery('SELECT __key__ FROM Word '
+                            'WHERE author = :1 '
+                            'ORDER BY created DESC', user)
+        w1 = query.fetch(8)
+        if w1:
+          w += w1
+      else:
+        # List up to the last 8 created by this remote_addr.
+        query = db.GqlQuery('SELECT __key__ FROM Word '
+                            'WHERE remote_addr = :1 '
+                            'ORDER BY created DESC', self.request.remote_addr)
+        w1 = query.fetch(8)
+        if w1:
+          w += w1
       # Then add in the more order by score then last_used.
       query = db.GqlQuery('SELECT __key__ FROM Word '
                           'ORDER BY score DESC, last_used DESC')
@@ -350,13 +364,15 @@ def CompileSource(key, source):
 
 
 def AddFullWord(description, definition, intrinsic,
-                author, user_agent, keywords, icon, source, executable):
+                author, remote_addr, user_agent,
+                keywords, icon, source, executable):
   # Add word to database.
   word = Word()
   word.description = description
   word.definition = definition
   word.intrinsic = intrinsic
   word.author = author
+  word.remote_addr = remote_addr
   word.user_agent = user_agent
   word.keywords = keywords
   word.put()
@@ -383,14 +399,21 @@ def DeleteFullWord(word, icon, source, exe):
 
 class DeleteWord(webapp.RequestHandler):
   def post(self):
+    # Get id.
     id = self.request.get('id', '')
     word = Word.get(id)
+    # Decide if they can delete this.
+    can_delete = (users.is_current_user_admin() or
+                  users.get_current_user() == w.author)
+    if not can_delete: return
+    # Get other child entries.
     query = db.GqlQuery('SELECT * FROM WordIcon WHERE ANCESTOR is :1', id)
     icon = query.fetch(1)[0]
     query = db.GqlQuery('SELECT * FROM WordSource WHERE ANCESTOR is :1', id)
     source = query.fetch(1)[0]
     query = db.GqlQuery('SELECT * FROM WordExecutable WHERE ANCESTOR is :1', id)
     exe = query.fetch(1)[0]
+    # Delete as transaction.
     db.run_in_transaction(DeleteFullWord, word, icon, source, exe)
 
 
@@ -431,7 +454,8 @@ class WriteWord(webapp.RequestHandler):
                           description=description,
                           definition=definition,
                           intrinsic=intrinsic,
-                          author=self.request.remote_addr,
+                          author=users.get_current_user(),
+                          remote_addr=self.request.remote_addr,
                           user_agent=user_agent,
                           keywords=FindKeywords(description),
                           icon=icon,
