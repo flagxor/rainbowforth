@@ -171,13 +171,13 @@ function keyup(evt) {
 
 function init() {
   blank();
-  //document.onmousedown = mousedown;
-  //document.onmouseup = mouseup;
-  //document.onmousemove = mousemove;
-  //document.onkeypress = keypress;
-  //document.onkeydown = keydown;
-  //document.onkeyup = keyup;
-  //setInterval('run()', 30);
+  document.onmousedown = mousedown;
+  document.onmouseup = mouseup;
+  document.onmousemove = mousemove;
+  document.onkeypress = keypress;
+  document.onkeydown = keydown;
+  document.onkeyup = keyup;
+  setInterval('run()', 30);
   run();
 }
 

@@ -218,6 +218,7 @@ function pick(id) {
 
 function deleteword(id) {
   submitting = 0;
+  if (!confirm("Delete this word?")) return;
   HTTP.post('/delete', {
       'id': id,
       }, function() {
