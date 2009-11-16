@@ -3,44 +3,150 @@
 <head>
   <meta http-equiv="X-UA-Compatible" content="chrome=1">
   <title>Icon Forth</title>
+  <style>
+    img dt dd {display: block;}
+    img.icon {width: 32px; height: 32px;}
+    dl.table-display
+    {
+      margin: 2em 0;
+      padding: 0;
+    }
+    .table-display dt
+    {
+    margin: 0 0 0 0;
+    padding: .5em;
+    border-top: 1px solid #999;
+    font-weight: bold;
+    }
+    .table-display dd
+    {
+      padding: .5em;
+    }
+  </style>
 </head>
 <body>
   <table><tr>
       <td valign="center">
         <img src="/images/iconforth.png" width="48" height="48">
       </td>
-      <td valign="center"><h1>Core Word Glossary</h1></td>
+      <td align="center" valign="center"><h1>Core Word Glossary</h1></td>
       <td valign="center">
         <img src="/images/iconforth.png" width="48" height="48">
       </td>
   </tr></table>
-  <p>
-  Integer constants can be input using the following words:
-  <img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6ScM.png">
-  <img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY4zYM.png">
-  <img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY5CcM.png">
-  <img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6CcM.png">
-  <img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY5zYM.png">
-  <img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY5DYM.png">
-  <img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6DYM.png">
-  <img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6icM.png">
-  <img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6TYM.png">
-  <img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6ycM.png">
-  <img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6jYM.png">
-  A number must start with
-  <img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6ScM.png">
-  which pushes a zero onto the data stack.
-  This is then followed by decimal digits which each in turn multiply the
-  current top of the stack by ten and then add in the face value of the digit.
-  For example the number 42 is represented as
-  <img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6ScM.png"><img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY5DYM.png"><img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6CcM.png">.
-  </p>
-  <img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY7CcM.png"> - moves one value
-  from the data stack to the return stack.
-  <p>
-  </p>
-  <img src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6zYM.png"> - moves one value
-  from the return stack to the data stack.
-  <p>
+  <dl class="table-display">
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6ScM.png">,
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY4zYM.png">,
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY5CcM.png">,
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6CcM.png">,
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY5zYM.png">,
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY5DYM.png">,
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6DYM.png">,
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6icM.png">,
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6TYM.png">,
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6ycM.png">,
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6jYM.png">
+    </dt>
+    <dd>
+    Using these number words, you can specify integer constants.
+    A number must start with
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6ScM.png">
+    which pushes a zero onto the data stack.
+    This is then followed by decimal digits which each in turn multiply the
+    current top of the stack by ten and then add in the face value of the digit.
+    For example the number 42 is represented as
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6ScM.png"><img class="icon"src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY5DYM.png"><img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6CcM.png">.
+    </dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY5TYM.png"></dt>
+    <dd>Emit a single character to the console. The ascii code for the
+    character is taken from the top of the data stack. In reality this character
+    is just added to the HTML content of a div. This means that some characters
+    must be escaped in order to appear. It has the advantage that abtitrary HTML
+    can be added using this word.</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY5TYM.png"></dt>
+    <dd>Take an event from the event queue and place it on the data stack.
+    Events consist of three values: x coordinate, y coordinate, event type. And
+    event type of zero indicates that no events are present.</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY7DYM.png"></dt>
+    <dd>Add the top two values on the data stack and place the result back on
+    the data stack.</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY7TYM.png"></dt>
+    <dd>Subtract the top most value on the stack from the second to the top most
+    value. Replace these two values with the result.</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY7ScM.png"></dt>
+    <dd>Multiply the top two values on the data stack and place the result
+    back on the data stack.</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY8ScM.png"></dt>
+    <dd>Logically OR the two values on top of the data stack together and
+    place the result back on the data stack.</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY8CcM.png"></dt>
+    <dd>Logically AND the two values on top of the data stack together and
+    place the result back on the data stack.</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY7jYM.png"></dt>
+    <dd>Negate (flip the sign) of the value on the top of the data stack.</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY7zYM.png"></dt>
+    <dd>Drop the top element from the data stack.</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY8icM.png"></dt>
+    <dd>Swap the top two values on the data stack.</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY8DYM.png"></dt>
+    <dd>Duplicate the top element on the data stack.</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY7icM.png"></dt>
+    <dd>Double the size of the top value on the stack (multiply by 2).</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY7ycM.png"></dt>
+    <dd>Halve the size of the top value on the stack (divide by 2).</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY7CcM.png"></dt>
+    <dd>Move one value from the data stack to the return stack.</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY6zYM.png"></dt>
+    <dd>Move one value from the return stack to the data stack.</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY9CcM.png"></dt>
+    <dd>Halt all execution and ignore all further events.</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY8ycM.png"></dt>
+    <dd>Load the value in memory from the address at the top of the data stack.
+    Store the result to the data stack.</dd>
+
+    <dt>
+    <img class="icon" src="/icon?id=aglpY29uZm9ydGhyCwsSBFdvcmQY8TYM.png"></dt>
+    <dd>Store the second-to-the-top-most value on the data stack to the memory
+    location addressed by the top-most value. Remove these two values from the
+    data stack.</dd>
+
+    <dt></dt>
+    <dd></dd>
+  </dl>
 </body>
 </html>
