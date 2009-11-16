@@ -1,3 +1,9 @@
+a:link {
+  color: blue;
+}
+a:visited {
+  color: blue;
+}
 img dt dd {
   display: block;
 }
