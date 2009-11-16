@@ -1,6 +1,9 @@
 img dt dd {
   display: block;
 }
+p {
+  max-width: 500px;
+}
 img {
   vertical-align: middle;
 }
