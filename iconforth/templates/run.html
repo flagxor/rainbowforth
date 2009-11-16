@@ -134,6 +134,20 @@ function run() {
         if(!dstack.pop()) { ip++; } break; // if
       case 0x7fffff23: // op(35)
         console.innerHTML += (dstack.pop() + ' '); break; // .
+      case 0x7fffff24: // op(36)
+        if (dstack.pop() > dstack.pop()) {
+          dstack.push(1);
+        } else {
+          dstack.push(0);
+        }
+        break; // <
+      case 0x7fffff25: // op(37)
+        if (dstack.pop() == dstack.pop()) {
+          dstack.push(1);
+        } else {
+          dstack.push(0);
+        }
+        break; // =
       default:
         rstack.push(ip); ip += ir; break; // call
     }
