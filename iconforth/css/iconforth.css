@@ -7,6 +7,9 @@ p {
 img {
   vertical-align: middle;
 }
+img.snapshot {
+  margin: 5px 5px 5px 5px;
+}
 img.icon {
   width: 32px; height: 32px;
 }
