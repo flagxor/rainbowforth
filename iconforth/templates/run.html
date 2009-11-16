@@ -130,6 +130,8 @@ function run() {
         rstack.push(ip-1); ip += (memory[ip]+1); break; // forever
       case 0x7fffff21: // op(33)
         rstack.pop(); ip = rstack.pop(); break; // loop stop
+      case 0x7fffff21: // op(34)
+        if(!dstack.pop()) { ip++; } break; // if
       default:
         rstack.push(ip); ip += ir; break; // call
     }
