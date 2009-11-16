@@ -32,6 +32,7 @@
     <img width="1" height="32">
     {% for word in definition %}<img src="/icon?id={{ word }}.png" width="32" height="32" border="0" style="cursor: pointer;" onclick="view('/read?id={{ word }}')">{% endfor %}<br>
     {{ description }}<br>
+    {% if words_used %}
     <table><tr>
         <td valign="middle"><b>Used by:</b></td>
         <td valign="middle">
@@ -40,6 +41,7 @@
           {% endfor %}
         </td>
     </tr></table>
+    {% endif %}
     <i>Created {{ created }} / Last used {{ last_used }}</i>
     <br><img src="/images/iconforth.png" width="48" height="48">
 </font></body>
