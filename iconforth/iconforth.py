@@ -287,7 +287,7 @@ class ReadIcon(webapp.RequestHandler):
     self.response.headers['Cache-Control'] = 'public, max-age=86400'
     self.response.headers['Content-Type'] = 'image/png'
     id = self.request.get('id', '.png')[:-4]
-    img = memcache.get(id)
+    img = memcache.get('/icon/png/' + id)
     if img:
       self.response.out.write(img)
     else:
@@ -307,7 +307,7 @@ class ReadIcon(webapp.RequestHandler):
                            [0xff,0,0,0xff],
                            [0x20,0,0xff,0x80])
       img = c.dump()
-      memcache.add(id, img)
+      memcache.add('/icon/png/' + id, img)
       self.response.out.write(img)
 
 
