@@ -6,9 +6,10 @@ import random
 import re
 import sys
 import zlib
+from google.appengine.api import memcache
 from google.appengine.api import users
-from google.appengine.ext import webapp
 from google.appengine.ext import db
+from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 
@@ -285,23 +286,30 @@ class ReadIcon(webapp.RequestHandler):
   def get(self):
     self.response.headers['Cache-Control'] = 'public, max-age=86400'
     self.response.headers['Content-Type'] = 'image/png'
-    c = pngcanvas.PNGCanvas(32, 32)
     id = self.request.get('id', '.png')[:-4]
-    query = db.GqlQuery('SELECT * FROM WordIcon WHERE ANCESTOR is :1', id)
-    w = query.fetch(1)
-    if w:
-      data = w[0].icon
-      for y in range(0, 16):
-        for x in range(0, 16):
-          z = x + y * 16
-          if z < len(data):
-            c.color = colors[int(data[z])]
-          c.rectangle(x*2, y*2, x*2+1, y*2+1)
+    img = memcache.get(id)
+    if img:
+      self.response.out.write(img)
     else:
-      c.verticalGradient(0, 0, c.width-1, c.height-1,
-                         [0xff,0,0,0xff],
-                         [0x20,0,0xff,0x80])
-    self.response.out.write(c.dump())
+      c = pngcanvas.PNGCanvas(32, 32)
+      query = db.GqlQuery('SELECT * FROM WordIcon WHERE ANCESTOR is :1', id)
+      w = query.fetch(1)
+      if w:
+        data = w[0].icon
+        for y in range(0, 16):
+          for x in range(0, 16):
+            z = x + y * 16
+            if z < len(data):
+              c.color = colors[int(data[z])]
+            c.rectangle(x*2, y*2, x*2+1, y*2+1)
+      else:
+        c.verticalGradient(0, 0, c.width-1, c.height-1,
+                           [0xff,0,0,0xff],
+                           [0x20,0,0xff,0x80])
+      img = c.dump()
+      memcache.add(id, img)
+      self.response.out.write(img)
+
 
 
 def EncodeSource(source):
