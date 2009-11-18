@@ -186,7 +186,9 @@ function mousedown(evt) {
 }
 
 function mouseup(evt) {
-  drawing = 0;
+  if (drawing) {
+    drawing = 0;
+  }
 }
 
 function mousemove(evt) {
@@ -230,8 +232,9 @@ function deleteword(id) {
 function init() {
   blank();
   cv.onmousedown = mousedown;
-  cv.onmouseup = mouseup;
   cv.onmousemove = mousemove;
+  document.onmouseup = mouseup;
+  document.onmousedown = function() { return false; }
   cv.addEventListener('touchstart', function(event) {
       event.preventDefault();
       mousedown(event.touches[0]);
