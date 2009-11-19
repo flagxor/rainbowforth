@@ -249,22 +249,29 @@ class Results(webapp.RequestHandler):
       if w1:
         w = w1
     else:
-      w = []
       user = users.get_current_user()
       if user:
-        # List up to the last 8 created by this remote_addr.
-        query = db.GqlQuery('SELECT __key__ FROM Word '
-                            'WHERE author = :1 '
-                            'ORDER BY created DESC', user)
-        w1 = query.fetch(8)
+        # List up to the last 8 created by this user.
+        mkey = '/results/user/' + user.email()
+        w1 = memcache.get(mkey)
+        if not w1:
+          query = db.GqlQuery('SELECT __key__ FROM Word '
+                              'WHERE author = :1 '
+                              'ORDER BY created DESC', user)
+          w1 = query.fetch(8)
+          memcache.add(mkey, w1, 100)
         if w1:
           w += w1
       else:
         # List up to the last 8 created by this remote_addr.
-        query = db.GqlQuery('SELECT __key__ FROM Word '
-                            'WHERE remote_addr = :1 '
-                            'ORDER BY created DESC', self.request.remote_addr)
-        w1 = query.fetch(8)
+        mkey = '/results/remote_addr/' + self.request.remote_addr
+        w1 = memcache.get(mkey)
+        if not w1:
+          query = db.GqlQuery('SELECT __key__ FROM Word '
+                              'WHERE remote_addr = :1 '
+                              'ORDER BY created DESC', self.request.remote_addr)
+          w1 = query.fetch(8)
+          memcache.add(mkey, w1, 100)
         if w1:
           w += w1
       # Then add in the more order by score then last_used.
@@ -430,6 +437,13 @@ class DeleteWord(webapp.RequestHandler):
 
 class WriteWord(webapp.RequestHandler):
   def post(self):
+    # Clear cache for this user/remote_addr.
+    user = users.get_current_user()
+    if user:
+      mkey = '/results/user/' + user.email()
+    else:
+      mkey = '/results/remote_addr/' + self.request.remote_addr
+    memcache.delete(mkey)
     # Extract description + intrinsic.
     description = str(self.request.get('description'))
     m = re.match('^~~~intrinsic: ([0-9]+)~~~(.*)$', description)
