@@ -415,8 +415,21 @@ def DeleteFullWord(word, icon, source, exe):
   exe.delete()
 
 
+def ClearUserCache():
+  user = users.get_current_user()
+  if user:
+    mkey = '/results/user/' + user.email()
+  else:
+    mkey = '/results/remote_addr/' + self.request.remote_addr
+  memcache.delete(mkey)
+
+
 class DeleteWord(webapp.RequestHandler):
   def post(self):
+    # Clear cache for this user/remote_addr.
+    ClearUserCache()
+    # Clear popular results cache.
+    memcache.delete('/results/popular')
     # Get id.
     id = self.request.get('id', '')
     word = Word.get(id)
@@ -438,12 +451,7 @@ class DeleteWord(webapp.RequestHandler):
 class WriteWord(webapp.RequestHandler):
   def post(self):
     # Clear cache for this user/remote_addr.
-    user = users.get_current_user()
-    if user:
-      mkey = '/results/user/' + user.email()
-    else:
-      mkey = '/results/remote_addr/' + self.request.remote_addr
-    memcache.delete(mkey)
+    ClearUserCache()
     # Extract description + intrinsic.
     description = str(self.request.get('description'))
     m = re.match('^~~~intrinsic: ([0-9]+)~~~(.*)$', description)
