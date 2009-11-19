@@ -268,9 +268,12 @@ class Results(webapp.RequestHandler):
         if w1:
           w += w1
       # Then add in the more order by score then last_used.
-      query = db.GqlQuery('SELECT __key__ FROM Word '
-                          'ORDER BY score DESC, last_used DESC')
-      w1 = query.fetch(1000)
+      w1 = memcache.get('/results/popular')
+      if not w1:
+        query = db.GqlQuery('SELECT __key__ FROM Word '
+                            'ORDER BY score DESC, last_used DESC')
+        w1 = query.fetch(1000)
+        memcache.add('/results/popular', w1, 20)
       if w1:
         w += [i for i in w1 if i not in w]
     # Display results.
