@@ -47,18 +47,32 @@ function ColorStr(x) {
 }
 
 function grf_resize(w, h) {
-  cvd.style = "";
+  cvd.style.display = "";
   blank();
 }
 
 var pen_color = '#ffffff';
 var pen_x = 0, pen_y = 0;
+
 function grf_box(x, y) {
+  cvd.style.display = "";
   ctx.fillStyle = pen_color;
   ctx.beginPath();
   ctx.rect(pen_x, pen_y, x, y);
   ctx.closePath();
-  pen_x = x; pen_y = y;
+  ctx.fill();
+}
+
+function grf_lineto(x, y) {
+  cvd.style.display = "";
+  ctx.strokeStyle = pen_color;
+  ctx.beginPath();
+  ctx.moveTo(pen_x, pen_y);
+  ctx.lineTo(x, y);
+  ctx.closePath();
+  ctx.stroke();
+  pen_x = x;
+  pen_y = y;
 }
 
 var events = [];
@@ -176,18 +190,24 @@ function run() {
         grf_resize(x, y);
         break; // grf_resize
       case 0x7fffff27: // op(39)
-        pen_y = dstack.pop();
-        pen_x = dstack.pop();
-        pen_x = x;
-        break; // grf_moveto
-      case 0x7fffff28: // op(40)
         var y = dstack.pop();
         var x = dstack.pop();
         grf_box(x, y);
         break; // grf_rect
+      case 0x7fffff28: // op(40)
+        pen_y = dstack.pop();
+        pen_x = dstack.pop();
+        break; // grf_moveto
       case 0x7fffff29: // op(41)
         pen_color = ColorStr(dstack.pop());
         break; // grf_color
+      case 0x7fffff2a: // op(42)
+        var y = dstack.pop();
+        var x = dstack.pop();
+        grf_lineto(x, y);
+        break; // grf_lineto
+      case 0x7fffff2b: // op(43)
+        dstack.push(Math.floor(Math.random()*dstack.pop())); break; // random
       default:
         rstack.push(ip); ip += ir; break; // call
     }

@@ -147,7 +147,8 @@ class ReadWord(webapp.RequestHandler):
         words_used = []
       # Decide if they can delete this.
       can_delete = (users.is_current_user_admin() or
-                    users.get_current_user() == w.author)
+                    (users.get_current_user() is not None and
+                     users.get_current_user() == w.author))
       # Output info on word.
       path = os.path.join(os.path.dirname(__file__),
                           'templates/read.html')
@@ -435,7 +436,8 @@ class DeleteWord(webapp.RequestHandler):
     word = Word.get(id)
     # Decide if they can delete this.
     can_delete = (users.is_current_user_admin() or
-                  users.get_current_user() == word.author)
+                  (users.get_current_user() is not None and
+                   users.get_current_user() == word.author))
     if not can_delete: return
     # Get other child entries.
     query = db.GqlQuery('SELECT * FROM WordIcon WHERE ANCESTOR is :1', id)
