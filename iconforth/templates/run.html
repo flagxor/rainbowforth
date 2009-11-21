@@ -16,6 +16,7 @@
 
 <script type="text/javascript">
 
+var cvd = document.getElementById("canvas_div");
 var cv = document.getElementById("canvas");
 var ctx = cv.getContext("2d");
 var id = "{{ id }}";
@@ -30,13 +31,34 @@ op(31), // halt
 ];
 
 function blank() {
-  ctx.clearRect(0, 0, 300, 300);
+  ctx.clearRect(0, 0, cv.width, cv.height);
 
   ctx.fillStyle = "#000000";
   ctx.beginPath();
-  ctx.rect(0, 0, 300, 300);
+  ctx.rect(0, 0, cv.width, cv.height);
   ctx.closePath();
   ctx.fill();
+}
+
+function ColorStr(x) {
+  var y = "00000" + x.toString(16);
+  var z = y.substr(y.length-6);
+  return "#" + z;
+}
+
+function grf_resize(w, h) {
+  cvd.style = "";
+  blank();
+}
+
+var pen_color = '#ffffff';
+var pen_x = 0, pen_y = 0;
+function grf_box(x, y) {
+  ctx.fillStyle = pen_color;
+  ctx.beginPath();
+  ctx.rect(pen_x, pen_y, x, y);
+  ctx.closePath();
+  pen_x = x; pen_y = y;
 }
 
 var events = [];
@@ -148,6 +170,24 @@ function run() {
           dstack.push(0);
         }
         break; // =
+      case 0x7fffff26: // op(38)
+        var y = dstack.pop();
+        var x = dstack.pop();
+        grf_resize(x, y);
+        break; // grf_resize
+      case 0x7fffff27: // op(39)
+        pen_y = dstack.pop();
+        pen_x = dstack.pop();
+        pen_x = x;
+        break; // grf_moveto
+      case 0x7fffff28: // op(40)
+        var y = dstack.pop();
+        var x = dstack.pop();
+        grf_box(x, y);
+        break; // grf_rect
+      case 0x7fffff29: // op(41)
+        pen_color = ColorStr(dstack.pop());
+        break; // grf_color
       default:
         rstack.push(ip); ip += ir; break; // call
     }
