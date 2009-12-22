@@ -18,7 +18,7 @@ website:
 
 
 # handle platform specific
-ifeq ($(shell uname -o),Cygwin)
+ifeq ($OSTYPE,Cygwin)
   PLATFORM_CFLAGS=-D_WIN32 -mno-cygwin
   LIBS=-mno-cygwin
   EXE=.exe
