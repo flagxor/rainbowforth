@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="X-UA-Compatible" content="chrome=1">
-  <title>Icon Forth</title>
+  <title>Prism Forth</title>
 </head>
 <body>
 
@@ -12,22 +12,20 @@
 </div>
 <div id="console"></div>
 
-<script type="text/javascript" src="/js/http.js"></script>
+<script type="text/javascript" src="/static/http.js"></script>
 
 <script type="text/javascript">
 
 var cvd = document.getElementById("canvas_div");
 var cv = document.getElementById("canvas");
 var ctx = cv.getContext("2d");
-var id = "{{ id }}";
 var console = document.getElementById("console");
 
 function op(x) { return 0x7fffff00 + x; }
 var RET = op(1);
 var exe = [
-1, // call exe
-op(31), // halt
-{{ exe }}
+  op(31), // halt
+  op(31), // halt
 ];
 
 function blank() {
