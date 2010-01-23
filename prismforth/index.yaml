@@ -1,0 +1,8 @@
+indexes:
+
+# Used to lookup blocks by user + index.
+- kind: Block
+  properties:
+  - name: owner
+  - name: index
+

@@ -1,0 +1,19 @@
+application: prismforth
+version: 1
+runtime: python
+api_version: 1
+
+default_expiration: "1h"
+
+handlers:
+
+- url: /favicon.ico
+  static_files: static/prism.ico
+  upload: static/prism.ico
+
+- url: /static
+  static_dir: static
+
+- url: /.*
+  script: iconforth.py
+

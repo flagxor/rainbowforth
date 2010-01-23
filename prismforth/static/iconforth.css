@@ -1,0 +1,38 @@
+a:link {
+  color: blue;
+}
+a:visited {
+  color: blue;
+}
+img dt dd {
+  display: block;
+}
+p {
+  max-width: 600px;
+}
+img {
+  vertical-align: middle;
+}
+img.snapshot {
+  margin: 5px 5px 5px 5px;
+}
+img.icon {
+  width: 32px; height: 32px;
+}
+dl.table-display
+{
+  margin: 2em 0;
+  padding: 0;
+}
+.table-display dt
+{
+  margin: 0 0 0 0;
+  padding: .5em;
+  border-top: 1px solid #999;
+  font-weight: bold;
+}
+.table-display dd
+{
+  padding: .5em;
+}
+
