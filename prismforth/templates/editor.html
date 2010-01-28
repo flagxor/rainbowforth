@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+  <META HTTP-EQUIV="Expires" CONTENT="-1">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <title>Prism Forth Raw Editor</title>
+  <style>
+    textarea { font-family: courier; }
+  </style>
+</head>
+<body>
+  <form action="/_editor" method="post">
+    <input name="index" type="hidden" value="{{ index }}">
+    <table>
+      <tr><td>
+          {{ greeting }}
+      </td></tr>
+      <tr><td>
+          <textarea name="data" cols="64" rows="16">{{ data }}</textarea>
+      </td></tr>
+      <tr><td width="100%">
+          <table width="100%">
+            <tr>
+              <td width="33%">
+                <input name="goindex" type="text" value="0" size="5">
+                <input name="go" type="submit" value="Go">
+              </td>
+              <td width="33%">
+                <input name="prev" type="submit" value="<<">
+                {{ index }}
+                <input name="next" type="submit" value=">>">
+              </td>
+              <td width="33%">
+                <input name="save" type="submit" value="Save">
+              </td>
+            </tr>
+          </table>
+      </td></tr>
+    </table>
+  </form>
+</body>
+</html>

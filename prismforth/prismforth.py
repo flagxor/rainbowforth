@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 import random
 import re
@@ -22,17 +23,9 @@ class Quota(db.Model):
   limit = db.IntegerProperty()
 
 
-class ReadBlock(webapp.RequestHandler):
-  def post(self):
-    self.response.headers['Content-Type'] = 'text/plain'
-    user = users.get_current_user()
-    if user:
-      index = int(self.request.get('index'))
-      query = Block.gql('WHERE owner = :owner andindex = :index LIMIT 1',
-                        owner=user, index=index)
-      block = query.fetch(1)
-      if block:
-        self.response.out.write(block[0].data)
+class Alias(db.Model):
+  src = db.StringProperty()
+  dst = db.StringProperty()
 
 
 def GetQuota(user):
@@ -50,30 +43,68 @@ def GetQuota(user):
   return quota
 
 
+def ReadBlock(user, index):
+  key = '/block/' + user.email() + '/index/%d' % index
+  data = memcache.get(key)
+  if data:
+    return data
+  query = Block.gql('WHERE owner = :owner and index = :index LIMIT 1',
+                    owner=user, index=index)
+  block = query.fetch(1)
+  if block:
+    self.response.out.write(block[0].data)
+    data = block[0].data
+  else:
+    data = ''
+  memcache.set(key, data)
+  return data
 
-class WriteBlock(webapp.RequestHandler):
+
+def WriteBlock(user, index, data):
+  # Seems to encode it wastefully (so limit is larger than 1024).
+  if len(data) > 2048: return False
+  # Must be non-negative.
+  if index < 0: return False
+  # Limit range.
+  limit = GetQuota(user)
+  if index >= limit: return False
+  # Update datastore.
+  query = Block.gql('WHERE owner = :owner and index = :index LIMIT 1',
+                    owner=user, index=index)
+  block = query.fetch(1)
+  if block:
+    b = block[0]
+  else:
+    b = Block()
+    b.owner = user
+    b.index = index
+  b.data = data
+  b.put()
+  # Update Cache
+  key = '/block/' + user.email() + '/index/%d' % index
+  memcache.set(key, data)
+  return True
+
+
+class ReadBlockHandler(webapp.RequestHandler):
   def post(self):
     self.response.headers['Content-Type'] = 'text/plain'
     user = users.get_current_user()
     if user:
-      if len(data) > 2048: return  # Seems to encode it wastefully.
       index = int(self.request.get('index'))
-      if index < 0: return  # Must be non-negative.
-      limit = GetQuota(user)
-      if index >= limit: return  # Limit range.
+      data = ReadBlock(user, index)
+      self.response.out.write(data)
+
+
+class WriteBlockHandler(webapp.RequestHandler):
+  def post(self):
+    self.response.headers['Content-Type'] = 'text/plain'
+    user = users.get_current_user()
+    if user:
+      index = int(self.request.get('index'))
       data = self.request.str_POST['data']
-      query = Block.gql('WHERE owner=:owner and index = :index LIMIT 1',
-                        owner=user, index=index)
-      block = query.fetch(1)
-      if block:
-        block[0].data = data
-        block[0].put()
-      else:
-        b = Block()
-        b.index = index
-        b.owner = user
-        b.data = data
-        b.put()
+      if WriteBlock(user, index, data):
+        self.response.out.write('1\n')
 
 
 def ChromeFrameMe(handler):
@@ -86,8 +117,7 @@ def ChromeFrameMe(handler):
   return False
 
 
-
-class RunWord(webapp.RequestHandler):
+class RunWordHandler(webapp.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
     path = os.path.join(os.path.dirname(__file__),
@@ -95,11 +125,70 @@ class RunWord(webapp.RequestHandler):
     self.response.out.write(template.render(path, {}))
 
 
+def DecodeBlock(data):
+  rows = []
+  for i in range(len(data)/64):
+    rows.append(data[i*64:i*64+64].rstrip())
+  rows = rows[0:16]
+  return '\n'.join(rows)
+
+
+def EncodeBlock(data):
+  rows = data.split('\n')
+  rows = rows[0:16]
+  rows = [(i[0:64] + ' ' * 64)[0:64] for i in rows]
+  return ''.join(rows)
+
+
+class EditorHandler(webapp.RequestHandler):
+  def get(self):
+    self.post()
+
+  def post(self):
+    # Make sure we're logged in.
+    user = users.get_current_user()
+    if not user:
+      self.redirect(users.create_login_url(self.request.uri))
+      return
+    url = users.create_logout_url(self.request.uri)
+    greeting = '[%s] <a href="%s">Logout</a>' % (user.email(), url)
+
+    # Get the current index.
+    index = int(self.request.get('index', 0))
+
+    # Save block if needed.
+    if self.request.get('save'):
+      data = EncodeBlock(str(self.request.get('data', '')))
+      WriteBlock(user, index, data)
+    else:
+      # Pick the new current index.
+      if self.request.get('prev'):
+        index -= 1
+      elif self.request.get('next'):
+        index += 1
+      else:
+        index = int(self.request.get('goindex', index))
+      if index < 0:
+        index = 0
+      # Load it.
+      data = ReadBlock(user, index)
+
+    # Display output.
+    path = os.path.join(os.path.dirname(__file__),
+                        'templates/editor.html')
+    self.response.out.write(template.render(path, {
+      'greeting': greeting,
+      'data': DecodeBlock(data),
+      'index': index,
+    }))
+
+
 def main():
   application = webapp.WSGIApplication([
-      ('/readblock', ReadBlock),
-      ('/writeblock', WriteBlock),
-      ('/.*', RunWord),
+      ('/_readblock', ReadBlockHandler),
+      ('/_writeblock', WriteBlockHandler),
+      ('/_editor', EditorHandler),
+      ('/.*', RunWordHandler),
   ], debug=True)
   run_wsgi_app(application)
 
