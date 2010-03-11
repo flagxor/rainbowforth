@@ -23,11 +23,6 @@ class Quota(db.Model):
   limit = db.IntegerProperty()
 
 
-class Alias(db.Model):
-  src = db.StringProperty()
-  dst = db.StringProperty()
-
-
 def GetQuota(user):
   key = '/quota/' + user.email()
   quota = memcache.get(key)
@@ -52,7 +47,6 @@ def ReadBlock(user, index):
                     owner=user, index=index)
   block = query.fetch(1)
   if block:
-    self.response.out.write(block[0].data)
     data = block[0].data
   else:
     data = ''
@@ -62,7 +56,7 @@ def ReadBlock(user, index):
 
 def WriteBlock(user, index, data):
   # Seems to encode it wastefully (so limit is larger than 1024).
-  if len(data) > 2048: return False
+  if len(data) > 1024: return False
   # Must be non-negative.
   if index < 0: return False
   # Limit range.
@@ -102,7 +96,7 @@ class WriteBlockHandler(webapp.RequestHandler):
     user = users.get_current_user()
     if user:
       index = int(self.request.get('index'))
-      data = self.request.str_POST['data']
+      data = str(self.request.str_POST['data'])
       if WriteBlock(user, index, data):
         self.response.out.write('1\n')
 
@@ -137,6 +131,8 @@ def EncodeBlock(data):
   rows = data.split('\n')
   rows = rows[0:16]
   rows = [(i[0:64] + ' ' * 64)[0:64] for i in rows]
+  while len(rows) < 16:
+    rows.append(' ' * 64)
   return ''.join(rows)
 
 
@@ -158,7 +154,10 @@ class EditorHandler(webapp.RequestHandler):
 
     # Save block if needed.
     if self.request.get('save'):
+      data = self.request.get('data', '')
+      data = str(data)
       data = EncodeBlock(str(self.request.get('data', '')))
+      assert len(data) == 1024
       WriteBlock(user, index, data)
     else:
       # Pick the new current index.
