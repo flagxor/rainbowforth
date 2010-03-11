@@ -12,6 +12,11 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 
+BLOCK_SIZE = 64 * 1024
+BLOCK_COLS = 64
+BLOCK_ROWS = int(BLOCK_SIZE / BLOCK_COLS)
+
+
 class Block(db.Model):
   owner = db.UserProperty()
   index = db.IntegerProperty()
@@ -21,6 +26,12 @@ class Block(db.Model):
 class Quota(db.Model):
   who = db.UserProperty()
   limit = db.IntegerProperty()
+
+
+class WebAlias(db.Model):
+  name = db.StringProperty()
+  who = db.UserProperty()
+  index = db.IntegerProperty()
 
 
 def GetQuota(user):
@@ -33,7 +44,7 @@ def GetQuota(user):
   if e:
     quota = e[0].limit
   else:
-    quota = 64 # Default 64 block quota.
+    quota = 4 # Default 4 block quota.
   memcache.set(key, quota)
   return quota
 
@@ -55,8 +66,7 @@ def ReadBlock(user, index):
 
 
 def WriteBlock(user, index, data):
-  # Seems to encode it wastefully (so limit is larger than 1024).
-  if len(data) > 1024: return False
+  if len(data) != BLOCK_SIZE: return False
   # Must be non-negative.
   if index < 0: return False
   # Limit range.
@@ -121,18 +131,18 @@ class RunWordHandler(webapp.RequestHandler):
 
 def DecodeBlock(data):
   rows = []
-  for i in range(len(data)/64):
-    rows.append(data[i*64:i*64+64].rstrip())
-  rows = rows[0:16]
+  for i in range(BLOCK_ROWS):
+    rows.append(data[i*BLOCK_COLS:(i+1)*BLOCK_COLS].rstrip())
+  rows = rows[0:BLOCK_ROWS]
   return '\n'.join(rows)
 
 
 def EncodeBlock(data):
   rows = data.split('\n')
-  rows = rows[0:16]
-  rows = [(i[0:64] + ' ' * 64)[0:64] for i in rows]
-  while len(rows) < 16:
-    rows.append(' ' * 64)
+  rows = rows[0:BLOCK_ROWS]
+  rows = [(i[0:BLOCK_COLS] + ' ' * BLOCK_COLS)[0:BLOCK_COLS] for i in rows]
+  while len(rows) < BLOCK_ROWS:
+    rows.append(' ' * BLOCK_COLS)
   return ''.join(rows)
 
 
@@ -157,7 +167,7 @@ class EditorHandler(webapp.RequestHandler):
       data = self.request.get('data', '')
       data = str(data)
       data = EncodeBlock(str(self.request.get('data', '')))
-      assert len(data) == 1024
+      assert len(data) == BLOCK_SIZE
       WriteBlock(user, index, data)
     else:
       # Pick the new current index.
