@@ -38,6 +38,37 @@
           </table>
       </td></tr>
     </table>
+    {% if admin %}
+    <table>
+      <tr><td>
+          Add Quota:
+          <input name="quota_email" type="text" value="">
+          <input name="quota_limit" type="text" value="4">
+          <input name="quota_add" type="submit" value="Add">
+      </td></tr>
+      {% for quota in quotas %}
+      <tr><td>
+          {{ quota.email }} &rarr; {{ quota.limit }}
+          <input name="del_quota_{{ quota.id }}" type="submit" value="x">
+      </td></tr>
+      {% endfor %}
+    </table>
+    <table>
+      <tr><td>
+          Add Web Alias:
+          <input name="alias_name" type="text" value="">
+          <input name="alias_email" type="text" value="">
+          <input name="alias_index" type="text" value="100">
+          <input name="alias_add" type="submit" value="Add">
+      </td></tr>
+      {% for alias in aliases %}
+      <tr><td>
+          {{ alias.name }} &rarr; {{ alias.email }} : {{ alias.index }}
+          <input name="del_alias_{{ alias.id }}" type="submit" value="x">
+      </td></tr>
+      {% endfor %}
+    </table>
+    {% endif %}
   </form>
 </body>
 </html>

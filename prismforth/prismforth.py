@@ -44,9 +44,45 @@ def GetQuota(user):
   if e:
     quota = e[0].limit
   else:
-    quota = 4 # Default 4 block quota.
+    quota = 4  # Default 4 block quota.
   memcache.set(key, quota)
   return quota
+
+
+def GetWebAlias(path):
+  key = '/web_alias/' + path
+  alias = memcache.get(key)
+  if alias is not None:
+    return alias
+  query = WebAlias.gql('WHERE name = :name LIMIT 1', name=path)
+  e = query.fetch(1)
+  if e:
+    alias = (e[0].who, e[0].index)
+  else:
+    alias = ()
+  memcache.set(key, alias)
+  return alias
+
+
+def GetQuotas():
+  query = Quota.all()
+  quotas = query.fetch(1000)
+  if not quotas:
+    return []
+  return [{'email': q.who.email(),
+           'limit': str(q.limit),
+           'id': q.key()} for q in quotas]
+
+
+def GetWebAliases():
+  query = WebAlias.all()
+  aliases = query.fetch(1000)
+  if not aliases:
+    return []
+  return [{'email': a.who.email(),
+           'name': str(q.name),
+           'index': str(q.index),
+           'id': a.key()} for a in aliases]
 
 
 def ReadBlock(user, index):
@@ -116,17 +152,11 @@ def ChromeFrameMe(handler):
   if agent.find('MSIE') >= 0 and agent.find('chromeframe') < 0:
     path = os.path.join(os.path.dirname(__file__),
                         'templates/chrome_frame.html')
-    handler.response.out.write(template.render(path, {}))
+    handler.response.out.write(template.render(path, {
+                                   'url': handler.request.url
+                               }))
     return True
   return False
-
-
-class RunWordHandler(webapp.RequestHandler):
-  def get(self):
-    if ChromeFrameMe(self): return
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates/run.html')
-    self.response.out.write(template.render(path, {}))
 
 
 def DecodeBlock(data):
@@ -182,23 +212,46 @@ class EditorHandler(webapp.RequestHandler):
       # Load it.
       data = ReadBlock(user, index)
 
-    # Display output.
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates/editor.html')
-    self.response.out.write(template.render(path, {
+    # Setup fields for template.
+    fields = {
       'greeting': greeting,
       'data': DecodeBlock(data),
       'index': index,
-    }))
+      'admin': user.is_admin(),
+    }
+
+    # Optionally add quota and alias info.
+    if user.is_admin():
+      fields['quotas'] = GetQuotas()
+      fields['aliases'] = GetWebAliases()
+
+    # Display output.
+    path = os.path.join(os.path.dirname(__file__),
+                        'templates/editor.html')
+    self.response.out.write(template.render(path,
+   ))
+
+
+class WebAliasHandler(webapp.RequestHandler):
+  def get(self):
+    if ChromeFrameMe(self): return
+    alias = GetWebAlias(self.request.path)
+    if alias:
+      data = ReadBlock(alias[0], alias[1])
+      self.response.out.write(data)
+    else:
+      self.redirect('/')
+
+
+application = webapp.WSGIApplication([
+    ('/_readblock', ReadBlockHandler),
+    ('/_writeblock', WriteBlockHandler),
+    ('/_editor', EditorHandler),
+    ('/.*', WebAliasHandler),
+], debug=True)
 
 
 def main():
-  application = webapp.WSGIApplication([
-      ('/_readblock', ReadBlockHandler),
-      ('/_writeblock', WriteBlockHandler),
-      ('/_editor', EditorHandler),
-      ('/.*', RunWordHandler),
-  ], debug=True)
   run_wsgi_app(application)
 
 
