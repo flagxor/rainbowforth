@@ -80,8 +80,8 @@ def GetWebAliases():
   if not aliases:
     return []
   return [{'email': a.who.email(),
-           'name': str(q.name),
-           'index': str(q.index),
+           'name': str(a.name),
+           'index': str(a.index),
            'id': a.key()} for a in aliases]
 
 
@@ -168,6 +168,7 @@ def DecodeBlock(data):
 
 
 def EncodeBlock(data):
+  data = data.replace('\r', '')
   rows = data.split('\n')
   rows = rows[0:BLOCK_ROWS]
   rows = [(i[0:BLOCK_COLS] + ' ' * BLOCK_COLS)[0:BLOCK_COLS] for i in rows]
@@ -200,6 +201,28 @@ class EditorHandler(webapp.RequestHandler):
       assert len(data) == BLOCK_SIZE
       WriteBlock(user, index, data)
     else:
+      # Handle push buttons for admins.
+      if users.is_current_user_admin():
+        if self.request.get('quota_add'):
+          q = Quota()
+          q.who = users.User(self.request.get('quota_email'))
+          q.limit = int(self.request.get('quota_limit'))
+          q.put()
+          key = '/quota/' + q.who.email()
+          memcache.set(key, q.limit)
+        elif self.request.get('alias_add'):
+          a = WebAlias()
+          a.name = str(self.request.get('alias_name'))
+          a.who = users.User(self.request.get('alias_email'))
+          a.index = int(self.request.get('alias_index'))
+          a.put()
+          key = '/web_alias/' + a.name
+          memcache.set(key, (a.who, a.index))
+        else:
+          for k in self.request.arguments():
+            if k.startswith('del_quota_') or k.startswith('del_alias_'):
+              db.delete(db.Key(k[10:]))
+              memcache.flush_all()
       # Pick the new current index.
       if self.request.get('prev'):
         index -= 1
@@ -217,27 +240,30 @@ class EditorHandler(webapp.RequestHandler):
       'greeting': greeting,
       'data': DecodeBlock(data),
       'index': index,
-      'admin': user.is_admin(),
+      'admin': users.is_current_user_admin(),
     }
 
     # Optionally add quota and alias info.
-    if user.is_admin():
+    if users.is_current_user_admin():
       fields['quotas'] = GetQuotas()
       fields['aliases'] = GetWebAliases()
 
     # Display output.
     path = os.path.join(os.path.dirname(__file__),
                         'templates/editor.html')
-    self.response.out.write(template.render(path,
-   ))
+    self.response.out.write(template.render(path, fields))
 
 
 class WebAliasHandler(webapp.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
-    alias = GetWebAlias(self.request.path)
+    alias = GetWebAlias(str(self.request.path))
     if alias:
       data = ReadBlock(alias[0], alias[1])
+      text = []
+      for i in range(int(len(data)/BLOCK_COLS)):
+        text.append(data[i*BLOCK_COLS:(i+1)*BLOCK_COLS])
+      data = '\n'.join(text)
       self.response.out.write(data)
     else:
       self.redirect('/')
