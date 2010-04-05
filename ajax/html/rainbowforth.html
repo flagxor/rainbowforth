@@ -244,13 +244,15 @@ function setupEvents() {
     var e = window.event || e;
     keyBuffer.unshift(-e.keyCode);
     runAll();
-    return false;
+    if (e.keyCode == 8) return false;
+    return true;
   }
   document.onkeyup = function(e) {
     var e = window.event || e;
     keyBuffer.unshift(-e.keyCode - 1000);
     runAll();
-    return false;
+    if (e.keyCode == 8) return false;
+    return true;
   }
   document.onkeypress = function(e) {
     var e = window.event || e;
