@@ -244,13 +244,13 @@ function setupEvents() {
     var e = window.event || e;
     keyBuffer.unshift(-e.keyCode);
     runAll();
-    return true;
+    return false;
   }
   document.onkeyup = function(e) {
     var e = window.event || e;
     keyBuffer.unshift(-e.keyCode - 1000);
     runAll();
-    return true;
+    return false;
   }
   document.onkeypress = function(e) {
     var e = window.event || e;
@@ -258,7 +258,7 @@ function setupEvents() {
     if (ch == undefined) ch = e.keyCode;
     keyBuffer.unshift(ch);
     runAll();
-    return true;
+    return false;
   }
   setInterval('runAll()', 30);
 }
