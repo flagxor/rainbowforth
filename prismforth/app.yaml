@@ -11,6 +11,10 @@ handlers:
   static_files: static/prism.ico
   upload: static/prism.ico
 
+- url: /favicon.png
+  static_files: static/prism.png
+  upload: static/prism.png
+
 - url: /static
   static_dir: static
 
