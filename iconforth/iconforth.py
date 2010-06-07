@@ -131,7 +131,6 @@ def ChromeFrameMe(handler):
   return False
 
 
-
 class ReadWord(webapp.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
@@ -227,7 +226,7 @@ class RunWord(webapp.RequestHandler):
                           'templates/run.html')
       self.response.out.write(template.render(path, {
           'id': id,
-          'exe': exe[0].executable,
+          'exe': ',' + exe[0].executable,
       }))
     else:
       path = os.path.join(os.path.dirname(__file__),

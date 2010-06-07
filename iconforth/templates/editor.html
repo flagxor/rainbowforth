@@ -22,8 +22,8 @@ onchange="search()">
 
 var drawing = 0;
 var palette_color;
-var cv = document.getElementById("iconeditor");
-var ctx = cv.getContext("2d");
+var cv;
+var ctx;
 var grid = new Array();
 var submitting = 0;
 var colors = [
@@ -36,7 +36,7 @@ var colors = [
   '#00ff00',
   '#00ffff',
   '#0000ff',
-  '#ff00ff',
+  '#ff00ff'
 ];
 
 function icon_string() {
@@ -230,6 +230,8 @@ function deleteword(id) {
 }
 
 function init() {
+  cv = document.getElementById("iconeditor");
+  ctx = cv.getContext("2d");
   blank();
   cv.onmousedown = mousedown;
   cv.onmousemove = mousemove;

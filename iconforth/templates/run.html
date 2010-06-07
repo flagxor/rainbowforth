@@ -16,17 +16,17 @@
 
 <script type="text/javascript">
 
-var cvd = document.getElementById("canvas_div");
-var cv = document.getElementById("canvas");
-var ctx = cv.getContext("2d");
+var console;
+var cvd;
+var cv;
+var ctx;
 var id = "{{ id }}";
-var console = document.getElementById("console");
 
 function op(x) { return 0x7fffff00 + x; }
 var RET = op(1);
 var exe = [
 1, // call exe
-op(31), // halt
+op(31) // halt
 {{ exe }}
 ];
 
@@ -252,6 +252,11 @@ function keyup(evt) {
 
 
 function init() {
+  console = document.getElementById("console");
+  cvd = document.getElementById("canvas_div");
+  cv = document.getElementById("canvas");
+  ctx = cv.getContext("2d");
+
   blank();
   document.onmousedown = mousedown;
   document.onmouseup = mouseup;
