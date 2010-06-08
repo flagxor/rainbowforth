@@ -13,7 +13,7 @@
        cellpadding="0" cellspacing="0">
 <tr border="0" cellpadding="0" cellspacing="0">
 <td border="0" cellpadding="0" cellspacing="0">
-<b><pre id="console" style="font-size:200%"></pre></b>
+<b><pre id="rconsole" style="font-size:200%"></pre></b>
 </td></tr></table>
 
 <p id="extra"></p>
@@ -109,16 +109,16 @@ HTTP.getText = function(url, callback) {
 var CONSOLE_WIDTH = 64;
 var CONSOLE_HEIGHT = 18;
 
-var console = new Array();
+var console_buf = new Array();
 
 function setupConsole() {
-  var console_tag = document.getElementById('console');
+  var console_tag = document.getElementById('rconsole');
   for (var y = 0; y < CONSOLE_HEIGHT; y++) {
     for (var x = 0; x < CONSOLE_WIDTH; x++) {
       var element = document.createElement('font');
       element.appendChild(document.createTextNode(' '));
       console_tag.appendChild(element);
-      console[x+y*CONSOLE_WIDTH] = element;
+      console_buf[x+y*CONSOLE_WIDTH] = element;
     }
     var element=document.createElement('br')
     console_tag.appendChild(element);
@@ -132,7 +132,7 @@ function numberToColor(n) {
 }
 
 function consolePlot(x, y, text, fg, bg) {
-  var element = console[x+y*CONSOLE_WIDTH];
+  var element = console_buf[x+y*CONSOLE_WIDTH];
   element.firstChild.nodeValue = String.fromCharCode(text);
   element.color = numberToColor(fg);
   element.style.backgroundColor = numberToColor(bg);
@@ -560,7 +560,7 @@ var dictionary = {
     consoleEmitString(c, number);
   },
   'set-font-size': function(c) {
-    document.getElementById('console').style.fontSize = c.dstack.pop() + '%';
+    document.getElementById('rconsole').style.fontSize = c.dstack.pop() + '%';
   },
   'alert': function(c) {
     alert(c.dstack.pop());

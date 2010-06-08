@@ -10,13 +10,13 @@
   <canvas id="canvas" width="300" height="300"
   border="0" style="cursor: pointer;"></canvas><br>
 </div>
-<div id="console"></div>
+<div id="icon_console"></div>
 
 <script type="text/javascript" src="/js/http.js"></script>
 
 <script type="text/javascript">
 
-var console;
+var icon_console;
 var cvd;
 var cv;
 var ctx;
@@ -152,7 +152,8 @@ function run() {
         var a = dstack.pop();
         memory[a] = dstack.pop(); break; // !
       case 0x7fffff1c: // op(28)
-        console.innerHTML += String.fromCharCode(dstack.pop()); break; // emit
+        icon_console.innerHTML += String.fromCharCode(dstack.pop());
+        break; // emit
       case 0x7fffff1d: // op(29)
         var e = GetEvent();
         dstack.push(e.x);
@@ -169,7 +170,7 @@ function run() {
       case 0x7fffff22: // op(34)
         if(!dstack.pop()) { ip++; } break; // if
       case 0x7fffff23: // op(35)
-        console.innerHTML += (dstack.pop() + ' '); break; // .
+        icon_console.innerHTML += (dstack.pop() + ' '); break; // .
       case 0x7fffff24: // op(36)
         if (dstack.pop() > dstack.pop()) {
           dstack.push(1);
@@ -252,7 +253,7 @@ function keyup(evt) {
 
 
 function init() {
-  console = document.getElementById("console");
+  icon_console = document.getElementById("icon_console");
   cvd = document.getElementById("canvas_div");
   cv = document.getElementById("canvas");
   ctx = cv.getContext("2d");
