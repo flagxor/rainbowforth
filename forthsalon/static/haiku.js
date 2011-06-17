@@ -9,32 +9,26 @@ function core_words() {
   dict['r>'] = dict['pop'];
 
   dict['@'] = ['dstack.push(mem[dstack.pop()]);'];
-  dict['!'] = ['var t = dstack.pop(); mem[t] = dstack.pop();'];
+  dict['!'] = ['var w1 = dstack.pop(); mem[w1] = dstack.pop();'];
 
-  dict['dup'] = ['dstack.push(dstack[dstack.length-1]);']; 
-  dict['over'] = ['dstack.push(dstack[dstack.length-2]);']; 
+  dict['dup'] = ['var w1 = dstack.pop(); ' +
+                 'dstack.push(w1); dstack.push(w1);'];
+  dict['over'] = ['var w1 = dstack.pop(); ' +
+                  'var w2 = dstack.pop(); ' +
+                  'dstack.push(w2); dstack.push(w1); dstack.push(w2);'];
 
-  dict['2dup'] = ['dstack.push(dstack[dstack.length-2]);',
-                  'dstack.push(dstack[dstack.length-2]);'];
-  dict['z+'] = ['dstack[dstack.length-3] += dstack.pop();',
-                'dstack[dstack.length-3] += dstack.pop();'];
-  dict['z*'] = ['var t1 = dstack[dstack.length-4] * ' +
-                         'dstack[dstack.length-2] - ' +
-                         'dstack[dstack.length-3] * ' +
-                         'dstack[dstack.length-1];',
-                'var t2 = dstack[dstack.length-4] * ' +
-                         'dstack[dstack.length-1] + ' +
-                         'dstack[dstack.length-3] * ' +
-                         'dstack[dstack.length-2];',
-                'dstack.pop();',
-                'dstack.pop();',
-                'dstack[dstack.length-2] = t1;',
-                'dstack[dstack.length-1] = t2;'];
+  dict['2dup'] = dict['over'] + dict['over'];
+  dict['z+'] = ['var w1 = dstack.pop(); var w2 = dstack.pop(); ' +
+                'var w3 = dstack.pop(); var w4 = dstack.pop(); ' +
+                'dstack.push(w2 + w4); dstack.push(w1 + w3);'];
+  dict['z*'] = ['var w1 = dstack.pop(); var w2 = dstack.pop(); ' +
+                'var w3 = dstack.pop(); var w4 = dstack.pop(); ' +
+                'dstack.push(w4 * w2 - w3 * w1); ' +
+                'dstack.push(w4 * w1 + w3 * w2);'];
 
   dict['drop'] = ['dstack.pop();'];
-  dict['swap'] = ['var t = dstack[dstack.length-1];',
-                  'dstack[dstack.length-1] = dstack[dstack.length-2];',
-                  'dstack[dstack.length-2] = t;']
+  dict['swap'] = ['var w1 = dstack.pop(); var w2 = dstack.pop(); ' +
+                  'dstack.push(w1); dstack.push(w2);'];
 
   dict['='] = ['dstack.push((dstack.pop() == dstack.pop())?1:0);'];
   dict['<>'] = ['dstack.push((dstack.pop() != dstack.pop())?1:0);'];
@@ -45,46 +39,37 @@ function core_words() {
 
   dict['+'] = ['dstack.push(dstack.pop() + dstack.pop());'];
   dict['*'] = ['dstack.push(dstack.pop() * dstack.pop());'];
-  dict['-'] = ['var t = dstack.pop();',
-               'dstack.push(dstack.pop() - t);'];
-  dict['/'] = ['var t = dstack.pop();',
-               'dstack.push(dstack.pop() / t);'];
-  dict['mod'] = ['var t = dstack.pop();',
-                 'dstack.push(dstack.pop() % t);'];
-  dict['pow'] = ['var t = dstack.pop();',
-                 'dstack.push(Math.pow(dstack.pop(), t));'];
+  dict['-'] = ['var w1 = dstack.pop(); ' +
+               'dstack.push(dstack.pop() - w1);'];
+  dict['/'] = ['var w1 = dstack.pop(); ' +
+               'dstack.push(dstack.pop() / w1);'];
+  dict['mod'] = ['var w1 = dstack.pop(); ' +
+                 'dstack.push(dstack.pop() % w1);'];
+  dict['pow'] = ['var w1 = dstack.pop(); ' +
+                 'dstack.push(Math.pow(dstack.pop(), w1));'];
   dict['**'] = dict['pow'];
-  dict['atan2'] = ['var t = dstack.pop();',
-                   'dstack.push(Math.atan2(dstack.pop(), t));'];
+  dict['atan2'] = ['var w1 = dstack.pop(); ' +
+                   'dstack.push(Math.atan2(dstack.pop(), w1));'];
 
-  dict['and'] = ['var t = dstack.pop();',
-                 'dstack.push((dstack.pop() && t)?1:0);'];
-  dict['or'] = ['var t = dstack.pop();',
-                'dstack.push((dstack.pop() || t)?1:0);'];
-  dict['not'] = ['dstack[dstack.length-1] = (!dstack[dstack.length-1])?1:0;'];
+  dict['and'] = ['var w1 = dstack.pop(); ' +
+                 'dstack.push((dstack.pop() && w1)?1:0);'];
+  dict['or'] = ['var w1 = dstack.pop(); ' +
+                'dstack.push((dstack.pop() || w1)?1:0);'];
+  dict['not'] = ['dstack.push(!dstack.pop()?1:0);'];
 
   dict['min'] = ['dstack.push(Math.min(dstack.pop(), dstack.pop()));'];
   dict['max'] = ['dstack.push(Math.max(dstack.pop(), dstack.pop()));'];
 
-  dict['negate'] = ['dstack[dstack.length-1] = -dstack[dstack.length-1];'];
-  dict['sin'] = [
-      'dstack[dstack.length-1] = Math.sin(dstack[dstack.length-1]);'];
-  dict['cos'] = [
-      'dstack[dstack.length-1] = Math.cos(dstack[dstack.length-1]);'];
-  dict['tan'] = [
-      'dstack[dstack.length-1] = Math.tan(dstack[dstack.length-1]);'];
-  dict['log'] = [
-      'dstack[dstack.length-1] = Math.log(dstack[dstack.length-1]);'];
-  dict['exp'] = [
-      'dstack[dstack.length-1] = Math.exp(dstack[dstack.length-1]);'];
-  dict['sqrt'] = [
-      'dstack[dstack.length-1] = Math.sqrt(dstack[dstack.length-1]);'];
-  dict['floor'] = [
-      'dstack[dstack.length-1] = Math.floor(dstack[dstack.length-1]);'];
-  dict['ceil'] = [
-      'dstack[dstack.length-1] = Math.ceil(dstack[dstack.length-1]);'];
-  dict['abs'] = [
-      'dstack[dstack.length-1] = Math.abs(dstack[dstack.length-1]);'];
+  dict['negate'] = ['dstack.push(-dstack.pop());'];
+  dict['sin'] = ['dstack.push(Math.sin(dstack.pop()));'];
+  dict['cos'] = ['dstack.push(Math.cos(dstack.pop()));'];
+  dict['tan'] = ['dstack.push(Math.tan(dstack.pop()));'];
+  dict['log'] = ['dstack.push(Math.log(dstack.pop()));'];
+  dict['exp'] = ['dstack.push(Math.exp(dstack.pop()));'];
+  dict['sqrt'] = ['dstack.push(Math.sqrt(dstack.pop()));'];
+  dict['floor'] = ['dstack.push(Math.floor(dstack.pop()));'];
+  dict['ceil'] = ['dstack.push(Math.ceil(dstack.pop()));'];
+  dict['abs'] = ['dstack.push(Math.abs(dstack.pop()));'];
 
   dict['pi'] = ['dstack.push(Math.PI);'];
 
