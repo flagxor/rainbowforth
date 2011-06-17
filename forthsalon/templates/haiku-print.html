@@ -1,0 +1,53 @@
+<html>
+<head>
+<title>{{ haiku.title }}</title>
+<meta http-equiv="X-UA-Compatible" content="chrome=1"> 
+
+<style type="text/css">
+body {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+div.haiku_text {
+  font-family: "Courier New"
+               Courier
+               "Andale Mono"
+               "Fixed"
+               "Lucidatypewriter"
+               monospace;
+}
+</style>
+
+<link href="/favicon.ico" rel="SHORTCUT ICON">                
+<link href="http://forthsalon.appspot.com/favicon.png"        
+ rel="apple-touch-icon-precomposed">                          
+</head>
+
+<body onload="init();" bgcolor="#ffffff">
+
+<center>
+
+<div class="haiku">
+<span name="haiku" width="{{ haiku_size }}" height="{{ haiku_size }}">
+<textarea style="display: none">{{ haiku.code|escape }}</textarea>
+</span>
+</div>
+
+<h1>{{ haiku.title|escape }}</h1>
+<h2><i>{{ haiku.author|escape }}</i></h2>
+
+<div class="haiku_text">
+{{ haiku.code_formatted_print }}
+</div>
+
+</center>
+
+<script type="text/javascript" src="/static/haiku.js"></script>
+<script type="text/javascript">
+function init() {
+  update_haikus(function() {});
+}
+</script>
+
+</body>
+</html>

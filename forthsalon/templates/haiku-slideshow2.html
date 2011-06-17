@@ -1,0 +1,84 @@
+<html>
+<head>
+<title>{{ haiku.title }}</title>
+<meta http-equiv="X-UA-Compatible" content="chrome=1"> 
+
+<style type="text/css">
+body {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+div.haiku_text {
+  font-family: "Courier New"
+               Courier
+               "Andale Mono"
+               "Fixed"
+               "Lucidatypewriter"
+               monospace;
+}
+</style>
+
+<link href="/favicon.ico" rel="SHORTCUT ICON">                
+<link href="http://forthsalon.appspot.com/favicon.png"        
+ rel="apple-touch-icon-precomposed">                          
+<meta name="viewport" content="width=device-width">           
+<meta name="viewport" content="initial-scale=1.0">            
+<meta name="viewport" content="maximum-scale=1.0">            
+<meta name="viewport" content="user-scalable=0">              
+<meta name="apple-mobile-web-app-capable" content="yes"/>     
+<meta name="apple-mobile-web-app-status-bar-style"            
+ content="black-translucent"/>                      
+</head>
+
+<body onload="init();" bgcolor="#ffffff">
+
+<h1 id="loading">Loading...</h1>
+
+{% for haiku in haikus %}
+<center id="item{{ forloop.counter0 }}">
+
+<div class="haiku">
+<span name="haiku" width="{{ haiku_size }}" height="{{ haiku_size }}">
+<textarea style="display: none">{{ haiku.code|escape }}</textarea>
+</span>
+</div>
+
+<h1>{{ haiku.title|escape }}</h1>
+<h2><i>{{ haiku.author|escape }}</i></h2>
+
+<div class="haiku_text">
+{{ haiku.code_formatted_print }}
+</div>
+
+</center>
+{% endfor %}
+
+<script type="text/javascript" src="/static/haiku.js"></script>
+<script type="text/javascript">
+function init() {
+  update_haikus(function() { change(); });
+}
+
+function change() {
+  var tag = document.getElementById('loading');
+  tag.style.visibility = 'hidden';
+  tag.style.display = 'none';
+ 
+  var haiku_count = {{ haiku_count }};
+  var pick = Math.floor(Math.random() * haiku_count);
+  for (var i = 0; i < haiku_count; i++) {
+    var tag = document.getElementById('item' + i);
+    if (i == pick) {
+      tag.style.visibility = 'visible';
+      tag.style.display = 'inline';
+    } else {
+      tag.style.visibility = 'hidden';
+      tag.style.display = 'none';
+    }
+  }
+  setTimeout(function() { change(); }, {{ speed }} * 1000);
+}
+</script>
+
+</body>
+</html>

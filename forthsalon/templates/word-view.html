@@ -1,0 +1,56 @@
+<html>
+<head>
+<title>{{ entry.name|escape }}</title>
+<meta http-equiv="X-UA-Compatible" content="chrome=1"> 
+<link rel="stylesheet" type="text/css" href="/static/forthsalon.css"/>
+
+<link href="/favicon.ico" rel="SHORTCUT ICON">                
+<link href="http://forthsalon.appspot.com/favicon.png"        
+ rel="apple-touch-icon-precomposed">                          
+<meta name="viewport" content="width=device-width">           
+<meta name="viewport" content="initial-scale=1.0">            
+<meta name="viewport" content="maximum-scale=1.0">            
+<meta name="viewport" content="user-scalable=0">              
+<meta name="apple-mobile-web-app-capable" content="yes"/>     
+<meta name="apple-mobile-web-app-status-bar-style"            
+ content="black-translucent"/>                      
+</head>
+
+<div id="wrapper">
+
+<div id="header">
+<h1>{{ entry.name|escape }}</h1>
+</div>
+
+<div class="section">
+<h2>{{ entry.name }}</h2>
+{% if entry.stack %}
+<p>Stack effect: <b>{{ entry.stack }}</b></p>
+{% endif %}
+<p>{{ entry.summary }}</p>
+{% for part in entry.description %}
+<p>{{ part }}</p>
+{% endfor %}
+{% if entry.examples %}
+<p>
+Examples:
+<ul>
+{% for example in entry.examples %}
+<li>{{ example|first }} &rarr; {{ example|slice:"1:"|first }}</li>
+{% endfor %}
+</ul>
+</p>
+{% endif %}
+<p><a href="/word-list">Forth Haiku Glossary</a></p>
+</div>
+
+<div id="footer">
+<a href="/">Home</a>
+<a href="/haiku-editor">Haiku Editor</a>
+{{ login_status }}
+</div>
+
+</div>
+
+</body>
+</html>

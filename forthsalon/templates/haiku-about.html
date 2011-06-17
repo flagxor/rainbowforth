@@ -1,0 +1,73 @@
+<html>
+<head>
+<title>About Forth Haiku</title>
+<meta http-equiv="X-UA-Compatible" content="chrome=1"> 
+<link rel="stylesheet" type="text/css" href="/static/forthsalon.css"/>
+
+<link href="/favicon.ico" rel="SHORTCUT ICON">                
+<link href="http://forthsalon.appspot.com/favicon.png"        
+ rel="apple-touch-icon-precomposed">                          
+<meta name="viewport" content="width=device-width">           
+<meta name="viewport" content="initial-scale=1.0">            
+<meta name="viewport" content="maximum-scale=1.0">            
+<meta name="viewport" content="user-scalable=0">              
+<meta name="apple-mobile-web-app-capable" content="yes"/>     
+<meta name="apple-mobile-web-app-status-bar-style"            
+ content="black-translucent"/>                      
+</head>
+
+<body bgcolor="#000000">
+<div id="wrapper">
+
+<div id="header">
+<h1>About Forth Haiku</h1>
+</div>
+
+<div class="section">
+
+<p>
+A Forth Haiku is an attempt to mix mathematics, art,
+and the Forth programming language.
+It resembles a texture shader, however, the emphasis is on direct expression
+in the resulting image.
+</p>
+<p>
+The Forth program describing each Haiku is run once per pixel over a square
+image.  Forth cells are floating point. Conditions return 1 instead of -1.
+The position is available from the words x and y, which range from 0 to 1,
+which the origin in the lower left hand corner.
+The haiku returns the desired color in (red, green, blue, alpha),
+with alpha being topmost on the stack.
+If the stack has less than 4 items default values are assumed:
+red:0, green:0, blue:0, alpha:1.
+</p>
+<p>
+Like a traditional haiku, an ideal Forth Haiku has 3 lines of 5, 7, 5 words.
+Compositions which don't fit the haiku form are either 'short' (less than 140),
+or 'long'.
+</p>
+<p>
+Alpha (opacity), can be used to make semi-transparent haiku.
+Not every haiku will specify alpha (instead relying on the default 1,
+fully opaque).
+</p>
+<p>
+</p>
+<p>
+<b>Core words (<a href="/word-list">Glossary</a>):</b><br>
+{% for word in words %}
+<a href="/word-view/{{ word.id }}">{{ word.names|first|escape }}</a>
+{% endfor %}
+</p>
+</div>
+
+<div id="footer">
+<a href="/">Home</a>
+<a href="/haiku-editor">Haiku Editor</a>
+{{ login_status }}
+</div>
+
+</div>
+
+</body>
+</html>

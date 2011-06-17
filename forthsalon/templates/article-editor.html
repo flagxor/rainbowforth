@@ -1,0 +1,50 @@
+<html>
+<head>
+<title>Forth Haiku Editor</title>
+<meta http-equiv="X-UA-Compatible" content="chrome=1"> 
+<link rel="stylesheet" type="text/css" href="/static/forthsalon.css"/>
+
+<link href="/favicon.ico" rel="SHORTCUT ICON">                
+<link href="http://forthsalon.appspot.com/favicon.png"        
+ rel="apple-touch-icon-precomposed">                          
+<meta name="viewport" content="width=device-width">           
+<meta name="viewport" content="initial-scale=1.0">            
+<meta name="viewport" content="maximum-scale=1.0">            
+<meta name="viewport" content="user-scalable=0">              
+<meta name="apple-mobile-web-app-capable" content="yes"/>     
+<meta name="apple-mobile-web-app-status-bar-style"            
+ content="black-translucent"/>                      
+</head>
+<body onload="init()" bgcolor="#000000">
+<div id="wrapper">
+
+<div id="header">
+<h1>Forth Haiku Editor</h1>
+</div>
+
+<div class="section">
+
+<form method="post" action="/admin/article-submit">
+Title:<br>
+<input type="text" style="width: 256;" name="title"><br>
+Summary:<br>
+<textarea style="width: 256; height:150; resize: none"
+    name="summary"></textarea><br>
+Body:<br>
+<textarea style="width: 256; height:150; resize: none"
+    name="body"></textarea><br>
+<br>
+<input type="submit" value="Submit">
+</form>
+</div>
+
+<div id="footer">
+<a href="/">Home</a>
+<a href="/haiku-editor">Haiku Editor</a>
+{{ login_status }}
+</div>
+
+</div>
+
+</body>
+</html>

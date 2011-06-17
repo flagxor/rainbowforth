@@ -1,0 +1,143 @@
+a:link {
+  color: blue;
+}
+
+a:visited {
+  color: blue;
+}
+
+body {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  background-color: #000000;
+  padding: 0;
+  margin: 0;
+}
+
+#wrapper { 
+  background-color: #000000;;
+}
+
+#wrapper h1 {
+  font-size: 20px;
+}
+
+#header {
+  background-color: #0000cc;
+  color: #ffffff;
+
+  margin-bottom: 2px;
+  padding: 0.5em;
+  text-align: center;
+  border-top-right-radius: 24px;
+  -webkit-border-top-right-radius: 24px;
+  -moz-border-radius-topright: 1em;
+  border-top-left-radius: 24px;
+  -webkit-border-top-left-radius: 24px;
+  -moz-border-radius-topleft: 1em;
+/*
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+  -moz-box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+  -webkit-box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+*/
+}
+
+#footer {
+  background-color: #0000cc;
+  color: #ffffff;
+
+  margin-top: 2px;
+  padding: 0.5em;
+  text-align: left;
+  border-bottom-right-radius: 24px;
+  -webkit-border-bottom-right-radius: 24px;
+  -moz-border-radius-bottomright: 1em;
+  border-bottom-left-radius: 24px;
+  -webkit-border-bottom-left-radius: 24px;
+  -moz-border-radius-bottomleft: 1em;
+/*
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+  -moz-box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+  -webkit-box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+*/
+}
+
+div.links a {
+  padding: 1em;
+  display: inline-block;
+}
+
+#footer a {
+  padding: 1em;
+  display: inline-block;
+}
+
+#footer a:link {
+  color: white;
+}
+
+#footer a:visited {
+  color: white;
+}
+
+#footer span {
+  padding: 1em;
+  display: inline-block;
+}
+
+div.section {
+  margin: 1em;
+  padding: 0.5em;
+  background-color: #eeeeff;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #cccccc;
+}
+
+div.article {
+  margin: 1em;
+}
+
+div.haiku_text {
+  font-family: "Courier New"
+               Courier
+               "Andale Mono"
+               "Fixed"
+               "Lucidatypewriter"
+               monospace;
+}
+
+div.haiku_text a:link {
+  text-decoration: none;
+}
+
+div.haiku_text a:visited {
+  text-decoration: none;
+}
+
+div.haiku_text a:hover {
+  text-decoration: underline;
+}
+
+div.haiku {
+  display: inline-table;
+  margin: 5px;
+}
+
+.haiku a {
+  padding: 0;
+}
+
+.haiku b {
+  font-size: 8px;
+  display: block;
+}
+
+.haiku i {
+  font-size: 8px;
+  display: block;
+}
+
+.more {
+  font-size: 12px;
+}

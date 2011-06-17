@@ -1,0 +1,9 @@
+indexes:
+
+- kind: HaikuSnapshot
+  ancestor: yes
+  properties:
+    - name: width
+      direction: asc
+    - name: height
+      direction: asc

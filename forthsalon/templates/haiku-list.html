@@ -1,0 +1,59 @@
+<html>
+<head>
+<title>Haiku Gallery</title>
+<meta http-equiv="X-UA-Compatible" content="chrome=1"> 
+<link rel="stylesheet" type="text/css" href="/static/forthsalon.css"/>
+
+<link href="/favicon.ico" rel="SHORTCUT ICON">                
+<link href="http://forthsalon.appspot.com/favicon.png"        
+ rel="apple-touch-icon-precomposed">                          
+<meta name="viewport" content="width=device-width">           
+<meta name="viewport" content="initial-scale=1.0">            
+<meta name="viewport" content="maximum-scale=1.0">            
+<meta name="viewport" content="user-scalable=0">              
+<meta name="apple-mobile-web-app-capable" content="yes"/>     
+<meta name="apple-mobile-web-app-status-bar-style"            
+ content="black-translucent"/>                      
+</head>
+
+<body onload="init();" bgcolor="#000000">
+<div id="wrapper">
+
+<div id="header">
+<h1>Haiku Gallery</h1>
+</div>
+
+<div class="section">
+
+{% for haiku in haikus %}
+<a href="/haiku-view/{{ haiku.id }}">
+<div class="haiku"
+ onclick="window.location.href='/haiku-view/{{ haiku.id }}';"
+ style="cursor: pointer;">
+<span name="haiku" width="128" height="128">
+<textarea style="display: none">{{ haiku.code|escape }}</textarea>
+</span>
+<b>{{ haiku.title|escape }}</b></a>
+<i>{{ haiku.author|escape }}</i>
+</div>
+{% endfor %}
+
+</div>
+
+<div id="footer">
+<a href="/">Home</a>
+<a href="/haiku-editor">Haiku Editor</a>
+{{ login_status }}
+</div>
+
+</div>
+
+<script type="text/javascript" src="/static/haiku.js"></script>
+<script type="text/javascript">
+function init() {
+  update_haikus(function() {});
+}
+</script>
+
+</body>
+</html>

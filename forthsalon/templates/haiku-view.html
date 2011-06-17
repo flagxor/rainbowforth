@@ -1,0 +1,70 @@
+<html>
+<head>
+<title>{{ haiku.title }}</title>
+<meta http-equiv="X-UA-Compatible" content="chrome=1"> 
+<link rel="stylesheet" type="text/css" href="/static/forthsalon.css"/>
+
+<link href="/favicon.ico" rel="SHORTCUT ICON">                
+<link href="http://forthsalon.appspot.com/favicon.png"        
+ rel="apple-touch-icon-precomposed">                          
+<meta name="viewport" content="width=device-width">           
+<meta name="viewport" content="initial-scale=1.0">            
+<meta name="viewport" content="maximum-scale=1.0">            
+<meta name="viewport" content="user-scalable=0">              
+<meta name="apple-mobile-web-app-capable" content="yes"/>     
+<meta name="apple-mobile-web-app-status-bar-style"            
+ content="black-translucent"/>                      
+</head>
+
+<body onload="init();" bgcolor="#000000">
+<div id="wrapper">
+
+<div id="header">
+<h1>{{ haiku.title|escape }} - <i>{{ haiku.author|escape }}</i></h1>
+</div>
+
+<div class="section">
+
+<form action="/haiku-vote/{{ haiku.id|escape }}" method="post">
+<input type="submit" name="good" value="I like it">
+<input type="submit" name="bad" value="I hate it">
+</form>
+
+<div class="haiku">
+<span name="haiku" width="{{ haiku_size }}" height="{{ haiku_size }}">
+<textarea style="display: none">{{ haiku.code|escape }}</textarea>
+</span>
+<br>
+<br>
+<div class="haiku_text">
+{{ haiku.code_formatted }}
+</div>
+</div>
+
+<br>
+
+<div class="links">
+<a href="/haiku-editor?id={{ haiku.id|escape }}">Create a derived work</a>
+<a target="_blank" href="/haiku-print/{{ haiku.id|escape }}">Printer View</a>
+</div>
+</div>
+
+</div>
+
+<div id="footer">
+<a href="/">Home</a>
+<a href="/haiku-editor">Haiku Editor</a>
+{{ login_status }}
+</div>
+
+</div>
+
+<script type="text/javascript" src="/static/haiku.js"></script>
+<script type="text/javascript">
+function init() {
+  update_haikus(function() {});
+}
+</script>
+
+</body>
+</html>

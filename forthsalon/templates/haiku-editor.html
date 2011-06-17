@@ -1,0 +1,81 @@
+<html>
+<head>
+<title>Forth Haiku Editor</title>
+<meta http-equiv="X-UA-Compatible" content="chrome=1"> 
+<link rel="stylesheet" type="text/css" href="/static/forthsalon.css"/>
+
+<link href="/favicon.ico" rel="SHORTCUT ICON">                
+<link href="http://forthsalon.appspot.com/favicon.png"        
+ rel="apple-touch-icon-precomposed">                          
+<meta name="viewport" content="width=device-width">           
+<meta name="viewport" content="initial-scale=1.0">            
+<meta name="viewport" content="maximum-scale=1.0">            
+<meta name="viewport" content="user-scalable=0">              
+<meta name="apple-mobile-web-app-capable" content="yes"/>     
+<meta name="apple-mobile-web-app-status-bar-style"            
+ content="black-translucent"/>                      
+</head>
+<body onload="init()" bgcolor="#000000">
+<div id="wrapper">
+
+<div id="header">
+<h1>Forth Haiku Editor</h1>
+</div>
+
+<div class="section">
+<form method="post" action="/haiku-submit">
+<span id="editimage" name="haiku"
+    width="{{ haiku_size }}" height="{{ haiku_size }}">
+<textarea style="display: none" id="dst_code"></textarea>
+</span>
+<br>
+<button type="button" onclick="update()">Update</button><br>
+Code:<br>
+<textarea style="width: 256; height:100; resize: none"
+    onkeydown="update_tags()"
+    onkeyup="update_tags()"
+    onkeypress="update_tags()"
+    name="code" id="src_code" cols="40" rows="10">{{ code|escape }}</textarea>
+<br>
+Title:<br>
+<input name="title" type="text" style="width: 256;" value="{{ title|escape }}">
+<br>
+Author:<br>
+<input name="author" type="text" style="width: 256;"><br>
+<br>
+<input type="submit" value="Submit">
+</form>
+<div id="tag_area"></div>
+<p><a href="/word-list">Forth Haiku Glossary</a></p>
+</div>
+<div id="footer">
+<a href="/">Home</a>
+<span>Haiku Editor</span>
+{{ login_status }}
+</div>
+
+</div>
+
+<script type="text/javascript" src="/static/haiku.js"></script>
+<script type="text/javascript">
+function update() {
+  var src_code = document.getElementById('src_code');
+  var dst_code = document.getElementById('dst_code');
+  dst_code.value = src_code.value;
+  update_haikus(function() {});
+  update_tags();
+}
+
+function init() {
+  update();
+}
+
+function update_tags() {
+  var src_code = document.getElementById('src_code');
+  var tag_area = document.getElementById('tag_area');
+  tag_area.innerHTML = code_tags(src_code.value).join(' | ');
+}
+
+</script>
+</body>
+</html>
