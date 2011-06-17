@@ -135,18 +135,18 @@ if (typeof String.prototype.trim != 'function') {
   }
 }
 
+
 function compile(src) {
   var code = ['var go = function(x, y) {',
-              ' var dstack=[]; var rstack=[]; var mem=[]; var gas=512;',
+              ' var dstack=[]; var rstack=[]; var mem=[];',
               ' var here = 1024;'];
   var dict = core_words();
   var var_index = 0;
-  var func_index = 0;
-  var pending_cost = 0;
+  var pending_name = 'bogus';
+  var code_stack = [];
   src = src.replace(/[ \r\n\t]+/g, ' ').trim();
   src = src.split(' ');
   for (var i = 0; i < src.length; i++) {
-    pending_cost++;
     var word = src[i];
     word = word.toLowerCase();
     if (word == 'variable') {
@@ -160,26 +160,19 @@ function compile(src) {
       }
     } else if (word == ':') {
       i++;
-      dict[src[i]] = ['func' + func_index + '();'];
-      code.push('function func' + func_index + '() {');
-      func_index++;
+      pending_name = src[i];
+      // Disallow nested words.
+      if (code_stack.length != 0) return 0;
+      code_stack.push(code);
+      code = [];
     } else if (word == ';') {
-      code.push('}');
+      // Disallow ; other than to end a word.
+      if (code_stack.length != 1) return 0;
+      dict[pending_name] = code;
+      code = code_stack.pop(); 
+      pending_name = 'bogus';
     } else if (word in dict) {
-      var meaning = dict[word];
-      var need_check = (meaning.length == 1 &&
-                        meaning[0].substr(0, 4) == 'func') ||
-	               pending_cost > 10;
-      var gas_check = 'if (gas < 0) { return [0.87, 0.69, 1.0]; }';
-      if (need_check) {
-        code.push('gas -= ' + pending_cost + ';');
-        code.push(gas_check);
-        pending_cost = 0;
-      }
       code = code.concat(dict[word]);
-      if (need_check) {
-        code.push(gas_check);
-      }
     } else {
       code.push('dstack.push(' + parseFloat(word) + ');');
     }
@@ -194,7 +187,7 @@ function render_rows(image, ctx, img, y, w, h, next) {
   try {
     // Decide if we're on android or a normal browser.
     if (navigator.userAgent.toLowerCase().search('android') < 0) {
-      while (y < h && new Date().getTime() - start < 250) {
+      while (y < h) {
         var pos = w * (h - 1 - y) * 4;
         for (var x = 0; x < w; x++) {
           var col = image(x / w, y / h);
@@ -205,10 +198,11 @@ function render_rows(image, ctx, img, y, w, h, next) {
           img.data[pos++] = Math.floor(col[3] * 255);
         }
         y++;
+        if (new Date().getTime() - start > 250) break;
       }
     } else {
       // Work around what seems to be an android canvas bug?
-      while (y < h && new Date().getTime() - start < 250) {
+      while (y < h) {
         var pos = w * (h - 1 - y) * 4;
         for (var x = 0; x < w; x++) {
           var col = image(x / w, y / h);
@@ -226,6 +220,7 @@ function render_rows(image, ctx, img, y, w, h, next) {
           img.data[pos++] = Math.floor(col[3] * 255);
         }
         y++;
+        if (new Date().getTime() - start > 250) break;
       }
     }
   } catch(e) {
@@ -235,9 +230,9 @@ function render_rows(image, ctx, img, y, w, h, next) {
   if (y < h) {
     setTimeout(function() {
       render_rows(image, ctx, img, y, w, h, next);
-    }, 0);
+    }, 1);
   } else {
-    setTimeout(next, 0);
+    setTimeout(next, 1);
   }
 }
 
@@ -248,7 +243,7 @@ function render(cv, image, next) {
   var img = ctx.createImageData(w, h);
 
   render_rows(image, ctx, img, 0, w, h, function() {
-    setTimeout(next, 0);
+    setTimeout(next, 1);
   });
 }
 
