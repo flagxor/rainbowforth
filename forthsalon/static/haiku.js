@@ -9,26 +9,37 @@ function core_words() {
   dict['r>'] = dict['pop'];
 
   dict['@'] = ['dstack.push(mem[dstack.pop()]);'];
-  dict['!'] = ['var w1 = dstack.pop(); mem[w1] = dstack.pop();'];
+  dict['!'] = ['var work1 = dstack.pop();',
+               'mem[work1] = dstack.pop();'];
 
-  dict['dup'] = ['var w1 = dstack.pop(); ' +
-                 'dstack.push(w1); dstack.push(w1);'];
-  dict['over'] = ['var w1 = dstack.pop(); ' +
-                  'var w2 = dstack.pop(); ' +
-                  'dstack.push(w2); dstack.push(w1); dstack.push(w2);'];
+  dict['dup'] = ['var work1 = dstack.pop();',
+                 'dstack.push(work1);',
+                 'dstack.push(work1);'];
+  dict['over'] = ['var work1 = dstack.pop();',
+                  'var work2 = dstack.pop();',
+                  'dstack.push(work2);',
+                  'dstack.push(work1);',
+                  'dstack.push(work2);'];
 
-  dict['2dup'] = dict['over'] + dict['over'];
-  dict['z+'] = ['var w1 = dstack.pop(); var w2 = dstack.pop(); ' +
-                'var w3 = dstack.pop(); var w4 = dstack.pop(); ' +
-                'dstack.push(w2 + w4); dstack.push(w1 + w3);'];
-  dict['z*'] = ['var w1 = dstack.pop(); var w2 = dstack.pop(); ' +
-                'var w3 = dstack.pop(); var w4 = dstack.pop(); ' +
-                'dstack.push(w4 * w2 - w3 * w1); ' +
-                'dstack.push(w4 * w1 + w3 * w2);'];
+  dict['2dup'] = dict['over'].concat(dict['over']);
+  dict['z+'] = ['var work1 = dstack.pop();',
+                'var work2 = dstack.pop();',
+                'var work3 = dstack.pop();',
+                'var work4 = dstack.pop();',
+                'dstack.push(work2 + work4);',
+                'dstack.push(work1 + work3);'];
+  dict['z*'] = ['var work1 = dstack.pop();',
+                'var work2 = dstack.pop();',
+                'var work3 = dstack.pop();',
+                'var work4 = dstack.pop();',
+                'dstack.push(work4 * work2 - work3 * work1);',
+                'dstack.push(work4 * work1 + work3 * work2);'];
 
-  dict['drop'] = ['dstack.pop();'];
-  dict['swap'] = ['var w1 = dstack.pop(); var w2 = dstack.pop(); ' +
-                  'dstack.push(w1); dstack.push(w2);'];
+  dict['drop'] = ['var work1 = dstack.pop();'];
+  dict['swap'] = ['var work1 = dstack.pop();',
+                  'var work2 = dstack.pop();',
+                  'dstack.push(work1);',
+                  'dstack.push(work2);'];
 
   dict['='] = ['dstack.push((dstack.pop() == dstack.pop())?1:0);'];
   dict['<>'] = ['dstack.push((dstack.pop() != dstack.pop())?1:0);'];
@@ -39,22 +50,22 @@ function core_words() {
 
   dict['+'] = ['dstack.push(dstack.pop() + dstack.pop());'];
   dict['*'] = ['dstack.push(dstack.pop() * dstack.pop());'];
-  dict['-'] = ['var w1 = dstack.pop(); ' +
-               'dstack.push(dstack.pop() - w1);'];
-  dict['/'] = ['var w1 = dstack.pop(); ' +
-               'dstack.push(dstack.pop() / w1);'];
-  dict['mod'] = ['var w1 = dstack.pop(); ' +
-                 'dstack.push(dstack.pop() % w1);'];
-  dict['pow'] = ['var w1 = dstack.pop(); ' +
-                 'dstack.push(Math.pow(dstack.pop(), w1));'];
+  dict['-'] = ['var work1 = dstack.pop();',
+               'dstack.push(dstack.pop() - work1);'];
+  dict['/'] = ['var work1 = dstack.pop();',
+               'dstack.push(dstack.pop() / work1);'];
+  dict['mod'] = ['var work1 = dstack.pop();',
+                 'dstack.push(dstack.pop() % work1);'];
+  dict['pow'] = ['var work1 = dstack.pop();',
+                 'dstack.push(Math.pow(dstack.pop(), work1));'];
   dict['**'] = dict['pow'];
-  dict['atan2'] = ['var w1 = dstack.pop(); ' +
-                   'dstack.push(Math.atan2(dstack.pop(), w1));'];
+  dict['atan2'] = ['var work1 = dstack.pop();',
+                   'dstack.push(Math.atan2(dstack.pop(), work1));'];
 
-  dict['and'] = ['var w1 = dstack.pop(); ' +
-                 'dstack.push((dstack.pop() && w1)?1:0);'];
-  dict['or'] = ['var w1 = dstack.pop(); ' +
-                'dstack.push((dstack.pop() || w1)?1:0);'];
+  dict['and'] = ['var work1 = dstack.pop();',
+                 'dstack.push((dstack.pop() && work1)?1:0);'];
+  dict['or'] = ['var work1 = dstack.pop();',
+                'dstack.push((dstack.pop() || work1)?1:0);'];
   dict['not'] = ['dstack.push(!dstack.pop()?1:0);'];
 
   dict['min'] = ['dstack.push(Math.min(dstack.pop(), dstack.pop()));'];
@@ -136,6 +147,61 @@ if (typeof String.prototype.trim != 'function') {
 }
 
 
+function optimize(code) {
+  var tmp_index = 1;
+  for (var i = 0; i < code.length - 1; i++) {
+    var retry = false;
+    var m = code[i].match(/^dstack\.push\((.*)\);$/);
+    if (m) {
+      for (var j = i + 1; j < code.length; j++) {
+        if (code[j].search(/dstack\.pop\(\)/) >= 0) {
+          var tmp = 'temp' + tmp_index;
+          tmp_index++;
+          var x = code[j].replace(/dstack\.pop\(\)/, tmp);
+          code = code.slice(0, i).concat(
+              'var ' + tmp + ' = ' + m[1] + ';').concat(code.slice(
+              i + 1, j)).concat([x]).concat(code.slice(j + 1));
+          i = -1;
+          retry = true;
+          break;
+       }
+        if (code[j].match(/^dstack\.push\((.*)\);$/)) break;
+        if (code[j].match(/[{}]/)) break;
+      }
+      if (retry) continue;
+    }
+
+    var m = code[i].match(/^rstack\.push\((.*)\);$/);
+    if (m) {
+      for (var j = i + 1; j < code.length; j++) {
+        if (code[j].search(/rstack\.pop\(\)/) >= 0) {
+          var tmp = 'temp' + tmp_index;
+          tmp_index++;
+          var x = code[j].replace(/rstack\.pop\(\)/, tmp);
+          code = code.slice(0, i).concat(
+              'var ' + tmp + ' = ' + m[1] + ';').concat(code.slice(
+              i + 1, j)).concat([x]).concat(code.slice(j + 1));
+          i = -1;
+          retry = true;
+          break;
+        }
+        if (code[j].match(/^rstack\.push\((.*)\);$/)) break;
+        if (code[j].match(/[{}]/)) break;
+      }
+      if (retry) continue;
+    }
+  }
+
+  console.log(code.join('\n') + '\n');
+  return code;
+}
+
+
+function bogus(x, y) {
+  return [1, 0, 1, 1];
+}
+
+
 function compile(src) {
   var code = ['var go = function(x, y) {',
               ' var dstack=[]; var rstack=[]; var mem=[];',
@@ -162,12 +228,12 @@ function compile(src) {
       i++;
       pending_name = src[i];
       // Disallow nested words.
-      if (code_stack.length != 0) return 0;
+      if (code_stack.length != 0) return bogus;
       code_stack.push(code);
       code = [];
     } else if (word == ';') {
       // Disallow ; other than to end a word.
-      if (code_stack.length != 1) return 0;
+      if (code_stack.length != 1) return bogus;
       dict[pending_name] = code;
       code = code_stack.pop(); 
       pending_name = 'bogus';
@@ -178,6 +244,9 @@ function compile(src) {
     }
   }
   code.push('return dstack; }; go');
+  // Limit number of steps.
+  if (code.length > 2000) return bogus;
+  code = optimize(code);
   code = eval(code.join(' '));
   return code;
 }
@@ -225,14 +294,15 @@ function render_rows(image, ctx, img, y, w, h, next) {
     }
   } catch(e) {
     // Ignore errors.
+    //throw e;
   }
   ctx.putImageData(img, 0, 0);
   if (y < h) {
     setTimeout(function() {
       render_rows(image, ctx, img, y, w, h, next);
-    }, 1);
+    }, 0);
   } else {
-    setTimeout(next, 1);
+    setTimeout(next, 0);
   }
 }
 
@@ -243,7 +313,7 @@ function render(cv, image, next) {
   var img = ctx.createImageData(w, h);
 
   render_rows(image, ctx, img, 0, w, h, function() {
-    setTimeout(next, 1);
+    setTimeout(next, 0);
   });
 }
 
@@ -284,6 +354,7 @@ function update_haikus(next) {
       work.push([canvas, compile(code)]);
     } catch(e) {
       // Ignore errors.
+     // throw e;
     }
   }
   update_haikus_one(work, next);
