@@ -277,9 +277,9 @@ function render_rows(image, ctx, img, y, w, h, next) {
           var col = image(x / w, y / h);
           if (col[3] == null) col[3] = 1;
           if (isNaN(col[3])) col[3] = 0;
-          var alpha = col[3];
-          var alpha1 = 1 - col[3];
-          var alpha2 = 0.933333 * alpha1;
+          var alpha = Math.min(Math.max(0.0, col[3]), 1.0);
+          var alpha1 = 1.0 - alpha;
+          var alpha2 = 0.9333333333333 * alpha1;
           col[0] = col[0] * alpha + alpha2;
           col[1] = col[1] * alpha + alpha2;
           col[2] = col[2] * alpha + alpha1;
