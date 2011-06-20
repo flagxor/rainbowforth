@@ -332,7 +332,7 @@ function update_haikus_one(work, next) {
     return;
   }
   var cv = work[0][0];
-  var img = work[0][1];
+  var img = compile(work[0][1]);
   work = work.slice(1);
   render(cv, img, function() { update_haikus_one(work, next); });
 }
@@ -352,7 +352,7 @@ function update_haikus(next) {
     canvas.setAttribute('width', haiku.getAttribute('width'));
     canvas.setAttribute('height', haiku.getAttribute('height'));
     try {
-      work.push([canvas, compile(code)]);
+      work.push([canvas, code]);
     } catch(e) {
       // Ignore errors.
      // throw e;
