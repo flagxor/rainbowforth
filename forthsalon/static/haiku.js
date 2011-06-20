@@ -137,6 +137,14 @@ if (typeof String.prototype.trim != 'function') {
 
 
 function optimize(code) {
+  // Use alternate pre/post-amble to optimize away dstack/rstack.
+  code = code.slice(0, code.length - 1);
+  code[0] = 'var go = function(x, y) {';
+  code.push('dstack.pop()');
+  code.push('dstack.pop()');
+  code.push('dstack.pop()');
+  code.push('dstack.pop()');
+
   var tmp_index = 1;
   for (var i = 0; i < code.length - 1; i++) {
     var retry = false;
@@ -181,7 +189,29 @@ function optimize(code) {
     }
   }
 
+  // Fill in missing stack items with defaults [0,0,0,1].
+  var count = 0;
+  while (count < 4 && code[code.length - 1] == 'dstack.pop()') {
+    code = code.slice(0, code.length - 1);
+    count++;
+  }
+  count = 4 - count;
+  var ret = code.slice(code.length - count, code.length).reverse();
+  while (ret.length < 3) ret.push('0');
+  if (ret.length < 4) ret.push('1');
+  code = code.slice(0, code.length - count);
+  code.push('return [' + ret.join(', ') + ']; }; go');
+
+  // Dump code to console.
   console.log(code.join('\n') + '\n');
+
+  // Require no extra stuff on the stacks.
+  for (var i = 0; i < code.length; i++) {
+    if (code[i].search(/stack/) >= 0) {
+      return ['var go = function(x, y) { return [1, 0, 0.7, 1]; }; go'];
+    }
+  }
+
   return code;
 }
 
@@ -277,7 +307,6 @@ function render_rows(image, ctx, img, y, w, h, next) {
     }
   } catch(e) {
     // Ignore errors.
-    //throw e;
   }
   ctx.putImageData(img, 0, 0);
   if (y < h) {
@@ -337,7 +366,6 @@ function update_haikus(next) {
       work.push([canvas, code]);
     } catch(e) {
       // Ignore errors.
-     // throw e;
     }
   }
   update_haikus_one(work, next);
