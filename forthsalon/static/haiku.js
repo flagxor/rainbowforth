@@ -279,8 +279,9 @@ function render_rows(image, ctx, img, y, w, h, next) {
           if (isNaN(col[3])) col[3] = 0;
           var alpha = col[3];
           var alpha1 = 1 - col[3];
-          col[0] = col[0] * alpha + alpha1;
-          col[1] = col[1] * alpha + alpha1;
+          var alpha2 = 0.933333 * alpha1;
+          col[0] = col[0] * alpha + alpha2;
+          col[1] = col[1] * alpha + alpha2;
           col[2] = col[2] * alpha + alpha1;
           col[3] = 1;
           img.data[pos++] = Math.floor(col[0] * 255);
