@@ -609,30 +609,6 @@ core_words = [
     ],
   },
   {
-    'names': ['if', 'else', 'then'],
-    'stack': '( f -- )',
-    'summary': 'Describe a conditional branch.',
-    'description': [
-        'As in tradition Forth, one value is removed from the data stack. '
-        'If that value is considered "true", the true-case is executed, '
-        'execution then continues after "then". If not, the false-case if '
-        'any is executed, execution then continues after "then". '
-        ,
-        'Much of the complexity surrounding interpreter state with flow '
-        'control is glossed over, as these words are implemented using '
-        'Javascript flow control words. '
-        , 
-        'if <true-case> else <false-case> then'
-        ,
-        'if <true-case> then'
-        ,
-        boolean_text,
-    ],
-    'examples': [
-        [': foo 2dup < if drop else swap drop then ; 3 4 foo', '3 (min)'],
-    ],
-  },
-  {
     'names': [':', ';'],
     'summary': 'Define a new word.',
     'description': [

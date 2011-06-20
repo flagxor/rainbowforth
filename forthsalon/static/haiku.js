@@ -82,10 +82,6 @@ function core_words() {
 
   dict['random'] = ['dstack.push(Math.random());'];
 
-  dict['if'] = ['if(dstack.pop()) {'];
-  dict['else'] = ['} else {'];
-  dict['then'] = ['}'];
-
   return dict;
 }
 
