@@ -15,16 +15,6 @@ return_stack_text = (
 )
 
 
-memory_space_text = (
-    'The memory space in Haiku Forth is semi-unspecified. '
-    'Implementation details may change. '
-    'In general you can load and store from the address provided by '
-    'variables create with _variable or from _here assuming appropriate '
-    'use of _allot. '
-    'Addresses are in units of one floating point number. '
-)
-
-
 floating_point_text = (
     'NOTE: In Haiku Forth (unlike Traditional Forth), all stack cells and '
     'variables are floating point numbers. '
@@ -100,34 +90,6 @@ core_words = [
     'examples': [
         ['1 2 3 _push _+ _pop _*', '9'],
         ['_2dup _push _push _* _pop _pop _/ _-', '(a*b) - (a/b)'],
-    ],
-  },
-  {
-    'names': ['@'],
-    'stack': '( a -- n )',
-    'summary': 'Load the from the address on top of the stack.',
-    'description': [
-        memory_space_text
-        ,
-        floating_point_text
-    ],
-    'examples': [
-        ['_variable foo 3 foo _!  foo _@', '3'],
-        ['_here 1 _allot  4 _over _! _@', ' 4'],
-    ],
-  },
-  {
-    'names': ['!'],
-    'stack': '( n a -- )',
-    'summary': 'Store to the address on top of the stack the value under it.',
-    'description': [
-        memory_space_text
-        ,
-        floating_point_text
-    ],
-    'examples': [
-        ['_variable foo 3 foo _!  foo _@', '3'],
-        ['_here 1 _allot  4 _over _! _@', ' 4'],
     ],
   },
   {
@@ -671,35 +633,6 @@ core_words = [
     ],
   },
   {
-    'names': ['here'],
-    'stack': '( -- n )',
-    'summary': ('Put the address of the first free memory location on '
-                'the data stack.'),
-    'description': [
-        'This word loosly corresponds to its traditional Forth counterpart. '
-        'Very little of the underlying Forth allocation model is present. '
-        ,
-        floating_point_text
-    ],
-    'examples': [
-        ['here 1 allot 3 over ! @', '3'],
-    ],
-  },
-  {
-    'names': ['allot'],
-    'stack': '( n -- )',
-    'summary': 'Allocate some number of values',
-    'description': [
-        'This word loosly corresponds to its traditional Forth counterpart. '
-        'Very little of the underlying Forth allocation model is present. '
-        ,
-        floating_point_text
-    ],
-    'examples': [
-        ['here 1 allot 3 over ! @', '3'],
-    ],
-  },
-  {
     'names': [':', ';'],
     'summary': 'Define a new word.',
     'description': [
@@ -711,19 +644,6 @@ core_words = [
     ],
     'examples': [
         [': square ( n -- n ) dup * ; 4 square', '16'],
-    ],
-  },
-  {
-    'names': ['variable'],
-    'summary': 'Define a variable.',
-    'description': [
-        'As in traditional Forth, variables return their address when '
-        'invoked. _@ and _! are then used to load and store to the variable. '
-        ,
-        floating_point_text
-    ], 
-    'examples': [
-        ['variable foo 3 foo ! foo @', '3'],
     ],
   },
 ]

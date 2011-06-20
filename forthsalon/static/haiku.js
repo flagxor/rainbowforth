@@ -8,10 +8,6 @@ function core_words() {
   dict['>r'] = dict['push'];
   dict['r>'] = dict['pop'];
 
-  dict['@'] = ['dstack.push(mem[dstack.pop()]);'];
-  dict['!'] = ['var work1 = dstack.pop();',
-               'mem[work1] = dstack.pop();'];
-
   dict['dup'] = ['var work1 = dstack.pop();',
                  'dstack.push(work1);',
                  'dstack.push(work1);'];
@@ -89,9 +85,6 @@ function core_words() {
   dict['if'] = ['if(dstack.pop()) {'];
   dict['else'] = ['} else {'];
   dict['then'] = ['}'];
-
-  dict['here'] = ['dstack.push(here);'];
-  dict['allot'] = ['here += dstack.pop();'];
 
   return dict;
 }
@@ -203,11 +196,8 @@ function bogus(x, y) {
 
 
 function compile(src) {
-  var code = ['var go = function(x, y) {',
-              ' var dstack=[]; var rstack=[]; var mem=[];',
-              ' var here = 1024;'];
+  var code = ['var go = function(x, y) { var dstack=[]; var rstack=[];'];
   var dict = core_words();
-  var var_index = 0;
   var pending_name = 'bogus';
   var code_stack = [];
   src = src.replace(/[ \r\n\t]+/g, ' ').trim();
@@ -215,10 +205,8 @@ function compile(src) {
   for (var i = 0; i < src.length; i++) {
     var word = src[i];
     word = word.toLowerCase();
-    if (word == 'variable') {
-      i++;
-      dict[src[i]] = ['dstack.push(' + var_index + ');'];
-      var_index++;
+    if (word in dict) {
+      code = code.concat(dict[word]);
     } else if (word == '(') {
       // Skip comments.
       while (i < src.length && src[i] != ')') {
@@ -237,8 +225,6 @@ function compile(src) {
       dict[pending_name] = code;
       code = code_stack.pop(); 
       pending_name = 'bogus';
-    } else if (word in dict) {
-      code = code.concat(dict[word]);
     } else {
       code.push('dstack.push(' + parseFloat(word) + ');');
     }
