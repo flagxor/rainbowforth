@@ -59,10 +59,10 @@ core_words = [
   {
     'names': ['t'],
     'stack': '( -- t )',
-    'summary': 'Put the current time in second since epoch on the stack.',
+    'summary': 'Put the current time in seconds since midnight on the stack.',
     'description': [
         'Unique to Haiku Forth. Returns a floating point number. '
-        'Experimental, may go away. '
+        'Midnight based to allow local time clocks. '
         ,
         floating_point_text
     ],

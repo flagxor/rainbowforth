@@ -380,7 +380,11 @@ function draw3d(cv) {
 
   var time_val_loc = gl.getUniformLocation(cv.program3d, 'time_val');
   var dt = new Date();
-  gl.uniform1f(time_val_loc, dt.getSeconds() + dt.getMilliseconds() / 1000.0);
+  var tm = dt.getHours();
+  tm = tm * 60 + dt.getMinutes();
+  tm = tm * 60 + dt.getSeconds();
+  tm = tm + dt.getMilliseconds() / 1000.0;
+  gl.uniform1f(time_val_loc, tm);
  
   gl.clearColor(0.0, 0.0, 0.0, 0.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
