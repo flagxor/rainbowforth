@@ -62,8 +62,8 @@ function update() {
   var src_code = document.getElementById('src_code');
   var dst_code = document.getElementById('dst_code');
   dst_code.value = src_code.value;
-  update_haikus(function() {});
   update_tags();
+  update_haikus(function() { update(); });
 }
 
 function init() {

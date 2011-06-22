@@ -327,13 +327,10 @@ function render_rows(image, ctx, img, y, w, h, next) {
   }
 }
 
-function render3d(cv, fshader_code, next) {
+function setup3d(cv, fshader_code) {
   gl = cv.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
-  
-  gl.clearColor(0.0, 0.0, 0.0, 0.0);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  
+
   var fshader = gl.createShader(gl.FRAGMENT_SHADER);
   gl.shaderSource(fshader, fshader_code);
   gl.compileShader(fshader);
@@ -350,17 +347,19 @@ function render3d(cv, fshader_code, next) {
       '}'].join('\n'));
   gl.compileShader(vshader);
   if (!gl.getShaderParameter(vshader, gl.COMPILE_STATUS)) throw 'bad vshader';
- 
+
   var program = gl.createProgram();
   gl.attachShader(program, fshader);
   gl.attachShader(program, vshader);
   gl.linkProgram(program);
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw 'bad link';
- 
+
   gl.validateProgram(program);
-  if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) throw 'bad program';
+  if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
+    throw 'bad program';
+  }
   gl.useProgram(program);
- 
+
   var vattrib = gl.getAttribLocation(program, 'ppos');
   if(vattrib == -1) throw 'ppos cannot get address';
   gl.enableVertexAttribArray(vattrib);
@@ -371,15 +370,21 @@ function render3d(cv, fshader_code, next) {
                                    -1.0,-1.0, 1.0,1.0, -1.0,1.0]);
   gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
   gl.vertexAttribPointer(vattrib, 2, gl.FLOAT, false, 0, 0);
- 
-  var time_val_loc = gl.getUniformLocation(program, 'time_val');
-  gl.uniform1f(time_val_loc, new Date().getTime());
- 
-  gl.drawArrays(gl.TRIANGLES, 0, 6);
-  gl.flush()
 
-  // Do the next thing.
-  setTimeout(next, 0);
+  cv.program3d = program;
+}
+
+function draw3d(cv) {
+  gl = cv.getContext('experimental-webgl');
+  if (!gl) throw 'no gl context';
+
+  var time_val_loc = gl.getUniformLocation(cv.program3d, 'time_val');
+  var dt = new Date();
+  gl.uniform1f(time_val_loc, dt.getSeconds() + dt.getMilliseconds() / 1000.0);
+ 
+  gl.clearColor(0.0, 0.0, 0.0, 0.0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
 
 function make_fragment_shader(code) {
@@ -387,9 +392,9 @@ function make_fragment_shader(code) {
     throw 'random not supported';
   }
   code = code.slice(1);
-  if (code.join(' ').search('time_val') < 0) {
-    throw 'only use for time_val';
-  }
+//  if (code.join(' ').search('time_val') < 0) {
+//    throw 'only use for time_val';
+//  }
   code = ['precision highp float;',
           'varying vec2 tpos;',
           'uniform float time_val;',
@@ -408,6 +413,7 @@ function make_fragment_shader(code) {
   }
   code[code.length-1] = code[code.length-1].replace(
       ']; }; go', '); ' +
+      'gl_FragColor.a = min(max(0.0, gl_FragColor.a), 1.0); ' +
       'gl_FragColor.r *= gl_FragColor.a; ' +
       'gl_FragColor.g *= gl_FragColor.a; ' + 
       'gl_FragColor.b *= gl_FragColor.a; }');
@@ -419,10 +425,18 @@ function make_fragment_shader(code) {
 }
 
 function render(cv, code, next) {
+  if (cv.code == code) {
+    if (cv.program3d != null) draw3d(cv);
+    setTimeout(next, 0);
+    return;
+  }
+  cv.code = code;
   var compiled_code = compile(code);
   try {
     var fshader = make_fragment_shader(compiled_code);
-    render3d(cv, fshader, next);
+    setup3d(cv, fshader);
+    draw3d(cv);
+    setTimeout(next, 0);
     return;
   } catch(e) {
     // Fall back on software.
@@ -455,13 +469,15 @@ function find_tag(parent, tag) {
 
 function update_haikus_one(work, next) {
   if (work.length == 0) {
-    next();
+    setTimeout(next, 0);
     return;
   }
   var cv = work[0][0];
   var code = work[0][1];
   work = work.slice(1);
-  render(cv, code, function() { update_haikus_one(work, next); });
+  render(cv, code, function() {
+    update_haikus_one(work, next);
+  });
 }
 
 function update_haikus(next) {
