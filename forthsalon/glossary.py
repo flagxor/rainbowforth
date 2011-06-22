@@ -57,6 +57,17 @@ core_words = [
     ],
   },
   {
+    'names': ['t'],
+    'stack': '( -- t )',
+    'summary': 'Put the current time in second since epoch on the stack.',
+    'description': [
+        'Unique to Haiku Forth. Returns a floating point number. '
+        'Experimental, may go away. '
+        ,
+        floating_point_text
+    ],
+  },
+  {
     'names': ['push', '>r'],
     'summary': 'Move one value from the data stack to the return stack.',
     'description': [

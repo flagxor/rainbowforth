@@ -1,68 +1,71 @@
 function core_words() {
   var dict = new Object();
-  dict['x'] = ['dstack.push(x);']; 
-  dict['y'] = ['dstack.push(y);']; 
+  dict['x'] = ['dstack.push(xpos);']; 
+  dict['y'] = ['dstack.push(ypos);']; 
+  dict['t'] = ['dstack.push(time_val);']; 
 
   dict['push'] = ['rstack.push(dstack.pop());'];
   dict['pop'] = ['dstack.push(rstack.pop());'];
   dict['>r'] = dict['push'];
   dict['r>'] = dict['pop'];
 
-  dict['dup'] = ['var work1 = dstack.pop();',
+  dict['dup'] = ['work1 = dstack.pop();',
                  'dstack.push(work1);',
                  'dstack.push(work1);'];
-  dict['over'] = ['var work1 = dstack.pop();',
-                  'var work2 = dstack.pop();',
+  dict['over'] = ['work1 = dstack.pop();',
+                  'work2 = dstack.pop();',
                   'dstack.push(work2);',
                   'dstack.push(work1);',
                   'dstack.push(work2);'];
 
   dict['2dup'] = dict['over'].concat(dict['over']);
-  dict['z+'] = ['var work1 = dstack.pop();',
-                'var work2 = dstack.pop();',
-                'var work3 = dstack.pop();',
-                'var work4 = dstack.pop();',
+  dict['z+'] = ['work1 = dstack.pop();',
+                'work2 = dstack.pop();',
+                'work3 = dstack.pop();',
+                'work4 = dstack.pop();',
                 'dstack.push(work2 + work4);',
                 'dstack.push(work1 + work3);'];
-  dict['z*'] = ['var work1 = dstack.pop();',
-                'var work2 = dstack.pop();',
-                'var work3 = dstack.pop();',
-                'var work4 = dstack.pop();',
+  dict['z*'] = ['work1 = dstack.pop();',
+                'work2 = dstack.pop();',
+                'work3 = dstack.pop();',
+                'work4 = dstack.pop();',
                 'dstack.push(work4 * work2 - work3 * work1);',
                 'dstack.push(work4 * work1 + work3 * work2);'];
 
-  dict['drop'] = ['var work1 = dstack.pop();'];
-  dict['swap'] = ['var work1 = dstack.pop();',
-                  'var work2 = dstack.pop();',
+  dict['drop'] = ['work1 = dstack.pop();'];
+  dict['swap'] = ['work1 = dstack.pop();',
+                  'work2 = dstack.pop();',
                   'dstack.push(work1);',
                   'dstack.push(work2);'];
 
-  dict['='] = ['dstack.push((dstack.pop() == dstack.pop())?1:0);'];
-  dict['<>'] = ['dstack.push((dstack.pop() != dstack.pop())?1:0);'];
-  dict['<'] = ['dstack.push((dstack.pop() > dstack.pop())?1:0);'];
-  dict['>'] = ['dstack.push((dstack.pop() < dstack.pop())?1:0);'];
-  dict['<='] = ['dstack.push((dstack.pop() >= dstack.pop())?1:0);'];
-  dict['>='] = ['dstack.push((dstack.pop() <= dstack.pop())?1:0);'];
+  dict['='] = ['dstack.push((dstack.pop() == dstack.pop())?1.0:0.0);'];
+  dict['<>'] = ['dstack.push((dstack.pop() != dstack.pop())?1.0:0.0);'];
+  dict['<'] = ['dstack.push((dstack.pop() > dstack.pop())?1.0:0.0);'];
+  dict['>'] = ['dstack.push((dstack.pop() < dstack.pop())?1.0:0.0);'];
+  dict['<='] = ['dstack.push((dstack.pop() >= dstack.pop())?1.0:0.0);'];
+  dict['>='] = ['dstack.push((dstack.pop() <= dstack.pop())?1.0:0.0);'];
 
   dict['+'] = ['dstack.push(dstack.pop() + dstack.pop());'];
   dict['*'] = ['dstack.push(dstack.pop() * dstack.pop());'];
-  dict['-'] = ['var work1 = dstack.pop();',
+  dict['-'] = ['work1 = dstack.pop();',
                'dstack.push(dstack.pop() - work1);'];
-  dict['/'] = ['var work1 = dstack.pop();',
+  dict['/'] = ['work1 = dstack.pop();',
                'dstack.push(dstack.pop() / work1);'];
-  dict['mod'] = ['var work1 = dstack.pop();',
-                 'dstack.push(dstack.pop() % work1);'];
-  dict['pow'] = ['var work1 = dstack.pop();',
+  dict['mod'] = ['work1 = dstack.pop();',
+                 'work2 = dstack.pop();',
+                 'work2 %= work1;',
+                 'dstack.push(work2);'];
+  dict['pow'] = ['work1 = dstack.pop();',
                  'dstack.push(Math.pow(dstack.pop(), work1));'];
   dict['**'] = dict['pow'];
-  dict['atan2'] = ['var work1 = dstack.pop();',
+  dict['atan2'] = ['work1 = dstack.pop();',
                    'dstack.push(Math.atan2(dstack.pop(), work1));'];
 
-  dict['and'] = ['var work1 = dstack.pop();',
-                 'dstack.push((dstack.pop() && work1)?1:0);'];
-  dict['or'] = ['var work1 = dstack.pop();',
-                'dstack.push((dstack.pop() || work1)?1:0);'];
-  dict['not'] = ['dstack.push(!dstack.pop()?1:0);'];
+  dict['and'] = ['work1 = dstack.pop();',
+                 'dstack.push((dstack.pop()!=0.0 && work1!=0.0)?1.0:0.0);'];
+  dict['or'] = ['work1 = dstack.pop();',
+                'dstack.push((dstack.pop()!=0.0 || work1!=0.0)?1.0:0.0);'];
+  dict['not'] = ['dstack.push(dstack.pop()!=0.0?1.0:0.0);'];
 
   dict['min'] = ['dstack.push(Math.min(dstack.pop(), dstack.pop()));'];
   dict['max'] = ['dstack.push(Math.max(dstack.pop(), dstack.pop()));'];
@@ -136,14 +139,22 @@ if (typeof String.prototype.trim != 'function') {
 }
 
 
+BOGUS = ['var go = function(xpos, ypos) {',
+         'return [1.0, 0.0, 0.7, 1.0]; }; go'];
+
+
 function optimize(code) {
+  if (code == BOGUS) return BOGUS;
+  CAPPED_VALUE = 'dstack.pop()';
+
   // Use alternate pre/post-amble to optimize away dstack/rstack.
   code = code.slice(0, code.length - 1);
-  code[0] = 'var go = function(x, y) {';
-  code.push('dstack.pop()');
-  code.push('dstack.pop()');
-  code.push('dstack.pop()');
-  code.push('dstack.pop()');
+  code[0] = 'var go = function(xpos, ypos) { ' + 
+            'var time_val=0.0; var work1, work2, work3, work4;';
+  code.push(CAPPED_VALUE);
+  code.push(CAPPED_VALUE);
+  code.push(CAPPED_VALUE);
+  code.push(CAPPED_VALUE);
 
   var tmp_index = 1;
   for (var i = 0; i < code.length - 1; i++) {
@@ -191,14 +202,14 @@ function optimize(code) {
 
   // Fill in missing stack items with defaults [0,0,0,1].
   var count = 0;
-  while (count < 4 && code[code.length - 1] == 'dstack.pop()') {
+  while (count < 4 && code[code.length - 1] == CAPPED_VALUE) {
     code = code.slice(0, code.length - 1);
     count++;
   }
   count = 4 - count;
   var ret = code.slice(code.length - count, code.length).reverse();
-  while (ret.length < 3) ret.push('0');
-  if (ret.length < 4) ret.push('1');
+  while (ret.length < 3) ret.push('0.0');
+  if (ret.length < 4) ret.push('1.0');
   code = code.slice(0, code.length - count);
   code.push('return [' + ret.join(', ') + ']; }; go');
 
@@ -208,7 +219,7 @@ function optimize(code) {
   // Require no extra stuff on the stacks.
   for (var i = 0; i < code.length; i++) {
     if (code[i].search(/stack/) >= 0) {
-      return ['var go = function(x, y) { return [1, 0, 0.7, 1]; }; go'];
+      return BOGUS;
     }
   }
 
@@ -216,13 +227,9 @@ function optimize(code) {
 }
 
 
-function bogus(x, y) {
-  return [1, 0, 1, 1];
-}
-
-
 function compile(src) {
-  var code = ['var go = function(x, y) { var dstack=[]; var rstack=[];'];
+  var code = ['var go = function(xpos, ypos) { ' +
+              'var time_val=0.0; var dstack=[]; var rstack=[];'];
   var dict = core_words();
   var pending_name = 'bogus';
   var code_stack = [];
@@ -242,24 +249,27 @@ function compile(src) {
       i++;
       pending_name = src[i];
       // Disallow nested words.
-      if (code_stack.length != 0) return bogus;
+      if (code_stack.length != 0) return BOGUS;
       code_stack.push(code);
       code = [];
     } else if (word == ';') {
       // Disallow ; other than to end a word.
-      if (code_stack.length != 1) return bogus;
+      if (code_stack.length != 1) return BOGUS;
       dict[pending_name] = code;
       code = code_stack.pop(); 
       pending_name = 'bogus';
     } else {
-      code.push('dstack.push(' + parseFloat(word) + ');');
+      var num = '' + parseFloat(word);
+      if (num.match(/^[-]?[0-9]+$/)) {
+        num += '.0';
+      }
+      code.push('dstack.push(' + num + ');');
     }
   }
   code.push('return dstack; }; go');
   // Limit number of steps.
-  if (code.length > 2000) return bogus;
+  if (code.length > 2000) return BOGUS;
   code = optimize(code);
-  code = eval(code.join(' '));
   return code;
 }
 
@@ -272,7 +282,6 @@ function render_rows(image, ctx, img, y, w, h, next) {
         var pos = w * (h - 1 - y) * 4;
         for (var x = 0; x < w; x++) {
           var col = image(x / w, y / h);
-          if (col[3] == null) col[3] = 1;
           img.data[pos++] = Math.floor(col[0] * 255);
           img.data[pos++] = Math.floor(col[1] * 255);
           img.data[pos++] = Math.floor(col[2] * 255);
@@ -318,11 +327,118 @@ function render_rows(image, ctx, img, y, w, h, next) {
   }
 }
 
-function render(cv, image, next) {
-  var ctx = cv.getContext('2d');
-  var w = cv.width;
-  var h = cv.height;
-  var img = ctx.createImageData(w, h);
+function render3d(cv, fshader_code, next) {
+  gl = cv.getContext('experimental-webgl');
+  if (!gl) throw 'no gl context';
+  
+  gl.clearColor(0.0, 0.0, 0.0, 0.0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  
+  var fshader = gl.createShader(gl.FRAGMENT_SHADER);
+  gl.shaderSource(fshader, fshader_code);
+  gl.compileShader(fshader);
+  if (!gl.getShaderParameter(fshader, gl.COMPILE_STATUS)) throw 'bad fshader';
+ 
+  var vshader = gl.createShader(gl.VERTEX_SHADER);
+  gl.shaderSource(vshader, [
+      'attribute vec2 ppos;',
+      'varying highp vec2 tpos;',
+      'void main(void) {',
+      'gl_Position = vec4(ppos.x, ppos.y, 0.0, 1.0);',
+      'tpos.x = (ppos.x + 1.0) / 2.0;',
+      'tpos.y = (ppos.y + 1.0) / 2.0;',
+      '}'].join('\n'));
+  gl.compileShader(vshader);
+  if (!gl.getShaderParameter(vshader, gl.COMPILE_STATUS)) throw 'bad vshader';
+ 
+  var program = gl.createProgram();
+  gl.attachShader(program, fshader);
+  gl.attachShader(program, vshader);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw 'bad link';
+ 
+  gl.validateProgram(program);
+  if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) throw 'bad program';
+  gl.useProgram(program);
+ 
+  var vattrib = gl.getAttribLocation(program, 'ppos');
+  if(vattrib == -1) throw 'ppos cannot get address';
+  gl.enableVertexAttribArray(vattrib);
+
+  var time_val_loc = gl.getUniformLocation(program, 'time_val');
+  gl.uniform1f(time_val_loc, 0.5);
+ 
+  var vbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vbuffer);
+  var vertices = new Float32Array([-1.0,-1.0, 1.0,-1.0, 1.0,1.0,
+                                   -1.0,-1.0, 1.0,1.0, -1.0,1.0]);
+  gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+  gl.vertexAttribPointer(vattrib, 2, gl.FLOAT, false, 0, 0);
+ 
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+  gl.flush()
+
+  // Do the next thing.
+  setTimeout(next, 0);
+}
+
+function make_fragment_shader(code) {
+  if (code.join(' ').search('random') >= 0) {
+    throw 'random not supported';
+  }
+  code = code.slice(1);
+  if (code.join(' ').search('time_val') < 0) {
+    throw 'only use for time_val';
+  }
+  code = ['precision highp float;',
+          'varying vec2 tpos;',
+          'uniform float time_val;',
+          'void main(void) {',
+          'float work1, work2, work3, work4;',
+  ].concat(code);
+  for (var i = 0; i < code.length; i++) {
+    code[i] = code[i].replace(/var /, 'float ');
+    code[i] = code[i].replace(/xpos/g, 'tpos.x');
+    code[i] = code[i].replace(/ypos/g, 'tpos.y');
+    code[i] = code[i].replace(/Math\./g, '');
+    code[i] = code[i].replace(/atan2/g, 'atan');
+    code[i] = code[i].replace('work2 %= work1;', 'work2 = mod(work2, work1);');
+    code[i] = code[i].replace(/PI/g, '3.1415926535897931');
+    code[i] = code[i].replace(/NaN/g, '0.0');
+  }
+  code[code.length-1] = code[code.length-1].replace(
+      ']; }; go', '); ' +
+      'gl_FragColor.r *= gl_FragColor.a; ' +
+      'gl_FragColor.g *= gl_FragColor.a; ' + 
+      'gl_FragColor.b *= gl_FragColor.a; }');
+  code[code.length-1] = code[code.length-1].replace(
+      'return [', 'gl_FragColor = vec4(');
+  code = code.join('\n');
+  console.log(code);
+  return code;
+}
+
+function render(cv, code, next) {
+  var compiled_code = compile(code);
+  try {
+    var fshader = make_fragment_shader(compiled_code);
+    render3d(cv, fshader, next);
+    return;
+  } catch(e) {
+    // Fall back on software.
+  }
+
+  try {
+    var image = eval(compiled_code.join(' '));
+    var ctx = cv.getContext('2d');
+    var w = cv.width;
+    var h = cv.height;
+    var img = ctx.createImageData(w, h);
+  } catch(e) {
+    // Go on to the next one.
+    setTimeout(next, 0);
+    return;
+  }
 
   render_rows(image, ctx, img, 0, w, h, function() {
     setTimeout(next, 0);
@@ -343,9 +459,9 @@ function update_haikus_one(work, next) {
     return;
   }
   var cv = work[0][0];
-  var img = compile(work[0][1]);
+  var code = work[0][1];
   work = work.slice(1);
-  render(cv, img, function() { update_haikus_one(work, next); });
+  render(cv, code, function() { update_haikus_one(work, next); });
 }
 
 function update_haikus(next) {
