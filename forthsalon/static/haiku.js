@@ -365,15 +365,15 @@ function render3d(cv, fshader_code, next) {
   if(vattrib == -1) throw 'ppos cannot get address';
   gl.enableVertexAttribArray(vattrib);
 
-  var time_val_loc = gl.getUniformLocation(program, 'time_val');
-  gl.uniform1f(time_val_loc, 0.5);
- 
   var vbuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, vbuffer);
   var vertices = new Float32Array([-1.0,-1.0, 1.0,-1.0, 1.0,1.0,
                                    -1.0,-1.0, 1.0,1.0, -1.0,1.0]);
   gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
   gl.vertexAttribPointer(vattrib, 2, gl.FLOAT, false, 0, 0);
+ 
+  var time_val_loc = gl.getUniformLocation(program, 'time_val');
+  gl.uniform1f(time_val_loc, new Date().getTime());
  
   gl.drawArrays(gl.TRIANGLES, 0, 6);
   gl.flush()
