@@ -392,9 +392,6 @@ function draw3d(cv) {
 }
 
 function make_fragment_shader(code) {
-  if (code.join(' ').search('random') >= 0) {
-    throw 'random not supported';
-  }
   code = code.slice(1);
 //  if (code.join(' ').search('time_val') < 0) {
 //    throw 'only use for time_val';
@@ -403,7 +400,7 @@ function make_fragment_shader(code) {
           'varying vec2 tpos;',
           'uniform float time_val;',
           'void main(void) {',
-          'float work1, work2, work3, work4;',
+          'float work1, work2, work3, work4, seed;',
   ].concat(code);
   for (var i = 0; i < code.length; i++) {
     code[i] = code[i].replace(/var /, 'float ');
@@ -414,6 +411,9 @@ function make_fragment_shader(code) {
     code[i] = code[i].replace('work2 %= work1;', 'work2 = mod(work2, work1);');
     code[i] = code[i].replace(/PI/g, '3.1415926535897931');
     code[i] = code[i].replace(/NaN/g, '0.0');
+    code[i] = code[i].replace(/random\(\)/g,
+        '(seed=fract(sin(seed*104053.0+' +
+        '101869.0*tpos.x+102533.0*tpos.y)*103723.0))');
   }
   code[code.length-1] = code[code.length-1].replace(
       ']; }; go', '); ' +
