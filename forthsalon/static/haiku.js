@@ -327,12 +327,12 @@ function render_rows(image, ctx, img, y, w, h, next) {
   }
 }
 
-function setup3d(cv3, fshader_code) {
+function setup3d(cv3, code) {
   gl = cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
-
+    
   var fshader = gl.createShader(gl.FRAGMENT_SHADER);
-  gl.shaderSource(fshader, fshader_code);
+  gl.shaderSource(fshader, make_fragment_shader(code));
   gl.compileShader(fshader);
   if (!gl.getShaderParameter(fshader, gl.COMPILE_STATUS)) throw 'bad fshader';
  
@@ -374,12 +374,9 @@ function setup3d(cv3, fshader_code) {
   cv3.program3d = program;
 }
 
-function draw3d(cv, cv3) {
+function draw3d(cv3) {
   gl = cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
-
-  cv.style.display = 'none';
-  cv3.style.display = 'block';
 
   var time_val_loc = gl.getUniformLocation(cv3.program3d, 'time_val');
   var dt = new Date();
@@ -438,11 +435,14 @@ function code_animated(code) {
 
 function render(cv, cv3, animated, code, next) {
   if (cv3.code == code) {
-    if (cv3.program3d != null) draw3d(cv, cv3);
-    setTimeout(next, 0);
+    if (cv3.program3d != null) draw3d(cv3);
+    next();
     return;
   }
   cv3.code = code;
+
+  var compiled_code = compile(code);
+  var compiled_code_flat = compiled_code.join(' ');
 
   // Set animated to visible or not.
   if (code_animated(code)) {
@@ -451,37 +451,36 @@ function render(cv, cv3, animated, code, next) {
     animated.style.display = 'none';
   }
 
-  var compiled_code = compile(code);
-  var compiled_code_flat = compiled_code.join(' ');
   try {
     if (compiled_code_flat.search('time_val') < 0 &&
         compiled_code_flat.search('random') < 0 &&
         cv3.width <= 128) {
       throw 'only use for time_val and large';
     }
-    var fshader = make_fragment_shader(compiled_code);
-    setup3d(cv3, fshader);
-    draw3d(cv, cv3);
+    setup3d(cv3, compiled_code);
+    draw3d(cv3);
+    cv.style.display = 'none';
+    cv3.style.display = 'block';
     setTimeout(next, 0);
     return;
   } catch (e) {
     // Fall back on software.
   }
-  
+ 
   cv.style.display = 'block';
   cv3.style.display = 'none';
 
-  try {
+//  try {
     var image = eval(compiled_code_flat);
     var ctx = cv.getContext('2d');
     var w = cv.width;
     var h = cv.height;
     var img = ctx.createImageData(w, h);
-  } catch (e) {
+//  } catch (e) {
     // Go on to the next one.
-    setTimeout(next, 0);
-    return;
-  }
+//    setTimeout(next, 0);
+//    return;
+//  }
 
   render_rows(image, ctx, img, 0, w, h, function() {
     setTimeout(next, 0);
@@ -512,7 +511,7 @@ function update_haikus_one(work, next) {
   var animated = work[0][2];
   var code = work[0][3];
   work = work.slice(1);
-  render(canvas2d, canvas2d, animated, code, function() {
+  render(canvas2d, canvas3d, animated, code, function() {
     update_haikus_one(work, next);
   });
 }
@@ -548,7 +547,7 @@ function update_haikus(next) {
     var animated = find_tag_name(haiku, 'a', 'animated');
     if (animated == null) {
       animated = document.createElement('a');
-      animated.appendChild(document.createTextNode('&'));
+      animated.appendChild(document.createTextNode('*'));
       animated.name = 'animated';
       animated.href = '/haiku-animated';
       animated.style.display = 'none';

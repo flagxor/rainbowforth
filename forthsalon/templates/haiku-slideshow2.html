@@ -59,11 +59,19 @@ function init() {
   animate_haikus(function() { change(); });
 }
 
+
+var last_tm = new Date().getTime();
+
+
 function change() {
+  var tm = new Date().getTime();
+  if (tm - last_tm < {{ speed }} * 1000)) return;
+  last_tm = tm;
+
   var tag = document.getElementById('loading');
   tag.style.visibility = 'hidden';
   tag.style.display = 'none';
- 
+
   var haiku_count = {{ haiku_count }};
   var pick = Math.floor(Math.random() * haiku_count);
   for (var i = 0; i < haiku_count; i++) {
@@ -76,7 +84,6 @@ function change() {
       tag.style.display = 'none';
     }
   }
-  setTimeout(function() { change(); }, {{ speed }} * 1000);
 }
 </script>
 
