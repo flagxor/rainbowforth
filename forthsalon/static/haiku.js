@@ -529,7 +529,7 @@ function update_haikus(next) {
     if (canvas2d == null) {
       canvas2d = document.createElement('canvas');
       canvas2d.name = 'canvas2d';
-      canvas2d.style.display = 'none';
+      // have 2d canvas initially visible for layout.
       haiku.appendChild(canvas2d);
       canvas2d.setAttribute('width', haiku.getAttribute('width'));
       canvas2d.setAttribute('height', haiku.getAttribute('height'));
