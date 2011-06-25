@@ -56,7 +56,8 @@ div.haiku_text {
 <script type="text/javascript" src="/static/haiku.js"></script>
 <script type="text/javascript">
 function init() {
-  animate_haikus(function() { change(); });
+  update_haikus(function() {});
+  setInterval(change, 30);
 }
 
 
@@ -65,7 +66,7 @@ var last_tm = new Date().getTime();
 
 function change() {
   var tm = new Date().getTime();
-  if (tm - last_tm < {{ speed }} * 1000)) return;
+  if (tm - last_tm < {{ speed }} * 1000) return;
   last_tm = tm;
 
   var tag = document.getElementById('loading');

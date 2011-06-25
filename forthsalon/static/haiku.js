@@ -375,6 +375,8 @@ function setup3d(cv3, code) {
 }
 
 function draw3d(cv3) {
+  if (cv3.style.display == 'none') return;
+
   gl = cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
 
@@ -458,9 +460,9 @@ function render(cv, cv3, animated, code, next) {
       throw 'only use for time_val and large';
     }
     setup3d(cv3, compiled_code);
-    draw3d(cv3);
     cv.style.display = 'none';
     cv3.style.display = 'block';
+    draw3d(cv3);
     setTimeout(next, 0);
     return;
   } catch (e) {
