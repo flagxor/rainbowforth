@@ -63,11 +63,11 @@ function update() {
   var dst_code = document.getElementById('dst_code');
   dst_code.value = src_code.value;
   update_tags();
-  update_haikus(function() { update(); });
 }
 
 function init() {
   update();
+  animate_haikus(function() {});
 }
 
 function update_tags() {

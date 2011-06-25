@@ -314,7 +314,7 @@ function render_rows(image, ctx, img, y, w, h, next) {
         if (new Date().getTime() - start > 250) break;
       }
     }
-  } catch(e) {
+  } catch (e) {
     // Ignore errors.
   }
   ctx.putImageData(img, 0, 0);
@@ -327,8 +327,8 @@ function render_rows(image, ctx, img, y, w, h, next) {
   }
 }
 
-function setup3d(cv, fshader_code) {
-  gl = cv.getContext('experimental-webgl');
+function setup3d(cv3, fshader_code) {
+  gl = cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
 
   var fshader = gl.createShader(gl.FRAGMENT_SHADER);
@@ -371,14 +371,17 @@ function setup3d(cv, fshader_code) {
   gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
   gl.vertexAttribPointer(vattrib, 2, gl.FLOAT, false, 0, 0);
 
-  cv.program3d = program;
+  cv3.program3d = program;
 }
 
-function draw3d(cv) {
-  gl = cv.getContext('experimental-webgl');
+function draw3d(cv, cv3) {
+  gl = cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
 
-  var time_val_loc = gl.getUniformLocation(cv.program3d, 'time_val');
+  cv.style.display = 'none';
+  cv3.style.display = 'block';
+
+  var time_val_loc = gl.getUniformLocation(cv3.program3d, 'time_val');
   var dt = new Date();
   var tm = dt.getHours();
   tm = tm * 60 + dt.getMinutes();
@@ -393,9 +396,6 @@ function draw3d(cv) {
 
 function make_fragment_shader(code) {
   code = code.slice(1);
-//  if (code.join(' ').search('time_val') < 0) {
-//    throw 'only use for time_val';
-//  }
   code = ['precision highp float;',
           'varying vec2 tpos;',
           'uniform float time_val;',
@@ -428,31 +428,56 @@ function make_fragment_shader(code) {
   return code;
 }
 
-function render(cv, code, next) {
-  if (cv.code == code) {
-    if (cv.program3d != null) draw3d(cv);
+function code_animated(code) {
+  var tags = code_tags(code);
+  for (var i = 0; i < tags.length; i++) {
+    if (tags[i] == 'animated') return true;
+  }
+  return false;
+}
+
+function render(cv, cv3, animated, code, next) {
+  if (cv3.code == code) {
+    if (cv3.program3d != null) draw3d(cv, cv3);
     setTimeout(next, 0);
     return;
   }
-  cv.code = code;
-  var compiled_code = compile(code);
-  try {
-    var fshader = make_fragment_shader(compiled_code);
-    setup3d(cv, fshader);
-    draw3d(cv);
-    setTimeout(next, 0);
-    return;
-  } catch(e) {
-    // Fall back on software.
+  cv3.code = code;
+
+  // Set animated to visible or not.
+  if (code_animated(code)) {
+    animated.style.display = 'inline';
+  } else {
+    animated.style.display = 'none';
   }
 
+  var compiled_code = compile(code);
+  var compiled_code_flat = compiled_code.join(' ');
   try {
-    var image = eval(compiled_code.join(' '));
+    if (compiled_code_flat.search('time_val') < 0 &&
+        compiled_code_flat.search('random') < 0 &&
+        cv3.width <= 128) {
+      throw 'only use for time_val and large';
+    }
+    var fshader = make_fragment_shader(compiled_code);
+    setup3d(cv3, fshader);
+    draw3d(cv, cv3);
+    setTimeout(next, 0);
+    return;
+  } catch (e) {
+    // Fall back on software.
+  }
+  
+  cv.style.display = 'block';
+  cv3.style.display = 'none';
+
+  try {
+    var image = eval(compiled_code_flat);
     var ctx = cv.getContext('2d');
     var w = cv.width;
     var h = cv.height;
     var img = ctx.createImageData(w, h);
-  } catch(e) {
+  } catch (e) {
     // Go on to the next one.
     setTimeout(next, 0);
     return;
@@ -463,12 +488,18 @@ function render(cv, code, next) {
   });
 }
 
-function find_tag(parent, tag) {
-  for (var i = 0; i < parent.childNodes.length; i++) {
-    var child = parent.childNodes[i];
-    if (child.tagName == tag.toUpperCase()) return child;
+function find_tag_name(base, tag, name) {
+  tag = tag.toUpperCase();
+  for (var i = 0; i < base.childNodes.length; i++) {
+    var child = base.childNodes[i];
+    if (child.tagName == tag &&
+        (name == null || name == child.name)) return child;
   }
   return null;
+}
+
+function find_tag(base, tag) {
+  return find_tag_name(base, tag, null);
 }
 
 function update_haikus_one(work, next) {
@@ -476,10 +507,12 @@ function update_haikus_one(work, next) {
     setTimeout(next, 0);
     return;
   }
-  var cv = work[0][0];
-  var code = work[0][1];
+  var canvas2d = work[0][0];
+  var canvas3d = work[0][1];
+  var animated = work[0][2];
+  var code = work[0][3];
   work = work.slice(1);
-  render(cv, code, function() {
+  render(canvas2d, canvas2d, animated, code, function() {
     update_haikus_one(work, next);
   });
 }
@@ -491,18 +524,47 @@ function update_haikus(next) {
     var haiku = haikus[i];
     var code_tag = find_tag(haiku, 'textarea');
     var code = code_tag.value;
-    var canvas = find_tag(haiku, 'canvas');
-    if (canvas == null) {
-      canvas = document.createElement('canvas');
-      haiku.appendChild(canvas);
+    // Create 2d canvas.
+    var canvas2d = find_tag_name(haiku, 'canvas', 'canvas2d');
+    if (canvas2d == null) {
+      canvas2d = document.createElement('canvas');
+      canvas2d.name = 'canvas2d';
+      canvas2d.style.display = 'none';
+      haiku.appendChild(canvas2d);
+      canvas2d.setAttribute('width', haiku.getAttribute('width'));
+      canvas2d.setAttribute('height', haiku.getAttribute('height'));
     }
-    canvas.setAttribute('width', haiku.getAttribute('width'));
-    canvas.setAttribute('height', haiku.getAttribute('height'));
-    try {
-      work.push([canvas, code]);
-    } catch(e) {
-      // Ignore errors.
+    // Create 3d canvas.
+    var canvas3d = find_tag_name(haiku, 'canvas', 'canvas3d');
+    if (canvas3d == null) {
+      canvas3d = document.createElement('canvas');
+      canvas3d.name = 'canvas3d';
+      canvas3d.style.display = 'none';
+      haiku.appendChild(canvas3d);
+      canvas3d.setAttribute('width', haiku.getAttribute('width'));
+      canvas3d.setAttribute('height', haiku.getAttribute('height'));
     }
+    // Create animated tag.
+    var animated = find_tag_name(haiku, 'a', 'animated');
+    if (animated == null) {
+      animated = document.createElement('a');
+      animated.appendChild(document.createTextNode('&'));
+      animated.name = 'animated';
+      animated.href = '/haiku-animated';
+      animated.style.display = 'none';
+      haiku.insertBefore(animated, haiku.firstChild);
+    }
+    // Add to the work queue.
+    work.push([canvas2d, canvas3d, animated, code]);
   }
   update_haikus_one(work, next);
+}
+
+function animate_haikus(tick) {
+  update_haikus(function() {
+    tick();
+    setTimeout(function() {
+      animate_haikus(tick);
+    }, 30);
+  });
 }
