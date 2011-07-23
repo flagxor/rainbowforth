@@ -472,17 +472,17 @@ function render(cv, cv3, animated, code, next) {
   cv.style.display = 'block';
   cv3.style.display = 'none';
 
-//  try {
+  try {
     var image = eval(compiled_code_flat);
     var ctx = cv.getContext('2d');
     var w = cv.width;
     var h = cv.height;
     var img = ctx.createImageData(w, h);
-//  } catch (e) {
+  } catch (e) {
     // Go on to the next one.
-//    setTimeout(next, 0);
-//    return;
-//  }
+    setTimeout(next, 0);
+    return;
+  }
 
   render_rows(image, ctx, img, 0, w, h, function() {
     setTimeout(next, 0);
