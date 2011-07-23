@@ -218,7 +218,7 @@ function optimize(code, result_limit) {
   code.push('return [' + ret.join(', ') + ']; }; go');
 
   // Dump code to console.
-  console.log(code.join('\n') + '\n');
+  //console.log(code.join('\n') + '\n');
 
   // Require no extra stuff on the stacks.
   for (var i = 0; i < code.length; i++) {
@@ -427,7 +427,7 @@ function make_fragment_shader(code) {
   code[code.length-1] = code[code.length-1].replace(
       'return [', 'gl_FragColor = vec4(');
   code = code.join('\n');
-  console.log(code);
+  //console.log(code);
   return code;
 }
 
