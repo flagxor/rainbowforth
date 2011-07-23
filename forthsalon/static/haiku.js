@@ -140,10 +140,10 @@ if (typeof String.prototype.trim != 'function') {
 
 
 BOGUS = ['var go = function(xpos, ypos) {',
-         'return [1.0, 0.0, 0.7, 1.0]; }; go'];
+         'return [1.0, 0.0, 0.7, 1.0, 0.0]; }; go'];
 
 
-function optimize(code) {
+function optimize(code, result_limit) {
   if (code == BOGUS) return BOGUS;
   CAPPED_VALUE = 'dstack.pop()';
 
@@ -151,10 +151,9 @@ function optimize(code) {
   code = code.slice(0, code.length - 1);
   code[0] = 'var go = function(xpos, ypos) { ' + 
             'var time_val=0.0; var work1, work2, work3, work4;';
-  code.push(CAPPED_VALUE);
-  code.push(CAPPED_VALUE);
-  code.push(CAPPED_VALUE);
-  code.push(CAPPED_VALUE);
+  for (var i = 0; i < result_limit; i++) {
+    code.push(CAPPED_VALUE);
+  }
 
   var tmp_index = 1;
   for (var i = 0; i < code.length - 1; i++) {
@@ -200,16 +199,21 @@ function optimize(code) {
     }
   }
 
-  // Fill in missing stack items with defaults [0,0,0,1].
+  // Fill in missing stack items with defaults [0,0,0,1,0].
   var count = 0;
-  while (count < 4 && code[code.length - 1] == CAPPED_VALUE) {
+  while (count < result_limit && code[code.length - 1] == CAPPED_VALUE) {
     code = code.slice(0, code.length - 1);
     count++;
   }
-  count = 4 - count;
+  count = result_limit - count;
   var ret = code.slice(code.length - count, code.length).reverse();
-  while (ret.length < 3) ret.push('0.0');
-  if (ret.length < 4) ret.push('1.0');
+  while (ret.length < result_limit) {
+    if (ret.length == 3) {
+      ret.push('1.0');
+    } else {
+      ret.push('0.0');
+    }
+  }
   code = code.slice(0, code.length - count);
   code.push('return [' + ret.join(', ') + ']; }; go');
 
@@ -227,7 +231,7 @@ function optimize(code) {
 }
 
 
-function compile(src) {
+function compile(src, result_limit) {
   var code = ['var go = function(xpos, ypos) { ' +
               'var time_val=0.0; var dstack=[]; var rstack=[];'];
   var dict = core_words();
@@ -269,7 +273,7 @@ function compile(src) {
   code.push('return dstack; }; go');
   // Limit number of steps.
   if (code.length > 2000) return BOGUS;
-  code = optimize(code);
+  code = optimize(code, result_limit);
   return code;
 }
 
@@ -443,7 +447,7 @@ function render(cv, cv3, animated, code, next) {
   }
   cv3.code = code;
 
-  var compiled_code = compile(code);
+  var compiled_code = compile(code, 4);
   var compiled_code_flat = compiled_code.join(' ');
 
   // Set animated to visible or not.
@@ -518,13 +522,39 @@ function update_haikus_one(work, next) {
   });
 }
 
+function haiku_split(code) {
+  var grf, audio;
+  if (code.search(/^audio[ \t\r\n]/) >= 0) {
+    grf = '';
+    audio = code.replace(/^audio[ \t\r\n]/, '');
+  } else if (code.search(/[ \t\r\n]audio$/) >= 0) {
+    grf = code.replace(/[ \t\r\n]audio$/, '');
+    audio = '';
+  } else {
+    grf = code.replace(/[ \t\r\n]audio[ \t\r\n].*$/, '');
+    audio = code.replace(/^.*[ \t\r\n]audio[ \t\r\n]/, '');
+  }
+  return [grf, audio];
+}
+
+function graphics_part(code) {
+  return haiku_split(code)[0];
+}
+
+function audio_part(code) {
+  return haiku_split(code)[1];
+}
+
 function update_haikus(next) {
   var haikus = document.getElementsByName('haiku');
+  var first_code;
   var work = [];
   for (var i = 0; i < haikus.length; i++) {
     var haiku = haikus[i];
     var code_tag = find_tag(haiku, 'textarea');
-    var code = code_tag.value;
+    // Keep first one for audio.
+    if (i == 0 ) { first_code = code_tag.value; }
+    var code = graphics_part(code_tag.value);
     // Create 2d canvas.
     var canvas2d = find_tag_name(haiku, 'canvas', 'canvas2d');
     if (canvas2d == null) {
@@ -558,6 +588,10 @@ function update_haikus(next) {
     // Add to the work queue.
     work.push([canvas2d, canvas3d, animated, code]);
   }
+  // Do audio if there's only one.
+  if (work.length == 1) {
+    audio_haiku(first_code);
+  }
   update_haikus_one(work, next);
 }
 
@@ -568,4 +602,48 @@ function animate_haikus(tick) {
       animate_haikus(tick);
     }, 30);
   });
+}
+
+// Setup audio pipeline.
+var audio_context;
+try {
+  audio_context = new webkitAudioContext();
+} catch (e) {
+  try {
+  } catch (e) {
+    audio_context = new mozAudioContext();
+  }
+}
+var audio_function = [function(t) { return 0; }];
+if (audio_context) {
+  var audio_src = audio_context.createJavaScriptNode(16384, 0, 1);
+  audio_src.onaudioprocess = function(e) {
+    try {
+      var data = e.outputBuffer.getChannelData(0);
+      var func = audio_function[0];
+      var buffer = [];
+      for (var i = 0; i < data.length; i++) {
+        var t = i / 44100;
+        buffer[i] = func(t)[0];
+      }
+      data.set(buffer);
+    } catch (e) {
+    }
+  }
+  audio_src.connect(audio_context.destination);
+}
+
+function audio_haiku(code) {
+  if (!audio_context) return;
+  try {
+    var compiled_code = compile(audio_part(code), 1);
+    compiled_code[0] = 'var go = function(time_val) { ' +
+                       'var xpos = 0.0; var ypos = 0.0; ' +
+                       'var dstack=[]; var rstack=[];';
+    var compiled_code_flat = compiled_code.join(' ');
+    var func = eval(compiled_code_flat);
+    audio_function[0] = func;
+  } catch (e) {
+    audio_function[0] = function(t) { return 0; };
+  }
 }
