@@ -528,15 +528,15 @@ function update_haikus_one(work, next) {
 
 function haiku_split(code) {
   var grf, audio;
-  if (code.search(/^audio[ \t\r\n]/) >= 0) {
+  if (code.search(/^audio[ \t\r\n]/m) >= 0) {
     grf = '';
-    audio = code.replace(/^audio[ \t\r\n]/, '');
-  } else if (code.search(/[ \t\r\n]audio$/) >= 0) {
-    grf = code.replace(/[ \t\r\n]audio$/, '');
+    audio = code.replace(/^audio[ \t\r\n]/m, '');
+  } else if (code.search(/[ \t\r\n]audio$/m) >= 0) {
+    grf = code.replace(/[ \t\r\n]audio$/m, '');
     audio = '';
   } else {
-    grf = code.replace(/[ \t\r\n]audio[ \t\r\n].*$/, '');
-    audio = code.replace(/^.*[ \t\r\n]audio[ \t\r\n]/, '');
+    grf = code.replace(/[ \t\r\n]audio[ \t\r\n].*$/m, '');
+    audio = code.replace(/^.*[ \t\r\n]audio[ \t\r\n]/m, '');
   }
   return [grf, audio];
 }
