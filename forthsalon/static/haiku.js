@@ -378,6 +378,15 @@ function setup3d(cv3, code) {
   cv3.program3d = program;
 }
 
+function GetTime() {
+  var dt = new Date();
+  var tm = dt.getHours();
+  tm = tm * 60 + dt.getMinutes();
+  tm = tm * 60 + dt.getSeconds();
+  tm = tm + dt.getMilliseconds() / 1000.0;
+  return tm;
+}
+
 function draw3d(cv3) {
   if (cv3.style.display == 'none') return;
 
@@ -385,12 +394,7 @@ function draw3d(cv3) {
   if (!gl) throw 'no gl context';
 
   var time_val_loc = gl.getUniformLocation(cv3.program3d, 'time_val');
-  var dt = new Date();
-  var tm = dt.getHours();
-  tm = tm * 60 + dt.getMinutes();
-  tm = tm * 60 + dt.getSeconds();
-  tm = tm + dt.getMilliseconds() / 1000.0;
-  gl.uniform1f(time_val_loc, tm);
+  gl.uniform1f(time_val_loc, GetTime());
  
   gl.clearColor(0.0, 0.0, 0.0, 0.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
@@ -615,6 +619,7 @@ try {
   }
 }
 var audio_function = [function(t) { return 0; }];
+var audio_time_base = 0;
 if (audio_context) {
   var audio_src = audio_context.createJavaScriptNode(16384, 0, 1);
   audio_src.onaudioprocess = function(e) {
@@ -622,11 +627,15 @@ if (audio_context) {
       var data = e.outputBuffer.getChannelData(0);
       var func = audio_function[0];
       var buffer = [];
+      var base_time = audio_time_base;
+      audio_time_base += data.length;
       for (var i = 0; i < data.length; i++) {
-        var t = i / 44100;
+        var t = (i + base_time) / audio_context.sampleRate;
         buffer[i] = func(t)[0];
       }
-      data.set(buffer);
+      for (var i = 0; i < e.outputBuffer.numberOfChannels; i++) {
+        e.outputBuffer.getChannelData(i).set(buffer);
+      }
     } catch (e) {
     }
   }
