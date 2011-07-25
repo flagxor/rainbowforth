@@ -534,9 +534,12 @@ function haiku_split(code) {
   } else if (code.search(/[ \t\r\n]audio$/) >= 0) {
     grf = code.replace(/[ \t\r\n]audio$/, '');
     audio = '';
-  } else {
+  } else if (code.search(/[ \t\r\n]audio[ \t\r\n]/) >= 0) {
     grf = code.replace(/[ \t\r\n]audio[ \t\r\n][\s\S]*$/, '');
     audio = code.replace(/^[\s\S]*[ \t\r\n]audio[ \t\r\n]/, '');
+  } else {
+    grf = code;
+    audio = '';
   }
   return [grf, audio];
 }
