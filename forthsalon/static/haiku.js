@@ -622,20 +622,35 @@ try {
   }
 }
 var audio_function = [function(t) { return 0; }];
-var audio_time_base = 0;
+var audio_last_sync = new Date().getTime();
+var audio_time_offset = 0;
+var audio_time_base = GetTime();
 if (audio_context) {
-  var audio_src = audio_context.createJavaScriptNode(16384, 0, 1);
+  var audio_src = audio_context.createJavaScriptNode(8192, 0, 1);
   audio_src.onaudioprocess = function(e) {
     try {
       var data = e.outputBuffer.getChannelData(0);
       var func = audio_function[0];
       var buffer = [];
-      var base_time = audio_time_base;
-      audio_time_base += data.length;
+      // Periodically go back in sync with the main clock.
+      // This should be done gradually, but currently isn't.
+      // This will produce periodic glitches.
+      var now = new Date().getTime();
+      if (now - audio_last_sync > (10*60*1000)) {  // Sync every 10 minutes.
+        audio_last_sync = now;
+        audio_time_base = GetTime();
+        audio_time_offset = 0;
+      }
+      // Decide the clock offset.
+      var offset = audio_time_offset / audio_context.sampleRate +
+                   audio_time_base;
+      audio_time_offset += data.length;
+      // Fill up the audio buffer.
       for (var i = 0; i < data.length; i++) {
-        var t = (i + base_time) / audio_context.sampleRate;
+        var t = (i / audio_context.sampleRate + offset) % (60*60*24);
         buffer[i] = func(t)[0];
       }
+      // Emit to all channels for now.
       for (var i = 0; i < e.outputBuffer.numberOfChannels; i++) {
         e.outputBuffer.getChannelData(i).set(buffer);
       }
