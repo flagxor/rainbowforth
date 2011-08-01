@@ -185,6 +185,17 @@ class HaikuAnimatedPage(webapp.RequestHandler):
     }))
 
 
+class HaikuSoundPage(webapp.RequestHandler):
+  def get(self):
+    if BrowserRedirect(self): return
+
+    path = os.path.join(os.path.dirname(__file__),
+                        'templates', 'haiku-sound.html')
+    self.response.out.write(template.render(path, {
+        'login_status': LoginStatus(),
+    }))
+
+
 class HaikuVotePage(webapp.RequestHandler):
   def post(self):
     if BrowserRedirect(self): return
@@ -434,6 +445,7 @@ application = webapp.WSGIApplication([
     ('/haiku-vote/.*', HaikuVotePage),
     ('/haiku-about', HaikuAboutPage),
     ('/haiku-animated', HaikuAnimatedPage),
+    ('/haiku-sound', HaikuSoundPage),
     ('/haiku-slideshow', HaikuSlideshowPage),
     ('/haiku-slideshow2', HaikuSlideshow2Page),
     ('/haiku-dump', HaikuDumpPage),

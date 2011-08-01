@@ -125,6 +125,13 @@ function code_tags(src) {
       break;
     }
   }
+  // Detect audio.
+  for (var i = 0; i < words.length; i++) {
+    if (words[i].toLowerCase() == 'audio') {
+      tags.push('audio');
+      break;
+    }
+  }
   // Show counts.
   tags.push('characters:' + char_count);
   tags.push('words:' + words.length);
@@ -443,7 +450,15 @@ function code_animated(code) {
   return false;
 }
 
-function render(cv, cv3, animated, code, next) {
+function code_has_audio(code) {
+  var tags = code_tags(code);
+  for (var i = 0; i < tags.length; i++) {
+    if (tags[i] == 'audio') return true;
+  }
+  return false;
+}
+
+function render(cv, cv3, animated, sound, code, next) {
   if (cv3.code == code) {
     if (cv3.program3d != null) draw3d(cv3);
     next();
@@ -451,7 +466,7 @@ function render(cv, cv3, animated, code, next) {
   }
   cv3.code = code;
 
-  var compiled_code = compile(code, 4);
+  var compiled_code = compile(graphics_part(code), 4);
   var compiled_code_flat = compiled_code.join(' ');
 
   // Set animated to visible or not.
@@ -459,6 +474,13 @@ function render(cv, cv3, animated, code, next) {
     animated.style.display = 'inline';
   } else {
     animated.style.display = 'none';
+  }
+
+  // Set sound to visible or not.
+  if (code_has_audio(code)) {
+    sound.style.display = 'inline';
+  } else {
+    sound.style.display = 'none';
   }
 
   try {
@@ -519,9 +541,10 @@ function update_haikus_one(work, next) {
   var canvas2d = work[0][0];
   var canvas3d = work[0][1];
   var animated = work[0][2];
-  var code = work[0][3];
+  var sound = work[0][3];
+  var code = work[0][4];
   work = work.slice(1);
-  render(canvas2d, canvas3d, animated, code, function() {
+  render(canvas2d, canvas3d, animated, sound, code, function() {
     update_haikus_one(work, next);
   });
 }
@@ -561,7 +584,7 @@ function update_haikus(next) {
     var code_tag = find_tag(haiku, 'textarea');
     // Keep first one for audio.
     if (i == 0 ) { first_code = code_tag.value; }
-    var code = graphics_part(code_tag.value);
+    var code = code_tag.value;
     // Create 2d canvas.
     var canvas2d = find_tag_name(haiku, 'canvas', 'canvas2d');
     if (canvas2d == null) {
@@ -586,14 +609,24 @@ function update_haikus(next) {
     var animated = find_tag_name(haiku, 'a', 'animated');
     if (animated == null) {
       animated = document.createElement('a');
-      animated.appendChild(document.createTextNode('*'));
+      animated.appendChild(document.createTextNode(' a '));
       animated.name = 'animated';
       animated.href = '/haiku-animated';
       animated.style.display = 'none';
       haiku.insertBefore(animated, haiku.firstChild);
     }
+    // Create sound tag.
+    var sound = find_tag_name(haiku, 'a', 'sound');
+    if (sound == null) {
+      sound = document.createElement('a');
+      sound.appendChild(document.createTextNode(' s '));
+      sound.name = 'sound';
+      sound.href = '/haiku-sound';
+      sound.style.display = 'none';
+      haiku.insertBefore(sound, haiku.firstChild);
+    }
     // Add to the work queue.
-    work.push([canvas2d, canvas3d, animated, code]);
+    work.push([canvas2d, canvas3d, animated, sound, code]);
   }
   // Do audio if there's only one.
   if (work.length == 1) {

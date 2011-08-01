@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Animated Haiku</title>
+<title>Haiku Sound</title>
 <meta http-equiv="X-UA-Compatible" content="chrome=1"> 
 <link rel="stylesheet" type="text/css" href="/static/forthsalon.css"/>
 
@@ -20,23 +20,28 @@
 <div id="wrapper">
 
 <div id="header">
-<h1>Animated Haiku</h1>
+<h1>Haiku Sound</h1>
 </div>
 
 <div class="section">
 
 <p>
-Some haiku are now animated using the 't' word.
-These haiku can only be seen in animated form using
-<a href="http://en.wikipedia.org/wiki/WebGL>WebGL</a>.
-WebGL is available in the very latest versions of
-<a href="http://www.google.com/chrome">Google Chrome</a>,
-<a href="http://www.firefox.com/">Firefox</a>,
-and <a href="http://www.apple.com/safari">Safari</a>.
-Click on haiku marked with an 'a' to see the animation.
+Some haiku now have audio.
+The sound can only be heard at the moment in browsers that support the
+<a href="https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html">WebAudio&nbsp;API</a>.
+This is a very new API and is not supported in most browsers.
+This feature works on OSX in 'Stable Channel'
+<a href="http://www.google.com/chrome">Google Chrome</a>.
+On other platforms is known to work in 'Canary'
+<a href="http://www.chromium.org/getting-involved/dev-channel">channel</a>.
 </p>
 <p>
-The haiku is converted on the fly to a GLSL fragment shader.
+Haiku containing the word 'audio' will be treated as two sections.
+Everything before 'audio' will be a typical graphical haiku.
+Everything after will be a sound haiku expected to emit a single data stack
+value for the audio amplitude (-1 thru 1) using 't' as an input.
+A planned future feature: stereo may be supported by running the haiku twice
+with 'x' at -1 and 1 for left and right.
 </p>
 <p>
 This feature is a work in progress and may change.
