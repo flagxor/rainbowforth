@@ -28,6 +28,8 @@
 <form action="/haiku-vote/{{ haiku.id|escape }}" method="post">
 <input type="submit" name="good" value="I like it">
 <input type="submit" name="bad" value="I hate it">
+<button type="button" id="mute" style="display:none"
+        onclick="audio_toggle_mute()">Mute</button>
 </form>
 
 <div class="haiku">

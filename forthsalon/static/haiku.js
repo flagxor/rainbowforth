@@ -479,8 +479,16 @@ function render(cv, cv3, animated, sound, code, next) {
   // Set sound to visible or not.
   if (code_has_audio(code)) {
     sound.style.display = 'inline';
+    try {
+      document.getElementById('mute').style.display = '';
+    } catch (e) {
+    }
   } else {
     sound.style.display = 'none';
+    try {
+      document.getElementById('mute').style.display = 'none';
+    } catch (e) {
+    }
   }
 
   try {
@@ -658,6 +666,7 @@ var audio_function = [function(t) { return 0; }];
 var audio_last_sync = new Date().getTime();
 var audio_time_offset = 0;
 var audio_time_base = GetTime();
+var audio_mute = false;
 if (audio_context) {
   var audio_src = audio_context.createJavaScriptNode(8192, 0, 1);
   audio_src.onaudioprocess = function(e) {
@@ -679,9 +688,15 @@ if (audio_context) {
                    audio_time_base;
       audio_time_offset += data.length;
       // Fill up the audio buffer.
-      for (var i = 0; i < data.length; i++) {
-        var t = (i / audio_context.sampleRate + offset) % (60*60*24);
-        buffer[i] = func(t)[0];
+      if (audio_mute) {
+        for (var i = 0; i < data.length; i++) {
+          buffer[i] = 0;
+        }
+      } else {
+        for (var i = 0; i < data.length; i++) {
+          var t = (i / audio_context.sampleRate + offset) % (60*60*24);
+          buffer[i] = func(t)[0];
+        }
       }
       // Emit to all channels for now.
       for (var i = 0; i < e.outputBuffer.numberOfChannels; i++) {
@@ -705,5 +720,15 @@ function audio_haiku(code) {
     audio_function[0] = func;
   } catch (e) {
     audio_function[0] = function(t) { return 0; };
+  }
+}
+
+function audio_toggle_mute() {
+  var mute_button = document.getElementById('mute');
+  audio_mute = !audio_mute;
+  if (audio_mute) {
+    mute_button.style.color = 'red';
+  } else {
+    mute_button.style.color = '';
   }
 }

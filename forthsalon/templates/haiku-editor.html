@@ -29,7 +29,10 @@
 <textarea style="display: none" id="dst_code"></textarea>
 </span>
 <br>
-<button type="button" onclick="update()">Update</button><br>
+<button type="button" onclick="update()">Update</button>
+<button type="button" id="mute" style="display:none"
+        onclick="audio_toggle_mute()">Mute</button>
+<br>
 Code:<br>
 <textarea style="width: 256; height:100; resize: none"
     onkeydown="update_tags()"
