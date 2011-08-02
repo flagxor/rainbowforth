@@ -124,6 +124,10 @@ function code_tags(src) {
       tags.push('animated');
       break;
     }
+    // Stop at audio.
+    if (words[i].toLowerCase() == 'audio') {
+      break;
+    }
   }
   // Detect audio.
   for (var i = 0; i < words.length; i++) {
