@@ -691,15 +691,42 @@ if (audio_context) {
       var offset = audio_time_offset / audio_context.sampleRate +
                    audio_time_base;
       audio_time_offset += data.length;
-      // Fill up the audio buffer.
+      // There are multiple possibilities:
+      //   - no audio
+      //   - 2 channel stereo
+      //   - 1 or >2 channel (assume mono)
       if (audio_mute) {
+        // no audio case.
         for (var i = 0; i < data.length; i++) {
           buffer[i] = 0;
         }
-      } else {
+        // Emit silence to all channels.
+        for (var i = 0; i < e.outputBuffer.numberOfChannels; i++) {
+          e.outputBuffer.getChannelData(i).set(buffer);
+        }
+      } else if (e.outputBuffer.numberOfChannels == 2) {
+        // stereo case.
+        // LEFT
         for (var i = 0; i < data.length; i++) {
           var t = (i / audio_context.sampleRate + offset) % (60*60*24);
-          buffer[i] = func(t)[0];
+          buffer[i] = func(t, -1)[0];
+        }
+        e.outputBuffer.getChannelData(0).set(buffer);
+        // RIGHT
+        for (var i = 0; i < data.length; i++) {
+          var t = (i / audio_context.sampleRate + offset) % (60*60*24);
+          buffer[i] = func(t, 1)[0];
+        }
+        e.outputBuffer.getChannelData(1).set(buffer);
+      } else {
+        // mono case.
+        for (var i = 0; i < data.length; i++) {
+          var t = (i / audio_context.sampleRate + offset) % (60*60*24);
+          buffer[i] = func(t, 0)[0];
+        }
+        // Emit same audio to all channels.
+        for (var i = 0; i < e.outputBuffer.numberOfChannels; i++) {
+          e.outputBuffer.getChannelData(i).set(buffer);
         }
       }
       // Emit to all channels for now.
@@ -716,8 +743,8 @@ function audio_haiku(code) {
   if (!audio_context) return;
   try {
     var compiled_code = compile(audio_part(code), 1);
-    compiled_code[0] = 'var go = function(time_val) { ' +
-                       'var xpos = 0.0; var ypos = 0.0; ' +
+    compiled_code[0] = 'var go = function(time_val, xpos) { ' +
+                       'var ypos = 0.0; ' +
                        'var dstack=[]; var rstack=[];';
     var compiled_code_flat = compiled_code.join(' ');
     var func = eval(compiled_code_flat);
