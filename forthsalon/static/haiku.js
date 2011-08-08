@@ -677,7 +677,6 @@ if (audio_context) {
     try {
       var data = e.outputBuffer.getChannelData(0);
       var func = audio_function[0];
-      var buffer = [];
       // Periodically go back in sync with the main clock.
       // This should be done gradually, but currently isn't.
       // This will produce periodic glitches.
@@ -697,41 +696,36 @@ if (audio_context) {
       //   - 1 or >2 channel (assume mono)
       if (audio_mute) {
         // no audio case.
-        for (var i = 0; i < data.length; i++) {
-          buffer[i] = 0;
-        }
         // Emit silence to all channels.
-        for (var i = 0; i < e.outputBuffer.numberOfChannels; i++) {
-          e.outputBuffer.getChannelData(i).set(buffer);
+        for (var j = 0; j < e.outputBuffer.numberOfChannels; j++) {
+          var buffer = e.outputBuffer.getChannelData(j);
+          for (var i = 0; i < data.length; i++) {
+            buffer[i] = 0;
+          }
         }
       } else if (e.outputBuffer.numberOfChannels == 2) {
         // stereo case.
         // LEFT
+        var buffer = e.outputBuffer.getChannelData(0);
         for (var i = 0; i < data.length; i++) {
           var t = (i / audio_context.sampleRate + offset) % (60*60*24);
           buffer[i] = func(t, -1)[0];
         }
-        e.outputBuffer.getChannelData(0).set(buffer);
         // RIGHT
+        var buffer = e.outputBuffer.getChannelData(1);
         for (var i = 0; i < data.length; i++) {
           var t = (i / audio_context.sampleRate + offset) % (60*60*24);
           buffer[i] = func(t, 1)[0];
         }
-        e.outputBuffer.getChannelData(1).set(buffer);
       } else {
         // mono case.
-        for (var i = 0; i < data.length; i++) {
-          var t = (i / audio_context.sampleRate + offset) % (60*60*24);
-          buffer[i] = func(t, 0)[0];
+        for (var j = 0; j < e.outputBuffer.numberOfChannels; j++) {
+          var buffer = e.outputBuffer.getChannelData(j);
+          for (var i = 0; i < data.length; i++) {
+            var t = (i / audio_context.sampleRate + offset) % (60*60*24);
+            buffer[i] = func(t, 0)[0];
+          }
         }
-        // Emit same audio to all channels.
-        for (var i = 0; i < e.outputBuffer.numberOfChannels; i++) {
-          e.outputBuffer.getChannelData(i).set(buffer);
-        }
-      }
-      // Emit to all channels for now.
-      for (var i = 0; i < e.outputBuffer.numberOfChannels; i++) {
-        e.outputBuffer.getChannelData(i).set(buffer);
       }
     } catch (e) {
     }
