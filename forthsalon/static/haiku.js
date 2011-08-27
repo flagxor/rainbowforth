@@ -1,3 +1,8 @@
+var NOTES = 10;
+var NOTE_BASE = 20;
+var STEP = 2048;
+
+
 function core_words() {
   var dict = new Object();
   dict['x'] = ['dstack.push(xpos);']; 
@@ -656,6 +661,24 @@ function animate_haikus(tick) {
   });
 }
 
+function chromatic(value) {
+  return 440 * Math.pow(2, (value - 49) / 12);
+}
+
+function pentatonic(value) {
+  return chromatic(Math.floor(value / 5) * 12 +
+                   Math.floor((value % 5) * 12 / 5));
+}
+
+function synth(parts, t) {
+  var value = 0;
+  for (var i = 0; i < parts.length; i++) {
+    var wave = Math.sin(Math.PI * 2 * t * pentatonic(i + NOTE_BASE));
+    value += (wave * parts[i] / parts.length);
+  }
+  return value;
+}
+
 // Setup audio pipeline.
 var audio_context;
 try {
@@ -690,41 +713,28 @@ if (audio_context) {
       var offset = audio_time_offset / audio_context.sampleRate +
                    audio_time_base;
       audio_time_offset += data.length;
-      // There are multiple possibilities:
-      //   - no audio
-      //   - 2 channel stereo
-      //   - 1 or >2 channel (assume mono)
-      if (audio_mute) {
-        // no audio case.
-        // Emit silence to all channels.
-        for (var j = 0; j < e.outputBuffer.numberOfChannels; j++) {
-          var buffer = e.outputBuffer.getChannelData(j);
-          for (var i = 0; i < data.length; i++) {
-            buffer[i] = 0;
-          }
+      // Fill left channel.
+      for (var j = 0; j < data.length; j+=STEP) {
+        var parts0 = [];
+        var parts1 = [];
+        var t0 = (j / audio_context.sampleRate + offset) % (60*60*24);
+        var t1 = ((j + STEP) / audio_context.sampleRate + offset) % (60*60*24);
+        for (var x = 0; x < NOTES; x++) {
+          parts0.push(func(t0, (x + 0.5) / NOTES)[0]);
+          parts1.push(func(t1, (x + 0.5) / NOTES)[0]);
         }
-      } else if (e.outputBuffer.numberOfChannels == 2) {
-        // stereo case.
-        // LEFT
-        var buffer = e.outputBuffer.getChannelData(0);
+        for (var i = 0; i < STEP; i++) {
+          var t = ((i + j) / audio_context.sampleRate + offset) % (60*60*24);
+          var frac = i / STEP;
+          var frac1 = 1 - frac;
+          data[i + j] = synth(parts0, t) * frac1 + synth(parts1, t) * frac;
+        }
+      }
+      // Clone to other channels.
+      for (var j = 0; j < e.outputBuffer.numberOfChannels; j++) {
+        var buffer = e.outputBuffer.getChannelData(j);
         for (var i = 0; i < data.length; i++) {
-          var t = (i / audio_context.sampleRate + offset) % (60*60*24);
-          buffer[i] = func(t, -1)[0];
-        }
-        // RIGHT
-        var buffer = e.outputBuffer.getChannelData(1);
-        for (var i = 0; i < data.length; i++) {
-          var t = (i / audio_context.sampleRate + offset) % (60*60*24);
-          buffer[i] = func(t, 1)[0];
-        }
-      } else {
-        // mono case.
-        for (var j = 0; j < e.outputBuffer.numberOfChannels; j++) {
-          var buffer = e.outputBuffer.getChannelData(j);
-          for (var i = 0; i < data.length; i++) {
-            var t = (i / audio_context.sampleRate + offset) % (60*60*24);
-            buffer[i] = func(t, 0)[0];
-          }
+          buffer[i] = data[i];
         }
       }
     } catch (e) {
