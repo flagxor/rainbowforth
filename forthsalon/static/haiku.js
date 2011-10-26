@@ -687,7 +687,7 @@ function audio_haiku(code) {
     audio_last_code[0] = code;
     var compiled_code = compile(code, 4);
     compiled_code[0] = 'var go = function(time_val, xpos) { ' +
-                       'var ypos = 0.0; ' +
+                       'var ypos = 0.5; ' +
                        'var dstack=[]; var rstack=[];';
     var compiled_code_flat = compiled_code.join(' ');
     var func = eval(compiled_code_flat);
