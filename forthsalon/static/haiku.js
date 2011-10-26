@@ -1,5 +1,5 @@
 var NOTES = 10;
-var NOTE_BASE = 20;
+var NOTE_BASE = 10;
 var STEP = 2048;
 
 
@@ -129,17 +129,6 @@ function code_tags(src) {
       tags.push('animated');
       break;
     }
-    // Stop at audio.
-    if (words[i].toLowerCase() == 'audio') {
-      break;
-    }
-  }
-  // Detect audio.
-  for (var i = 0; i < words.length; i++) {
-    if (words[i].toLowerCase() == 'audio') {
-      tags.push('audio');
-      break;
-    }
   }
   // Show counts.
   tags.push('characters:' + char_count);
@@ -234,7 +223,7 @@ function optimize(code, result_limit) {
   code.push('return [' + ret.join(', ') + ']; }; go');
 
   // Dump code to console.
-  //console.log(code.join('\n') + '\n');
+  console.log('----------JSCRIPT:\n' + code.join('\n') + '\n\n\n');
 
   // Require no extra stuff on the stacks.
   for (var i = 0; i < code.length; i++) {
@@ -447,7 +436,9 @@ function make_fragment_shader(code) {
   code[code.length-1] = code[code.length-1].replace(
       'return [', 'gl_FragColor = vec4(');
   code = code.join('\n');
-  //console.log(code);
+  
+  console.log('----------SHADER:\n' + code + '\n\n\n');
+  
   return code;
 }
 
@@ -459,15 +450,7 @@ function code_animated(code) {
   return false;
 }
 
-function code_has_audio(code) {
-  var tags = code_tags(code);
-  for (var i = 0; i < tags.length; i++) {
-    if (tags[i] == 'audio') return true;
-  }
-  return false;
-}
-
-function render(cv, cv3, animated, sound, code, next) {
+function render(cv, cv3, animated, code, next) {
   if (cv3.code == code) {
     if (cv3.program3d != null) draw3d(cv3);
     next();
@@ -475,7 +458,7 @@ function render(cv, cv3, animated, sound, code, next) {
   }
   cv3.code = code;
 
-  var compiled_code = compile(graphics_part(code), 4);
+  var compiled_code = compile(code, 4);
   var compiled_code_flat = compiled_code.join(' ');
 
   // Set animated to visible or not.
@@ -483,21 +466,6 @@ function render(cv, cv3, animated, sound, code, next) {
     animated.style.display = 'inline';
   } else {
     animated.style.display = 'none';
-  }
-
-  // Set sound to visible or not.
-  if (code_has_audio(code)) {
-    sound.style.display = 'inline';
-    try {
-      document.getElementById('mute').style.display = '';
-    } catch (e) {
-    }
-  } else {
-    sound.style.display = 'none';
-    try {
-      document.getElementById('mute').style.display = 'none';
-    } catch (e) {
-    }
   }
 
   try {
@@ -558,38 +526,11 @@ function update_haikus_one(work, next) {
   var canvas2d = work[0][0];
   var canvas3d = work[0][1];
   var animated = work[0][2];
-  var sound = work[0][3];
-  var code = work[0][4];
+  var code = work[0][3];
   work = work.slice(1);
-  render(canvas2d, canvas3d, animated, sound, code, function() {
+  render(canvas2d, canvas3d, animated, code, function() {
     update_haikus_one(work, next);
   });
-}
-
-function haiku_split(code) {
-  var grf, audio;
-  if (code.search(/^audio[ \t\r\n]/) >= 0) {
-    grf = '';
-    audio = code.replace(/^audio[ \t\r\n]/, '');
-  } else if (code.search(/[ \t\r\n]audio$/) >= 0) {
-    grf = code.replace(/[ \t\r\n]audio$/, '');
-    audio = '';
-  } else if (code.search(/[ \t\r\n]audio[ \t\r\n]/) >= 0) {
-    grf = code.replace(/[ \t\r\n]audio[ \t\r\n][\s\S]*$/, '');
-    audio = code.replace(/^[\s\S]*[ \t\r\n]audio[ \t\r\n]/, '');
-  } else {
-    grf = code;
-    audio = '';
-  }
-  return [grf, audio];
-}
-
-function graphics_part(code) {
-  return haiku_split(code)[0];
-}
-
-function audio_part(code) {
-  return haiku_split(code)[1];
 }
 
 function update_haikus(next) {
@@ -632,18 +573,8 @@ function update_haikus(next) {
       animated.style.display = 'none';
       haiku.insertBefore(animated, haiku.firstChild);
     }
-    // Create sound tag.
-    var sound = find_tag_name(haiku, 'a', 'sound');
-    if (sound == null) {
-      sound = document.createElement('a');
-      sound.appendChild(document.createTextNode(' s '));
-      sound.name = 'sound';
-      sound.href = '/haiku-sound';
-      sound.style.display = 'none';
-      haiku.insertBefore(sound, haiku.firstChild);
-    }
     // Add to the work queue.
-    work.push([canvas2d, canvas3d, animated, sound, code]);
+    work.push([canvas2d, canvas3d, animated, code]);
   }
   // Do audio if there's only one.
   if (work.length == 1) {
@@ -661,6 +592,8 @@ function animate_haikus(tick) {
   });
 }
 
+//// Generate pentatonic sounds.
+
 function chromatic(value) {
   return 440 * Math.pow(2, (value - 49) / 12);
 }
@@ -670,13 +603,8 @@ function pentatonic(value) {
                    Math.floor((value % 5) * 12 / 5));
 }
 
-function synth(parts, t) {
-  var value = 0;
-  for (var i = 0; i < parts.length; i++) {
-    var wave = Math.sin(Math.PI * 2 * t * pentatonic(i + NOTE_BASE));
-    value += (wave * parts[i] / parts.length);
-  }
-  return value;
+function synth(n, t) {
+  return Math.sin(Math.PI * 2 * t * pentatonic(n + NOTE_BASE));
 }
 
 // Setup audio pipeline.
@@ -684,16 +612,15 @@ var audio_context;
 try {
   audio_context = new webkitAudioContext();
 } catch (e) {
-  try {
-  } catch (e) {
-    audio_context = new mozAudioContext();
-  }
 }
-var audio_function = [function(t) { return 0; }];
+var audio_off = function(t, x) { return [0, 0, 0, 1]; };
+var audio_function = [audio_off];
+var audio_last_compile = [audio_off];
+var audio_last_code = [''];
 var audio_last_sync = new Date().getTime();
 var audio_time_offset = 0;
 var audio_time_base = GetTime();
-var audio_mute = false;
+var audio_play = false;
 if (audio_context) {
   var audio_src = audio_context.createJavaScriptNode(8192, 0, 1);
   audio_src.onaudioprocess = function(e) {
@@ -715,23 +642,26 @@ if (audio_context) {
       audio_time_offset += data.length;
       // Fill left channel.
       for (var j = 0; j < data.length; j+=STEP) {
-        var parts0 = [];
-        var parts1 = [];
         var t0 = (j / audio_context.sampleRate + offset) % (60*60*24);
         var t1 = ((j + STEP) / audio_context.sampleRate + offset) % (60*60*24);
-        for (var x = 0; x < NOTES; x++) {
-          parts0.push(func(t0, (x + 0.5) / NOTES)[0]);
-          parts1.push(func(t1, (x + 0.5) / NOTES)[0]);
+        function func1(t, x) {
+          var val = func(t, x)[0];
+          return Math.min(Math.max(val, 0.0), 1.0);
         }
+        var amp0 = func1(t0, 1.0);
+        var amp1 = func1(t1, 1.0);
+        var note0 = Math.floor(func1(t0, 0.0) * NOTES);
+        var note1 = Math.floor(func1(t1, 0.0) * NOTES);
         for (var i = 0; i < STEP; i++) {
           var t = ((i + j) / audio_context.sampleRate + offset) % (60*60*24);
           var frac = i / STEP;
           var frac1 = 1 - frac;
-          data[i + j] = synth(parts0, t) * frac1 + synth(parts1, t) * frac;
+          data[i + j] = (synth(note0, t) * amp0 * frac1 +
+                         synth(note1, t) * amp1 * frac) * 0.5;
         }
       }
       // Clone to other channels.
-      for (var j = 0; j < e.outputBuffer.numberOfChannels; j++) {
+      for (var j = 1; j < e.outputBuffer.numberOfChannels; j++) {
         var buffer = e.outputBuffer.getChannelData(j);
         for (var i = 0; i < data.length; i++) {
           buffer[i] = data[i];
@@ -746,24 +676,34 @@ if (audio_context) {
 function audio_haiku(code) {
   if (!audio_context) return;
   try {
-    var compiled_code = compile(audio_part(code), 1);
+    if (!audio_play) {
+      audio_function[0] = audio_off;
+      return;
+    }
+    if (audio_last_code[0] == code) {
+      audio_function[0] = audio_last_compile[0];
+      return;
+    }
+    audio_last_code[0] = code;
+    var compiled_code = compile(code, 4);
     compiled_code[0] = 'var go = function(time_val, xpos) { ' +
                        'var ypos = 0.0; ' +
                        'var dstack=[]; var rstack=[];';
     var compiled_code_flat = compiled_code.join(' ');
     var func = eval(compiled_code_flat);
+    audio_last_compile[0] = func;
     audio_function[0] = func;
   } catch (e) {
-    audio_function[0] = function(t) { return 0; };
+    audio_function[0] = audio_off;
   }
 }
 
-function audio_toggle_mute() {
-  var mute_button = document.getElementById('mute');
-  audio_mute = !audio_mute;
-  if (audio_mute) {
-    mute_button.style.color = 'red';
+function audio_toggle_play() {
+  var mute_button = document.getElementById('audio_play');
+  audio_play = !audio_play;
+  if (audio_play) {
+    mute_button.innerText = 'Mute Audio';
   } else {
-    mute_button.style.color = '';
+    mute_button.innerText = 'Play Audio';
   }
 }
