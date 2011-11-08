@@ -339,6 +339,9 @@ function render_rows(image, ctx, img, y, w, h, next) {
 function setup3d(cv3, code) {
   gl = cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
+  var renderer = gl.getParameter(gl.RENDERER);
+  // Reject i9* for webgl, as its too slow. 
+  if (renderer.search(' i9') >= 0) throw 'i9* too slow';
     
   var fshader = gl.createShader(gl.FRAGMENT_SHADER);
   gl.shaderSource(fshader, make_fragment_shader(code));
