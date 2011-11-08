@@ -26,22 +26,21 @@
 <div class="section">
 
 <p>
-Some haiku now have audio.
+Audio can now be synthesized to accompany haiku.
+Click 'Play Audio' / 'Mute Audio' to toggle.
 The sound can only be heard at the moment in browsers that support the
 <a href="https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html">WebAudio&nbsp;API</a>.
 This is a very new API and is not supported in most browsers.
-This feature works on OSX in 'Stable Channel'
+This feature works on mainly in
 <a href="http://www.google.com/chrome">Google Chrome</a>.
-On other platforms is known to work in 'Canary'
-<a href="http://www.chromium.org/getting-involved/dev-channel">channel</a>.
 </p>
 <p>
-Haiku containing the word 'audio' will be treated as two sections.
-Everything before 'audio' will be a typical graphical haiku.
-Everything after will be a sound haiku expected to emit a single data stack
-value for the audio amplitude (-1 thru 1) using 't' as an input.
-A planned future feature: stereo may be supported by running the haiku twice
-with 'x' at -1 and 1 for left and right.
+Audio is produced by sampling the red component at (0, 0.5) to select amplitude,
+and the red component at (1, 0.5) to select pitch.
+Both are clipped to [0, 1]. Pitch is mapped to a ten note pentatonic scale.
+Fractional pitches produce a mix of neighboring tones on the scale.
+This general scheme was selected to produce non-cacophonous sounds.
+Prior attempts with arbitrary audio sounded horrible.
 </p>
 <p>
 This feature is a work in progress and may change.
