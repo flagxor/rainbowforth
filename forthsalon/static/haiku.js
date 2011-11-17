@@ -337,6 +337,9 @@ function render_rows(image, ctx, img, y, w, h, next) {
 }
 
 function setup3d(cv3, code) {
+  // Reject CrOS for now.
+  if (navigator.userAgent.search(' CrOS ') >= 0) throw "CrOS bad card";
+    
   gl = cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
   var renderer = gl.getParameter(gl.RENDERER);
