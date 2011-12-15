@@ -9,6 +9,11 @@
 <body>
   <div id="out"></div>
   <script>
+    document.onmousemove = function(evt) {
+      document.getElementById('out').innerHTML = 'mousemove ' + evt.x +
+          ' ' + evt.y;
+      return false;
+    }
     document.onmousedown = function(evt) {
       document.getElementById('out').innerHTML = 'mousedown ' + evt.x +
           ' ' + evt.y;
