@@ -254,6 +254,15 @@ class EditorHandler(webapp.RequestHandler):
     self.response.out.write(template.render(path, fields))
 
 
+class TestHandler(webapp.RequestHandler):
+  def get(self):
+    fields = {}
+    # Display output.
+    path = os.path.join(os.path.dirname(__file__),
+                        'templates/test1.html')
+    self.response.out.write(template.render(path, fields))
+
+
 class WebAliasHandler(webapp.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
@@ -273,6 +282,7 @@ application = webapp.WSGIApplication([
     ('/_readblock', ReadBlockHandler),
     ('/_writeblock', WriteBlockHandler),
     ('/_editor', EditorHandler),
+    ('/t', TestHandler),
     ('/.*', WebAliasHandler),
 ], debug=True)
 

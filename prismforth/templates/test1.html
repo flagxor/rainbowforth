@@ -1,0 +1,32 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+  <META HTTP-EQUIV="Expires" CONTENT="-1">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <title>Test1</title>
+</head>
+<body>
+  <div id="out"></div>
+  <script>
+    document.onmousedown = function(evt) {
+      document.getElementById('out').innerHTML = 'mousedown ' + evt.x +
+          ' ' + evt.y;
+      return false;
+    }
+    document.onmouseup = function(evt) {
+      document.getElementById('out').innerHTML = 'mouseup ' + evt.x +
+          ' ' + evt.y;
+      return false;
+    }
+    document.onkeydown = function(evt) {
+      document.getElementById('out').innerHTML = 'keydown ' + evt.keyCode;
+      return false;
+    }
+    document.onkeyup = function(evt) {
+      document.getElementById('out').innerHTML = 'keyup ' + evt.keyCode;
+      return false;
+    }
+  </script>
+</body>
+</html>
