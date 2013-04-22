@@ -160,6 +160,28 @@ core_words = [
     ],
   },
   {
+    'names': ['rot'],
+    'stack': '( a b c -- b c a )',
+    'summary': 'Rotate the top three two elements on the stack.',
+    'description': [
+        floating_point_text
+    ],
+    'examples': [
+        ['1 2 3 _rot', '2 3 1'],
+    ],
+  },
+  {
+    'names': ['-rot'],
+    'stack': '( a b c -- c a b )',
+    'summary': 'Reverse rotate the top three two elements on the stack.',
+    'description': [
+        floating_point_text
+    ],
+    'examples': [
+        ['1 2 3 _rot', '3 1 2'],
+    ],
+  },
+  {
     'names': ['='],
     'stack': '( a b -- f )',
     'summary': '1 if the top two stack elements are equal, else 0.',

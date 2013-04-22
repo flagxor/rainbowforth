@@ -42,6 +42,18 @@ function core_words() {
                   'work2 = dstack.pop();',
                   'dstack.push(work1);',
                   'dstack.push(work2);'];
+  dict['rot'] = ['work1 = dstack.pop();',
+                 'work2 = dstack.pop();',
+                 'work3 = dstack.pop();',
+                 'dstack.push(work2);',
+                 'dstack.push(work1);',
+                 'dstack.push(work3);'];
+  dict['-rot'] = ['work1 = dstack.pop();',
+                  'work2 = dstack.pop();',
+                  'work3 = dstack.pop();',
+                  'dstack.push(work1);',
+                  'dstack.push(work3);',
+                  'dstack.push(work2);'];
 
   dict['='] = ['dstack.push((dstack.pop() == dstack.pop())?1.0:0.0);'];
   dict['<>'] = ['dstack.push((dstack.pop() != dstack.pop())?1.0:0.0);'];
