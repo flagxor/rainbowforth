@@ -1,0 +1,4701 @@
+------------------------------------
+Title: streak
+Author: BradN
+Score: 41
+When: 2011-04-23 20:29:43.185232
+Code:
+: web push push 
+         x 0.5 + y 0.3 + * pop * sin 0 max
+         x 0.3 + y 0.5 + * pop * sin 0 max + ;
+31 23 web 17 17 web * x +
+23 31 web 19 19 web * y x * +
+31 31 web 7 7 web * y +
+
+
+------------------------------------
+Title: Duality
+Author: Leo
+Score: 16
+When: 2011-06-11 20:09:31.919002
+Code:
+: xc  x .5 - ;
+: yc  y .5 - ;
+: yt  y .7 - ;
+: yb  y .3 - ;
+: r1 .16 ;
+: r2 .04 ;
+: r3 .005 ;
+: len  dup * swap dup * + ;
+: c1  xc yc len  r1 < ;
+: c2  xc yc len  r1 - dup .008 > swap .012 < and ;
+: lr  x .5 < ;
+: wb  xc yt len  r2 < ;
+: bb  xc yb len  r2 > ;
+: ws  xc yb len  r3 < ;
+: bs  xc yt len  r3 > ;
+
+c1 lr min
+bb min wb max  bs min ws max
+c2 max
+
+dup dup
+
+
+------------------------------------
+Title: inkblot mandelbrot
+Author: BradN
+Score: 16
+When: 2011-04-27 17:52:02.140969
+Code:
+: z^2 2dup z* ;
+: layer push push z^2 pop pop 2dup push push z+ pop pop ;
+: many layer layer layer layer layer layer layer layer layer layer ;
+: len dup * swap dup * + ;
+: mant y 0.7 - 3 * x 0.5 - 3 * many drop drop len dup 1 < * ;
+0 0 mant
+0.1 0.1 mant
+0.2 0.2 mant
+
+
+
+------------------------------------
+Title: falling icon
+Author: BradN
+Score: 15
+When: 2011-05-21 16:53:42.057517
+Code:
+: x' x 0.5 - 2 * ;
+: y' y 0.5 - 2 * ;
+: len dup * swap dup * + sqrt ;
+: polar x' y' atan2 x' y' len ;
+polar swap 11 * + sin 
+polar 10 * + cos
+polar 30 * + negate sin
+x 0.5 - dup * y 0.5 - dup * + 0.25 / 1 swap -
+
+
+------------------------------------
+Title: Continuity
+Author: Anonymous
+Score: 13
+When: 2011-06-16 17:30:31.315088
+Code:
+: xc  x .5 - ;
+: yc  y .5 - ;
+: yt  y .7 - ;
+: yb  y .3 - ;
+: r1 .16 ;
+: r2 .04 ;
+: r3 .005 ;
+: len  dup * swap dup * + ;
+: c1  xc yc len  r1 swap / ;
+: c2  xc yc len  r1 - dup .008 / swap .012 swap / min ;
+: lr 0.5 x - 0.5 y - 6 / - pi * 2 / sin 1 + 10 pow ;
+: wb  xc yt len  r2 swap / ;
+: bb  xc yb len  r2 / ;
+: ws  xc yb len  r3 swap / ;
+: bs  xc yt len  r3 / ;
+
+c1 lr min
+bb min wb max bs min ws max
+c2 max
+
+0.1 -
+dup dup x 0.6 + *
+
+
+------------------------------------
+Title: fiberellum Redux
+Author: Anonymous
+Score: 10
+When: 2011-06-10 07:51:46.418623
+Code:
+: b x * sin ;
+: e y * cos / log cos ;
+8 b 16 e
+17 b 10 e
+5 b 9 e
+
+
+
+------------------------------------
+Title: Basic swirl Redux Redux
+Author: Stainless
+Score: 10
+When: 2012-11-07 21:14:26.474204
+Code:
+: z x ;
+: w y 0.5 - 4 * ;
+: r z z * w w * + sqrt ;
+: a w z atan2 ;
+: n 2 ;
+r n a * - cos 6 * sin 
+r n a * - cos 12 * sin 
+r n a * - cos 3 * sin 
+
+
+------------------------------------
+Title: warpspeed
+Author: BradN
+Score: 8
+When: 2011-04-22 04:32:15.423173
+Code:
+: ang y 0.5 - x 0.5 - atan2 20 * ; 
+ang 1 + cos x * 
+ang 2 + cos y * 
+ang dup * cos
+
+
+
+------------------------------------
+Title: burn
+Author: BradN
+Score: 7
+When: 2011-04-23 18:35:57.407253
+Code:
+: square dup * ;
+: 2dup over over ;
+: len square swap square + sqrt ;
+: spiral x - swap y - 
+          2dup len push atan2 pop + 20 * sin ;
+0.2 0.2 spiral
+0.7 0.3 spiral
+0.4 0.6 spiral * *
+dup x *
+1 x - 1 y - + 0.25 * 
+
+
+------------------------------------
+Title: 4spire
+Author: BradN
+Score: 5
+When: 2011-04-23 21:17:40.579278
+Code:
+x x 23 * sin 2 / y max / sin
+y x 23 * sin 2 / y max / sin
+over over / sin
+
+
+
+------------------------------------
+Title: Hypnotism 2 Redux
+Author: Stainless
+Score: 5
+When: 2011-06-26 10:58:36.833809
+Code:
+: square dup * ;
+: dist square swap square + sqrt ;
+: 2dup over over ;
+: spiral 0.5 - swap 0.5 - 2dup dist
+push atan2 0.01 * pop + t 0.1 * +
+100 * sin ;
+x 0.03 - y spiral
+x y 0.03 - spiral x *
+y x spiral y *
+
+
+------------------------------------
+Title: fingers on chalkboard
+Author: BradN
+Score: 4
+When: 2011-04-22 06:15:50.325989
+Code:
+: square dup * ;
+: dist square swap square + sqrt ;
+: 2dup over over ;
+: spiral 0.5 - swap 0.5 - 2dup dist
+push atan2 0.01 * pop +
+100 * sin ;
+x 0.03 - y spiral
+x y 0.03 - spiral x *
+y x spiral y *
+
+
+------------------------------------
+Title: fiberellum
+Author: BradN
+Score: 4
+When: 2011-04-22 07:50:10.488602
+Code:
+x 15 * sin y 10 * cos / log cos
+x 14 * cos y 10 * sin / log cos
+x 10 * cos y 9 * cos / log cos
+x 10 * sin y 10 * sin / log cos
+over + push over + push +
+pop pop
+
+
+
+------------------------------------
+Title: first line 7 syllables. please continue Redux Redux
+Author: Anonymous
+Score: 4
+When: 2011-05-20 05:04:55.426909
+Code:
+x .2 * .3 .4 x y - 
+/ / 40 * sin /
+y 2dup z* x 2dup z*
+
+
+------------------------------------
+Title: autumn
+Author: BradN
+Score: 4
+When: 2011-05-21 16:36:02.835745
+Code:
+X y + 1.23  + 
+x * y * y sin 2dup 
+* over < x -
+
+
+------------------------------------
+Title: light drop
+Author: BradN
+Score: 4
+When: 2011-05-21 06:53:43.602187
+Code:
+: iii x y z*
+Sin ; x 5 * x y
+- iii exp y iii
+
+
+------------------------------------
+Title: orbit
+Author: BradN
+Score: 3
+When: 2011-04-23 21:40:33.810547
+Code:
+x y x 0.7 * + * 0.4 +
+dup 3 pow
+dup 4 pow
+x 0.2 - dup * y 0.4 - dup * + 0.1 <
+x y * 5 * * +
+
+
+------------------------------------
+Title: so grow to a point
+Author: BradN
+Score: 3
+When: 2011-04-22 05:52:09.575514
+Code:
+: 2dup over over ;
+: dist dup * swap dup * + sqrt ;
+: spiral-dist y 0.7 - x 0.3 - 2dup atan2 swap dist + cos ;
+spiral-dist
+spiral-dist x *
+spiral-dist x * 0.2 * 1 x - y * 0.4 * +
+
+
+------------------------------------
+Title: República ya!
+Author: Jorge Acereda
+Score: 3
+When: 2011-06-09 21:59:14.230151
+Code:
+y .333 > .333 max
+dup 1 = y .666 < and
+.333 y > .333 *
+
+
+------------------------------------
+Title: Summer sky
+Author: Miguel A. Chico (Lobosoft)
+Score: 3
+When: 2011-06-15 07:31:56.141905
+Code:
+x y *
+y x *
+* y x
+* x y
+
+
+------------------------------------
+Title: Taiwan
+Author: CH Ting
+Score: 3
+When: 2011-07-23 17:30:08.058007
+Code:
+: ox x ;
+: oy y ;
+: x x 1.1 * ;
+: y y 1.5 * 0.25 - ;
+: x x t + .7 * sin y x min 1.3 * t + 1.1 * sin * dup * 10 / x + ;
+: y y t + 1.1 * sin x .7 * sin * dup * y + ;
+: clip x 0 > x 1 < * y 0 > * y 1 < * * ;
+: iclip 1 1 clip - * ;
+: sun ox 0.5 + oy * 4 pow ;
+
+: tenth 10 / ;
+: hundredth 100 / ;
+: xor <> ;
+: round 0.5 + floor ;
+
+
+: spike
+	x 25 hundredth - y 75 hundredth - atan2
+	60 tenth * pi / dup round - abs 16 hundredth * ( star )
+	x 25 hundredth - dup * y 75 hundredth - dup * +
+	sqrt + 20 hundredth 
+	< ;
+
+: box
+	x 5 tenth < y 5 tenth > and 
+;
+
+: taiwan 
+  box 1 swap - spike +
+  spike
+  box
+;
+
+taiwan
+ push push push
+
+pop clip ox oy + 4 / +
+pop clip ox oy + 3 / +
+pop clip ox oy + 2 / +
+
+
+
+------------------------------------
+Title: Oceanic
+Author: BradN
+Score: 3
+When: 2011-07-22 22:12:18.393719
+Code:
+: x x 0.2 + ;
+: y y 0.2 + ;
+: t t 4 / ;
+t x + 9.1 * cos y / cos
+t y + 9.2 * cos x / cos
+t x y - + 9.3 * cos x y + / cos 
+2dup z* push 2dup z* pop
+dup z+ +
+sin
+dup 1.3 * dup 1.3 *
+
+
+------------------------------------
+Title: color flow
+Author: Cedric
+Score: 3
+When: 2011-12-31 20:15:43.420696
+Code:
+: frac dup floor - ;
+: a * sin + ;
+: b sin t swap 5 a y 9 a x 7 a frac pi * sin ;
+x b y b t 2 / b
+
+
+------------------------------------
+Title: Look into my Eyes
+Author: BradN
+Score: 2
+When: 2011-04-22 07:03:18.325078
+Code:
+: square dup * ;
+: dist square swap square + sqrt ;
+: 2dup over over ;
+: spiral 0.5 - swap 0.5 - 2dup dist
+push atan2 0.01 * pop +
+100 * sin ;
+x y spiral
+x y spiral
+x y spiral
+
+
+
+------------------------------------
+Title: super rainbow
+Author: BradN
+Score: 2
+When: 2011-04-22 01:20:41.904049
+Code:
+x y x y * 10 * 1 mod
+
+
+------------------------------------
+Title: true blue
+Author: BradN
+Score: 2
+When: 2011-04-28 20:24:02.228544
+Code:
+x y 2dup z* 0.3 + 2dup
+2dup z* 2dup z* +
+push x y * * pop sqrt
+
+
+------------------------------------
+Title: noon
+Author: BradN
+Score: 2
+When: 2011-05-21 07:48:54.213196
+Code:
+X .4 + y 2dup
+z* + dup .9 * dup 1.1
+* cos x + sqrt
+
+
+------------------------------------
+Title: Radar Redux
+Author: Stainless
+Score: 2
+When: 2011-06-11 14:49:49.830381
+Code:
+x 0.5 - dup * y  0.5 - dup * + sqrt dup pi * 17 * sin swap pi * -2 * tan x 4 * y tan *
+
+
+------------------------------------
+Title: electrified larva
+Author: BradN
+Score: 2
+When: 2011-06-25 01:19:01.064241
+Code:
+: bar * sin + ;
+: barx x bar ;
+: bary y bar ;
+: foo
+t sin 17 barx 3 bary 5 barx
+t sin 7 bary 11 barx 13 bary * atan2 4 * cos ;
+1 foo 2 foo 3 foo
+
+
+
+------------------------------------
+Title: scales breathing
+Author: Anonymous
+Score: 2
+When: 2011-06-25 07:24:52.839041
+Code:
+: x' x 0.3 - ;
+: y' y 0.1 + ;
+x' y' * 40 t sin 5 * + * sin
+1 x' - y' * 30 t 1.11 * sin 11 * + * sin *
+x' 1 y' - * 20 t 1.31 * sin 7 * + * sin *
+dup x' / sin
+dup y' / cos 1 x - 1 y - + *
+
+
+------------------------------------
+Title: Temporal Continuity
+Author: BradN
+Score: 2
+When: 2011-06-25 20:40:35.099898
+Code:
+: x x t + 1.3 * sin y t + 1.1 * sin * dup * x + ;
+: y y t + 1.1 * sin x y + 1.3 * sin * dup * y + ;
+: xc  x .5 - ;
+: yc  y .5 - ;
+: yt  y .7 - ;
+: yb  y .3 - ;
+: r1 .16 ;
+: r2 .04 ;
+: r3 .005 ;
+: len  dup * swap dup * + ;
+: c1  xc yc len  r1 swap / ;
+: c2  xc yc len  r1 - dup .008 / swap .012 swap / min ;
+: lr 0.5 x - 0.5 y - 6 / - pi * 2 / sin 1 + 10 pow ;
+: wb  xc yt len  r2 swap / ;
+: bb  xc yb len  r2 / ;
+: ws  xc yb len  r3 swap / ;
+: bs  xc yt len  r3 / ;
+
+c1 lr min
+bb min wb max bs min ws max
+c2 max
+
+0.1 -
+dup dup x 0.6 + *
+
+
+------------------------------------
+Title: pointilli Redux
+Author: Anonymous
+Score: 2
+When: 2011-11-18 06:52:42.818164
+Code:
+: x x t 3 / sin + ;
+: foil x 31 *
+Sin y 19 * cos z* ;
+y t sin + X foil y foil
+
+
+------------------------------------
+Title: pointilli round
+Author: Anonymous
+Score: 2
+When: 2011-11-18 06:53:23.554731
+Code:
+: x x t 3 / sin + ;
+: y y t 7 / sin + ;
+: foil x 31 *
+Sin y 19 * cos z* ;
+y t sin + X foil y foil
+
+
+------------------------------------
+Title: Dawn Redux
+Author: Stainless
+Score: 2
+When: 2011-12-27 11:36:56.955929
+Code:
+: sunangle t sin 3.141592653 * ;
+: angle 1 y - 1 atan2 ;
+angle sunangle atan2 dup 0.25 * sunangle 3.141597 / 
+
+
+
+
+------------------------------------
+Title: electrified larva Redux Redux
+Author: Anonymous
+Score: 2
+When: 2012-01-01 09:29:52.996099
+Code:
+: bar * sin + ;
+: barx x bar ;
+: bary y bar ;
+: foo
+t sin 20 barx 3 bary 5 barx
+t sin 7 bary 11 barx 13 bary * atan2 4 * cos ;
+1 foo 2 foo \ 3 foo
+
+
+
+------------------------------------
+Title: membrane
+Author: Hans N. 
+Score: 2
+When: 2012-04-22 09:09:33.432738
+Code:
+: square dup * ;
+: 2dup over over ;
+: len square swap square + sqrt ;
+: spiral x - swap y - 
+          2dup len push atan2 pop + 10 * tan ;
+0.2 0.2 spiral
+0.7 0.3 spiral
+0.4 0.6 spiral * *
+dup x *
+0.5 x - 0.3 y - + 0.95 * 
+
+
+------------------------------------
+Title: ova
+Author: BradN
+Score: 1
+When: 2011-04-22 06:03:18.351879
+Code:
+: ova dup * 4 * sin swap dup * 4 * sin * ;
+: flash x 15 * sin dup * 0.3 * y 14 * sin + 0.15 * ;
+x y ova x 0.1 + y 0.1 - ova + flash +
+x y ova flash +
+x y ova 0.8 * flash 1.1 * +
+
+
+
+------------------------------------
+Title: trisect
+Author: BradN
+Score: 1
+When: 2011-04-22 05:27:44.572404
+Code:
+x sin y cos * y 100 * cos *
+x cos y sin * x 100 * cos *
+x cos y cos * x y + 100 * cos *
+
+
+------------------------------------
+Title: pixels
+Author: BradN
+Score: 1
+When: 2011-04-23 20:44:31.979485
+Code:
+x 0.5 - 10 * floor 10 / y * 30 * sin
+y 0.3 - 10 * floor 10 / x * 30 * sin
+x 0.7 - 10 * floor 10 / y * 30 * sin
+
+
+
+------------------------------------
+Title: led
+Author: BradN
+Score: 1
+When: 2011-04-22 05:40:47.650390
+Code:
+: grid 7 * sin swap 7 * cos * dup * ;
+x 1 + y grid
+x y grid x +
+x y grid
+
+
+
+------------------------------------
+Title: frozen pond
+Author: BradN
+Score: 1
+When: 2011-04-22 19:39:34.156935
+Code:
+X 0.6 + dup * y y * 5 * sin /
+0.3 *
+Dup dup * 2 *
+Dup dup * 3 *
+
+
+------------------------------------
+Title: in too close
+Author: BradN
+Score: 1
+When: 2011-04-22 05:31:27.759358
+Code:
+x y * 10 * sin
+x 0.5 - y 0.5 - 5 * cos *
+y 0.3 - x 0.3 - 9 * sin *
+
+
+------------------------------------
+Title: paraswoosh
+Author: BradN
+Score: 1
+When: 2011-04-22 06:36:26.499194
+Code:
+: t^2 dup * y - abs 0.1 < ;
+x y x t^2
+
+
+------------------------------------
+Title: envelope
+Author: BradN
+Score: 1
+When: 2011-04-22 04:16:09.238975
+Code:
+x y < x * y + dup dup 0.8 *
+
+
+------------------------------------
+Title: sinc
+Author: BradN
+Score: 1
+When: 2011-04-23 19:50:46.963792
+Code:
+: sinc dup sin swap / ;
+x 0.5 - 31 * sinc 0.7 + 2 / y - abs 0.03 <
+x 0.5 - 23 * sinc 0.7 + 2 / y - abs 0.03 <
+x 0.5 - 17 * sinc 0.7 + 2 / y - abs 0.03 <
+
+
+
+------------------------------------
+Title: Difference Engine
+Author: BradN
+Score: 1
+When: 2011-05-06 21:05:44.441725
+Code:
+x 30 * sin y min y
+20 * sin x <
++ dup 0.7 * dup 0.4 *
+
+
+
+------------------------------------
+Title: squeeze ready
+Author: BradN
+Score: 1
+When: 2011-05-21 07:03:14.443492
+Code:
+: z** 2dup z* ;
+X y z** sqrt z** sin z**
+Y z** cos z** z**
+
+
+------------------------------------
+Title: two plus two is green
+Author: kremlach
+Score: 1
+When: 2011-05-17 21:17:39.237865
+Code:
+2 + 2
+
+
+------------------------------------
+Title: Radar
+Author: Stainless
+Score: 1
+When: 2011-06-11 14:47:55.310440
+Code:
+x dup * y dup * + sqrt dup pi * 17 * sin swap pi * 2 * cos x 4 * y tan *
+
+
+------------------------------------
+Title: Prisoner
+Author: p71
+Score: 1
+When: 2011-06-10 20:05:26.354982
+Code:
+: scale random atan2 ;
+y 41 * pi + sin scale
+x 167 * sin scale
+
+
+------------------------------------
+Title: 4spire Redux
+Author: Anonymous
+Score: 1
+When: 2011-06-28 16:25:09.533488
+Code:
+t sin abs x 23
+* sin 2 / y max /
+sin dup sqrt dup exp
+
+
+------------------------------------
+Title: sinc Redux
+Author: Stainless
+Score: 1
+When: 2011-06-26 11:02:07.203034
+Code:
+: sinc dup t 0.5 * * sin swap / ;
+x 0.5 - 31 * sinc 0.7 + 2 / y - abs 0.03 <
+x 0.5 - 23 * sinc 0.7 + 2 / y - abs 0.03 <
+x 0.5 - 17 * sinc 0.7 + 2 / y - abs 0.03 <
+
+
+
+------------------------------------
+Title: Wiggle
+Author: BradN
+Score: 1
+When: 2011-07-20 17:09:51.662548
+Code:
+: x x t + 1.3 * sin y t + 1.1 * sin * dup * x + ;
+: y y t + 1.1 * sin x y + 1.3 * sin * dup * y + ;
+x 30 * sin y 20 * sin
+x y - 50 * sin
+
+
+------------------------------------
+Title: Tumbling
+Author: BradN
+Score: 1
+When: 2011-07-22 22:05:04.202770
+Code:
+t x + sin
+t y + cos
+2dup z* +
+dup 10 * t 1.1 * + sin
+swap dup 11 * t + sin
+swap 12 * t 1.2 * + sin 
+
+
+------------------------------------
+Title: England
+Author: CH Ting
+Score: 1
+When: 2011-07-20 19:16:38.721194
+Code:
+: ox x ;
+: oy y ;
+: x x 1.1 * ;
+: y y 1.5 * 0.25 - ;
+: x x t + .7 * sin y x min 1.3 * t + 1.1 * sin * dup * 10 / x + ;
+: y y t + 1.1 * sin x .7 * sin * dup * y + ;
+: clip x 0 > x 1 < * y 0 > * y 1 < * * ;
+: iclip 1 1 clip - * ;
+: sun ox 0.5 + oy * 4 pow ;
+
+: tenth 10 / ;
+: hundredth 100 / ;
+: xor <> ;
+
+: red-mask
+	x 6 tenth < x 4 tenth > and
+	y 6 tenth < y 4 tenth > and or
+	x y - abs 1 tenth < or
+	1.0 x - y - abs 1 tenth < or
+	;
+: green-mask
+	x 55 hundredth < x 45 hundredth > and
+	y 55 hundredth < y 45 hundredth > and or
+	x y - abs 5 hundredth < or
+	1.0 x - y - abs 5 hundredth < or
+	;
+: england
+	red-mask
+	green-mask
+	over over xor
+	swap 1.0 xor
+	;
+
+england push push push
+
+pop clip
+pop clip
+pop clip
+
+
+
+------------------------------------
+Title: Switzerland
+Author: CH Ting
+Score: 1
+When: 2011-07-22 21:37:34.847786
+Code:
+: ox x ;
+: oy y ;
+: x x 1.1 * ;
+: y y 1.5 * 0.25 - ;
+: x x t + .7 * sin y x min 1.3 * t + 1.1 * sin * dup * 10 / x + ;
+: y y t + 1.1 * sin x .7 * sin * dup * y + ;
+: clip x 0 > x 1 < * y 0 > * y 1 < * * ;
+: iclip 1 1 clip - * ;
+: sun ox 0.5 + oy * 4 pow ;
+
+: tenth 10 / ;
+: hundredth 100 / ;
+
+: 1arm
+	5 tenth - abs 1 tenth <
+	;
+: 1mask
+	dup 2 tenth > 
+	swap 8 tenth <
+	and 
+	;
+
+: switzerland
+	1.0
+	x 1arm y 1mask and 
+        y 1arm x 1mask and or
+	dup ;
+
+switzerland
+
+push push push
+
+pop clip
+pop clip
+pop clip
+
+
+
+------------------------------------
+Title: test2 -- DEPRECATED
+Author: Anonymous
+Score: 1
+When: 2010-08-01 20:46:03.390452
+Code:
+x t + sin y t sin +
+audio
+500 t * sin 10 t * sin *
+
+
+------------------------------------
+Title: Hammond Organ by 3 -- DEPRECATED
+Author: BradN
+Score: 1
+When: 2010-08-27 18:18:16.704048
+Code:
+audio
+: hz pi * 2 * t * sin ;
+
+: tone 12 / 2 swap pow 220 *
+dup hz .6 * over 2 * hz .3 * + swap 4 * hz .1 * +
+;
+
+t 3 * 10 mod floor 3 * tone
+
+
+
+------------------------------------
+Title: Tracking
+Author: BradN
+Score: 1
+When: 2011-10-27 00:30:28.700378
+Code:
+t 11 mod  t 7 mod
+* sin 1 x - *
+t 3 mod  t 5 mod
+* sin x * +
+dup y >
+over x <
+
+
+------------------------------------
+Title: Wiggle
+Author: BradN
+Score: 1
+When: 2011-10-27 00:27:30.645323
+Code:
+t sin
+t 3 / sin abs +
+.3 max 1 x - *
+t 5 * sin abs x * +
+dup y * 1 mod
+2dup - x >
+
+
+------------------------------------
+Title: Ingress
+Author: BradN
+Score: 1
+When: 2011-11-16 21:51:24.399674
+Code:
+: x t sin 0.2 * x + ;
+: y t .3 * sin 0.2 * y + ;
+: 2square 2 * dup * ;
+t floor 5 / 1 mod
+t 3.1 * floor 3 / 1 mod +
+1 mod t 11 / 1 mod +
+x 0.4 - 2square y 0.7 - 2square +
+x 0.6 - 2square y 0.2 - 2square +
+min 1 min * x 2 / +
+x .3 - over / y .2 - / sin over 2dup z*
+
+
+
+------------------------------------
+Title: C Minor 1+2/
+Author: C. H. Ting
+Score: 1
+When: 2012-01-26 04:03:03.743863
+Code:
+26.1 x * sin 1 + 2 /
+31.1 x * sin 1 + 2 /
+39.2 x * sin 1 + 2 /
+
+
+------------------------------------
+Title: naclforth Redux Redux
+Author: Stainless
+Score: 1
+When: 2012-02-24 11:38:18.716782
+Code:
+: x2 x 0.5 - t cos * y 0.5 - t sin * + 0.5 + ;
+: y2 y 0.5 - t cos * x 0.5 - t sin * - 0.5 + ;
+: dot x2 - 10 * dup * swap y2 - 10 * dup * +   1 swap - 0 max - ;
+: edge 1 x2 .5 - 2 * dup * y2 .5 - 2 * dup * + 20 pow - * ;
+: dots .35 .35 dot .35 .65 dot .65 .35 dot .65 .65 dot edge ;
+1 x2 .3 - dup dup * * y2 .2 - dup * + - dots
+1 x2 .2 - dup dup * * y2 .1 - dup * + - dots .95 *
+2dup + 5 /
+x2 2 pow y * 2 / +
+1 x2 .5 - 2 * dup * y2 .5 - 2 * dup * + 8 pow -
+
+
+
+------------------------------------
+Title: Wipeout
+Author: Stainless
+Score: 1
+When: 2012-03-06 14:05:05.570045
+Code:
+: uu 4 * t sin 2 * - ;
+: vv 4 * t cos 2 * + ;
+x vv y uu * 
+x vv y vv *  
+y uu x vv * 
+
+
+
+------------------------------------
+Title: inkblot mandelbrot Redux
+Author: Stainless
+Score: 1
+When: 2012-03-06 14:19:58.110434
+Code:
+: z^2 2dup z* ;
+: layer push push z^2 pop pop 2dup push push z+ pop pop ;
+: many layer layer layer layer layer layer layer layer layer layer ;
+: len dup * swap dup * + ;
+: mant y 0.7 - 3 * x 0.5 - 3 * many drop drop len dup 1 < * ;
+t sin t sin mant
+t cos t cos mant
+0.2 0.2 mant
+
+
+
+------------------------------------
+Title: nh2 Redux
+Author: Stainless
+Score: 1
+When: 2012-03-06 14:51:10.847520
+Code:
+: x' x 0.5 - 1.6 * ;
+: y' y 0.5 - 1.6 * ;
+: len dup * swap dup * + sqrt ;
+: polar x' y' atan2 x' y' len ;
+polar 130 * t cos * 100 swap - sqrt + 3 + cos .4 + 
+polar 132 * t cos * 102 swap - sqrt + 3.1 + cos .4 + 
+polar * 134 t cos * 104 swap - sqrt + 3.2 + cos .4 + 
+
+
+
+------------------------------------
+Title: streak Redux
+Author: Anonymous
+Score: 1
+When: 2012-03-21 16:12:27.724895
+Code:
+: web push push 
+         x 0.5 + y 0.3 + * pop * sin 0 max
+         x 0.3 + y 0.5 + * pop * sin 0 max + ;
+31 23 web 17 17 web * x +
+23 31 web 19 19 web * y x * +
+31 31 web 7 7 web * y +
++ + 1 mod dup dup
+
+
+------------------------------------
+Title: Ahhh a flower Redux Redux
+Author: Stainless
+Score: 1
+When: 2012-10-27 10:47:15.833663
+Code:
+: x2 x 0.5 - ;
+: y2 y 0.5 - ;
+: x3 x2 t sin * y2 t cos * + ;
+: y3 x2 t cos * y2 t sin * - ;
+: radius x3 x3 * y3 y3 * + sqrt ;
+: angle x3 y3 atan2 ;
+angle cos abs radius /
+angle sin abs radius /
+radius 0.2 <
+
+
+
+
+
+
+------------------------------------
+Title: Radar Redux Redux
+Author: Stainless
+Score: 1
+When: 2012-10-27 09:21:46.043581
+Code:
+: t2 t sin 6 * abs ;
+x 0.5 - dup * y  0.5 - dup * + sqrt 
+dup pi * 17 * sin 
+swap pi * t2 * tan 
+x 4 * y tan *
+
+
+------------------------------------
+Title: Extended butterfly
+Author: Stainless
+Score: 1
+When: 2012-11-07 21:02:57.915035
+Code:
+: scale 20 t sin * ;
+: z x scale * ;
+: w y scale * ;
+z z * w w * +
+50 z w + / sin 
+z z * w w * - 
+* / abs
+dup 3 / swap dup 4 / swap 5 /
+
+
+------------------------------------
+Title: streak tile
+Author: BradN
+Score: 1
+When: 2012-11-17 17:22:29.244524
+Code:
+: x x pi * 2 * ;
+: y y pi * 2 * ;
+
+: x x y cos + sin ;
+: y y x sin + sin ;
+
+: web push push 
+         x 0.5 + y 0.3 + * pop * sin 0 max
+         x 0.3 + y 0.5 + * pop * sin 0 max + ;
+31 23 web 17 17 web * x +
+23 31 web 19 19 web * y x * +
+31 31 web 7 7 web * y +
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 1
+When: 2013-02-21 14:10:46.807878
+Code:
+: cent x .5 - 2 * y .5 - 2 * ;
+: square dup * ;
+: ang cent atan2 pi + pi / 2 / ;
+: dist cent square swap square + sqrt ;
+ang 5 * 1 mod dist .3 - <
+
+
+------------------------------------
+Title: pied
+Author: BradN
+Score: 0
+When: 2011-04-22 20:00:21.064378
+Code:
+Pi x mod pi y mod
+
+
+------------------------------------
+Title: quadtile
+Author: bowmanator
+Score: 0
+When: 2011-04-23 22:31:57.124864
+Code:
+: square dup * ;
+: dist abs swap abs + sqrt ;
+: 2dup over over ;
+: spiral 0.5 - swap 0.5 - 2dup dist
+push atan2 0.01 * pop +
+100 * sin ;
+x y spiral x 0.5 < and
+x y spiral y 0.5 > and
+x y spiral
+
+
+
+------------------------------------
+Title: rainbow
+Author: BradN
+Score: 0
+When: 2011-04-22 01:20:06.734966
+Code:
+x y 0
+
+
+------------------------------------
+Title: triforce
+Author: Anonymous
+Score: 0
+When: 2011-04-22 01:50:23.330957
+Code:
+x y - 1 x - y - y 0.5 -
+
+
+------------------------------------
+Title: black
+Author: Anonymous
+Score: 0
+When: 2011-04-22 01:21:07.759295
+Code:
+
+
+
+------------------------------------
+Title: beacons
+Author: BradN
+Score: 0
+When: 2011-04-22 04:19:33.427521
+Code:
+x y * 4 * sin x 1 y - + 4 * cos x y / 4 * sin
+
+
+------------------------------------
+Title: corner pool
+Author: BradN
+Score: 0
+When: 2011-04-22 05:20:45.911207
+Code:
+x 0.4 * y 0.5 * - 0.7 + 0.6 min y <
+x dup * y dup * + 0.3 > x 0.2 > *
+dup
+1 y - max
+
+
+------------------------------------
+Title: x^2
+Author: BradN
+Score: 0
+When: 2011-04-22 05:22:24.392943
+Code:
+x 100 * sin
+y 100 * sin
+x dup * y >
+
+
+------------------------------------
+Title: red rest
+Author: BradN
+Score: 0
+When: 2011-04-22 05:36:30.405860
+Code:
+: base x y * x y - 0.5 + * ;
+base x 0.1 *  0.9 + y < 0.4 * +
+base 
+base y 0.2 * +
+
+
+
+------------------------------------
+Title: spark
+Author: BradN
+Score: 0
+When: 2011-04-22 19:57:05.626639
+Code:
+X 0.3 - y 0.6 - atan2 2 * dup * dup
+Cos swap sin x atan2 cos x
+
+
+------------------------------------
+Title: primary fan
+Author: BradN
+Score: 0
+When: 2011-04-23 18:26:06.940556
+Code:
+: square dup * ;
+: spot y - square swap x - square + >
+          x y atan2 20 * sin abs * ;
+0.2 0.1 0.1 spot
+0.1 0.6 0.2 spot
+0.15 0.4 0.7 spot
+
+
+------------------------------------
+Title: red
+Author: Anonymous
+Score: 0
+When: 2011-04-22 01:41:56.157599
+Code:
+1 0 0
+
+
+------------------------------------
+Title: melting
+Author: BradN
+Score: 0
+When: 2011-04-22 19:45:36.263640
+Code:
+X 30 * sin y 40 * sin atan2 y * x / sin 
+dup y /
+Dup x /
+
+
+------------------------------------
+Title: ghost
+Author: BradN
+Score: 0
+When: 2011-04-23 20:01:52.227076
+Code:
+: sinc dup sin swap / ;
+: square dup * ;
+: len square swap square + sqrt ;
+: 2dup over over ;
+: burst x - swap y - 2dup len push atan2 pop 10 * + sin  ;
+: junk 2dup 0.2 + swap 0.3 + burst push
+2dup 0.7 + swap 0.2 + burst push
+0.4 + swap 0.7 + burst pop pop
+* * ;
+0 0 junk x y * + dup
+0.2 0.7 junk y + 0.7 * + dup
+0.7 0.2 junk x + +
+
+
+------------------------------------
+Title: scales
+Author: BradN
+Score: 0
+When: 2011-04-23 20:24:21.040685
+Code:
+: x' x 0.3 - ;
+: y' y 0.1 + ;
+x' y' * 40 * sin
+1 x' - y' * 30 * sin *
+x' 1 y' - * 20 * sin *
+dup x' / sin
+dup y' / cos 1 x - 1 y - + *
+
+
+------------------------------------
+Title: Air Force
+Author: bowmanator
+Score: 0
+When: 2011-04-23 22:17:20.304607
+Code:
+x .5 - dup * y .5 - dup * +
+dup .05 < swap
+dup .15 < swap
+.3 < 
+
+
+
+------------------------------------
+Title: pinch
+Author: Anonymous
+Score: 0
+When: 2011-04-22 05:12:43.529804
+Code:
+x dup * y min
+y dup * x min
+1 x - 1 y - *
+
+
+------------------------------------
+Title: odd stripe
+Author: BradN
+Score: 0
+When: 2011-04-22 05:25:16.060065
+Code:
+x x * 100 * cos
+1 x - dup * 100 * cos
+x 0.5 - dup * 100 * cos
+
+
+
+------------------------------------
+Title: goldenrods
+Author: BradN
+Score: 0
+When: 2011-04-22 20:21:27.953318
+Code:
+X 0.4 * y 0.3 * - 30 * sin y / 
+dup x * dup y *
+
+
+------------------------------------
+Title: summer
+Author: BradN
+Score: 0
+When: 2011-04-23 00:47:18.816142
+Code:
+: sun x 0.5 + y * 4 pow ;
+1 y x 0.4 * + - sun +
+1 y x 0.3 * + - sun +
+1 y x 0.2 * + - y + sun -
+
+
+------------------------------------
+Title: phaser
+Author: bowmanator
+Score: 0
+When: 2011-04-23 22:49:04.854727
+Code:
+: scale dup x * swap y * ;
+: tooth scale 10 * 2 mod swap 10 * 2 mod + 2 < ;
+3 tooth
+4 tooth
+5 tooth
+
+
+
+------------------------------------
+Title: red planet
+Author: Anonymous
+Score: 0
+When: 2011-04-22 04:14:12.385270
+Code:
+x y * dup dup * dup 0.9 *
+
+
+------------------------------------
+Title: L cut
+Author: BradN
+Score: 0
+When: 2011-04-22 07:55:53.132463
+Code:
+x y + 6 * sin abs
+1 x - y + 10 * sin abs *
+dup dup *
+x 3 * y 4 * min 10 * sin
+
+
+------------------------------------
+Title: neon blinds
+Author: BradN
+Score: 0
+When: 2011-04-22 20:09:02.473353
+Code:
+  X 0.4 + y atan2 8 * 1 mod dup sin / 1 mod
+Dup dup x atan2 dup *
+
+
+------------------------------------
+Title: falling
+Author: BradN
+Score: 0
+When: 2011-04-23 00:34:43.081667
+Code:
+: x' x 0.5 - 2 * ;
+: y' y 0.5 - 2 * ;
+: len dup * swap dup * + sqrt ;
+: polar x' y' atan2 x' y' len ;
+polar swap 11 * + sin 
+polar 10 * + cos
+polar 30 * + negate sin
+
+
+------------------------------------
+Title: pinstripe
+Author: bowmanator
+Score: 0
+When: 2011-04-23 22:39:34.352139
+Code:
+x y
+x 128.4 * y 63.9 * + sin
+
+
+------------------------------------
+Title: gape
+Author: BradN
+Score: 0
+When: 2011-04-22 04:22:48.706990
+Code:
+x y * x 4 * sin > 
+x y * y 4 * cos < 
+x y * x y - 3 * tan <
+
+
+------------------------------------
+Title: tv
+Author: BradN
+Score: 0
+When: 2011-04-22 04:24:41.356141
+Code:
+x y * 100 * cos 
+x y * 100 * sin 
+x y * 100 * cos negate
+
+
+------------------------------------
+Title: light spoon
+Author: BradN
+Score: 0
+When: 2011-04-22 06:06:44.401341
+Code:
+x 0.5 - y 0.5 - / x log +
+x 0.3 - y 0.7 - / x +
+x 0.2 - y 0.9 - / y /
+
+
+
+------------------------------------
+Title: jello glass
+Author: BradN
+Score: 0
+When: 2011-04-23 20:37:46.400062
+Code:
+: foo pi swap  x y + 1 - * 3 * pow 1 mod ;
+: glass push push push
+x pop * sin foo
+y pop * sin foo *
+x y * pop * sin foo * ;
+7 17 19 glass dup
+17 19 7 glass + dup
+19 7 17 glass + swap
+
+
+------------------------------------
+Title: blue ribbon
+Author: BradN
+Score: 0
+When: 2011-04-28 20:19:35.332863
+Code:
+: z^2 2dup z* ;
+: many z^2 z^2 z^2 z^2 ;
+x 0.6 - 10 * y 0.3 - 10 *
+many 1000000 / sin
+dup x swap / sin
+
+
+------------------------------------
+Title: diffraction
+Author: BradN
+Score: 0
+When: 2011-04-22 04:27:03.367258
+Code:
+x 20 * sin y 20 * sin * 
+x 19 * sin y 19 * sin * 
+x 18 * sin y 18 * sin *
+
+
+------------------------------------
+Title: awl
+Author: BradN
+Score: 0
+When: 2011-04-23 18:09:37.058169
+Code:
+: mask x y * 0.2 >
+           x y - abs 0.1 < or 
+           x y - abs 0.2 < and
+* ;
+x y / sin mask
+y x / sin mask
+over over * x * 3 *
+
+
+------------------------------------
+Title: arc lite
+Author: BradN
+Score: 0
+When: 2011-04-23 21:09:11.288062
+Code:
+x 1 x 0.5 - 2 * / 1 y 0.5 - 2 * / + cos /
+y 1 x 0.5 - 2 * / 1 y 0.5 - 2 * / + cos /
+over over *
+
+
+------------------------------------
+Title: unblinking iris
+Author: BradN
+Score: 0
+When: 2011-04-23 21:14:43.291621
+Code:
+: foo x 0.3 - 2 * dup * y 0.55 - 2 * dup * + ;
+x foo / sin x +
+y foo / sin y +
+over over / sin
+
+
+
+------------------------------------
+Title: Fusion
+Author: BradN
+Score: 0
+When: 2011-05-06 20:06:52.767300
+Code:
+x y x 5 * sin y
+7 * sin z+ over
+over swap + swap 2dup z* exp
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2011-05-06 20:11:47.633850
+Code:
+: flame x log sin y log
+cos 2dup z* + ;
+x flame atan2 y flame atan2 x
+
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2011-05-06 20:48:08.721813
+Code:
+x 20 * exp sin y /
+x y 2dup z* +
+y 20 * exp sin x /
+
+
+------------------------------------
+Title: asunder
+Author: BradN
+Score: 0
+When: 2011-05-06 21:38:37.047638
+Code:
+x 20 * dup sin swap /
+0.6 + y 2dup >
+push max pop max x 2dup z*
+
+
+
+------------------------------------
+Title: Blorf
+Author: Anonymous
+Score: 0
+When: 2011-05-15 18:52:30.105485
+Code:
+1 2 +
+
+
+------------------------------------
+Title: first line 7 syllables. please continue
+Author: carl hanse
+Score: 0
+When: 2011-05-20 02:18:09.008623
+Code:
+x .2 * .3 .4 x y - 
+
+
+
+------------------------------------
+Title: hand of man
+Author: BradN
+Score: 0
+When: 2011-05-21 07:26:11.748869
+Code:
+X y * x 4
+ y z* 9 x z+ x y
+ z* cos over x z*
+
+
+------------------------------------
+Title: Blorf
+Author: Anonymous
+Score: 0
+When: 2011-05-15 18:53:15.551070
+Code:
+1 x 2 y sin
+
+
+------------------------------------
+Title: pointilli
+Author: j art
+Score: 0
+When: 2011-05-21 06:44:59.287165
+Code:
+: foil x 31 *
+Sin y 19 * cos z* ;
+y X foil y foil
+
+
+------------------------------------
+Title: orbit Redux2
+Author: test
+Score: 0
+When: 2011-06-06 05:10:59.706380
+Code:
+x y x 0.7 * + * 0.4 +
+dup 3 pow
+dup 3 pow
+x 0.2 + dup * y 0.4 - dup * + 0.1 <
+x y * 2 * * +
+
+
+------------------------------------
+Title: 4spire porthole
+Author: Anonymous
+Score: 0
+When: 2011-05-16 02:06:10.961392
+Code:
+x x 23 * sin 2 / y max / sin
+y x 23 * sin 2 / y max / sin
+over over / sin
+x 0.6 - dup * y 0.4 - dup * + 0.1 <
+
+
+------------------------------------
+Title: Libya
+Author: Anonymous
+Score: 0
+When: 2011-05-16 02:13:21.192730
+Code:
+0 0.6 0
+y 0.5 - abs 0.25 <
+
+
+------------------------------------
+Title: Fusion
+Author: BradN
+Score: 0
+When: 2011-05-19 15:19:39.856269
+Code:
+x y x 5 *
+sin y 7 * sin z+ over
+over + swap 2dup z*
+
+
+------------------------------------
+Title: Untitled Redux
+Author: Anonymous
+Score: 0
+When: 2011-06-13 00:48:18.625656
+Code:
+x y * 4 +
+
+
+------------------------------------
+Title: sol
+Author: BradN
+Score: 0
+When: 2011-05-16 02:10:26.412149
+Code:
+x 5 * sin y 5 * sin + dup x + swap
+dup 0.5 *
+
+
+
+------------------------------------
+Title: 4spire porthole soft
+Author: Anonymous
+Score: 0
+When: 2011-05-16 02:34:18.977074
+Code:
+x x 23 * sin 2 / y max / sin
+y x 23 * sin 2 / y max / sin
+over over / sin
+x 0.6 - dup * y 0.4 - dup * + 7 * 1 swap -
+
+
+------------------------------------
+Title: fiberellum b/w
+Author: BradN
+Score: 0
+When: 2011-05-16 04:28:05.143087
+Code:
+0 0 0
+x 15 * sin y 10 * cos / log cos
+x 14 * cos y 10 * sin / log cos
++
+
+
+------------------------------------
+Title: Attuned
+Author: BradN
+Score: 0
+When: 2011-05-16 06:03:10.351211
+Code:
+x 0.5 + y 0.1
++ 2dup z* dup 0.7 * y
+x atan2 * 0.9 *
+
+
+------------------------------------
+Title: fount
+Author: BradN
+Score: 0
+When: 2011-05-21 07:34:26.979201
+Code:
+X 5 * sin y
+ mod 1 y x  z* over exp swap 2dup z* / x
+
+
+------------------------------------
+Title: White Static
+Author: Anonymous
+Score: 0
+When: 2011-06-06 20:56:15.656496
+Code:
+random dup dup
+
+
+------------------------------------
+Title: genesis
+Author: BradN
+Score: 0
+When: 2011-06-08 01:15:20.174136
+Code:
+: wander random random + random + random + random + 5 / ;
+x 0.2 - dup * y 0.3 - dup * + wander 0.3 * <
+dup wander *
+x wander *
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2011-06-09 10:51:42.797709
+Code:
+y x / y +
+
+x y / x +
+
+x y * 2 /
+
+
+------------------------------------
+Title: Whatever
+Author: Anonymous
+Score: 0
+When: 2011-06-09 20:20:26.340311
+Code:
+: sq dup * ;
+: ss over + sq sin ;
+x y ss x ss
+
+
+------------------------------------
+Title: fiberellum b/w Redux
+Author: gphil
+Score: 0
+When: 2011-05-17 17:22:50.091546
+Code:
+0 0 0
+x 33 * sin y 7 * cos / log cos
+x 3 * cos y 25 * sin / log cos
++
+
+
+
+------------------------------------
+Title: fiberellum b/w Redux Redux
+Author: Anonymous
+Score: 0
+When: 2011-05-18 00:34:41.852943
+Code:
+0 0 0
+x 33 * sin y 7 * cos / log cos
+x 3 * cos y 25 * sin dup * / log cos
++
+
+
+
+------------------------------------
+Title: first line 7 syllables. please continue Redux
+Author: Anonymous
+Score: 0
+When: 2011-05-20 05:03:06.858363
+Code:
+x .2 * .3 .4 x y - 
+/ / 40 * sin /
+
+
+------------------------------------
+Title: prismforth
+Author: BradN
+Score: 0
+When: 2011-06-01 18:19:33.152673
+Code:
+: hue dup sin over pi 3 / + sin push swap pi 2 * 3 / + sin pop swap ;
+x 5 *  y 2 * + 3.25 + hue
+x 0.5 - 2.1 * dup * y 0.5 - 2.1 * dup * + 10 pow 1 swap -  
+
+
+------------------------------------
+Title: Difference Engine
+Author: BradN
+Score: 0
+When: 2011-05-19 15:24:54.492568
+Code:
+x 30 * sin y
+min y 20 * sin x <
++ dup 0.7 * 0.2
+
+
+
+------------------------------------
+Title: Color Static
+Author: Anonymous
+Score: 0
+When: 2011-06-06 20:56:31.155367
+Code:
+random random random
+
+
+------------------------------------
+Title: carpet
+Author: alex wegel
+Score: 0
+When: 2011-06-09 01:43:54.484537
+Code:
+: co 0.1 mod 0.05 - dup * ;
+: o * 1 mod ;
+: f >r x co y co + dup sin swap r> + / ;
+.002 f 50 o
+.001 f 11 o
+.003 f 20 o
+
+
+
+------------------------------------
+Title: Mosaic
+Author: p71
+Score: 0
+When: 2011-06-10 20:24:27.286328
+Code:
+: f .5 - 1000 
+* swap 100 * * cos ;
+x y f dup exch
+
+
+------------------------------------
+Title: warpspeed Redux(shows back pattern)
+Author: Stanless 
+Score: 0
+When: 2011-06-11 15:02:32.450642
+Code:
+: ang y 0.5 - x 0.5 - atan2 20 * ; 
+ang 1 + cos x * 
+ang 2 + cos y * 
+ang 0.5 * dup * cos
+
+
+
+------------------------------------
+Title: Crystalines
+Author: p71
+Score: 0
+When: 2011-06-09 10:15:31.906173
+Code:
+x 10 * 1 mod
+x y + 10 * 1 mod 
+y 10 * 1 mod
+
+
+------------------------------------
+Title: shows bug in exp function
+Author: Stainless
+Score: 0
+When: 2011-06-09 16:11:16.333199
+Code:
+x 0.5 - exp
+y 0.5 - exp
+
+
+------------------------------------
+Title: pied Redux
+Author: Anonymous
+Score: 0
+When: 2011-06-11 10:24:51.143499
+Code:
+Pi x mod pi y mod 100 +
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2011-06-09 10:52:51.997665
+Code:
+y x / y +
+
+x y / x +
+
+x y * y * 42 *
+
+
+------------------------------------
+Title: Fusion Redux
+Author: Testing for bugs
+Score: 0
+When: 2011-06-09 12:59:37.790493
+Code:
+x y x 5 * sin y
+7 * sin z+ over
+over swap + swap 2dup z* exp dup
+
+
+------------------------------------
+Title: Crystalines Redux
+Author: Anonymous
+Score: 0
+When: 2011-06-09 20:18:47.197716
+Code:
+: sq dup * ;
+: ss over sq + not ;
+x y ss y ss
+
+
+------------------------------------
+Title: Interferences1
+Author: p71
+Score: 0
+When: 2011-06-10 20:55:54.736321
+Code:
+0.01 x + y 0.01 
++ 8001 * swap 1723 * * 
+cos dup .32711008 * 0.01
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2011-06-11 09:36:58.908183
+Code:
+10 10
+
+
+------------------------------------
+Title: Frontier lines
+Author: Miguel A. Chico
+Score: 0
+When: 2011-06-15 08:08:05.862843
+Code:
+x y *
+y x *
+* y x
+* x y
+tan tan tan
+tan tan
+tan
+abs
+pi /
+
+
+------------------------------------
+Title: Roses
+Author: p71
+Score: 0
+When: 2011-06-10 20:18:09.997887
+Code:
+: f .5 - 500 
+* swap .5 - 10 * * 
+tan ; x y f
+
+
+------------------------------------
+Title: boomerang
+Author: Greg S
+Score: 0
+When: 2011-06-12 02:33:21.805621
+Code:
+x dup * log
+y dup * log
++ 
+dup log swap dup sin swap cos
+
+
+------------------------------------
+Title: inkblot mandelbrot Redux
+Author: Anonymous
+Score: 0
+When: 2011-06-11 20:03:12.037606
+Code:
+: z^2 2dup z* ;
+: layer push push z^2 pop pop 2dup push push z+ pop pop ;
+: many layer layer layer layer layer layer layer layer layer layer ;
+: len dup * swap dup * + ;
+: mant y 0.7 - 8
+ * x 0.5 - 9 * many drop drop len dup 1 < * ;
+0 0 mant
+0.1 0.1 mant
+0.2 0.2 mant
+
+
+
+------------------------------------
+Title: electric larva
+Author: BradN
+Score: 0
+When: 2011-06-21 00:03:58.052531
+Code:
+: bar * sin + ;
+: barx x bar ;
+: bary y bar ;
+: foo
+0 17 barx 3 bary 5 barx
+0 7 bary 11 barx 13 bary * atan2 4 * cos ;
+1 foo 2 foo 3 foo
+
+
+
+------------------------------------
+Title: PAL/SECAM YUV Colorspace
+Author: BradN
+Score: 0
+When: 2011-06-21 16:30:27.082441
+Code:
+: xx x 0.5 - ;
+: yy y 0.5 - ;
+0.5 yy 1.13983 * +
+0.5 xx -0.39465 * + yy -0.58060 * +
+0.5 xx 2.03211 * +
+
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2011-06-25 20:35:13.911914
+Code:
+: foo t sin -
+/ sin ; x y foo y 
+x foo 2dup dup z*
+
+
+------------------------------------
+Title: Hypnotism 2
+Author: Stainless
+Score: 0
+When: 2011-06-26 10:50:56.760232
+Code:
+: square dup * ;
+: dist square swap square + sqrt ;
+: 2dup over over ;
+: spiral 0.5 - swap 0.5 - 2dup dist
+push atan2 0.01 * pop + t +
+100 * sin ;
+x 0.03 - y spiral
+x y 0.03 - spiral x *
+y x spiral y *
+
+
+------------------------------------
+Title: Duality Redux
+Author: Anonymous
+Score: 0
+When: 2011-06-20 11:41:06.835738
+Code:
+: xc  x .5 - ;
+: yc  y .5 - ;
+: yt  y .2 - ;
+: yb  y .3 - ;
+: r1 .16 ;
+: r2 .04 ;
+: r3 .005 ;
+: len  dup * swap dup * + ;
+: c1  xc yc len  r1 < ;
+: c2  xc yc len  r1 - dup .008 > swap .012 < and ;
+: lr  x .5 < ;
+: wb  xc yt len  r2 < ;
+: bb  xc yb len  r2 > ;
+: ws  xc yb len  r3 < ;
+: bs  xc yt len  r3 > ;
+
+c1 lr min
+bb min wb max  bs min ws max
+c2 max
+
+dup dup
+
+
+------------------------------------
+Title: red ball clipped
+Author: BradN
+Score: 0
+When: 2011-06-01 22:05:40.327686
+Code:
+: xx x 0.5 - 2 * ;
+: yy y 0.5 - 2 * ;
+: square dup * ;
+1 xx 0.2 - square yy 0.1 - square + -
+xx square yy square + 0.6 < *
+1 xx 0.3 - square yy 0.3 - square + -
+xx square yy square + 0.6 < *
+20 pow
+dup
+xx square yy square + 0.6 <
+
+
+------------------------------------
+Title: Circhequity
+Author: BradN
+Score: 0
+When: 2011-06-21 00:26:36.168675
+Code:
+: sincy 15.7 * dup
+sin atan2 ; x sincy y sincy
+- sincy dup log dup
+
+
+------------------------------------
+Title: warpspeed Animated
+Author: Stainless
+Score: 0
+When: 2011-06-25 16:39:52.801860
+Code:
+: ang y 0.5 - x 0.5 - atan2 t + 20 * ; 
+: tang y 0.5 - x 0.5 - atan2 20 * ; 
+ang 1 + cos x * 
+ang 2 + cos y * 
+tang 0.5 * dup * cos
+
+
+
+------------------------------------
+Title: primary fan Redux
+Author: Stainless
+Score: 0
+When: 2011-06-25 17:00:41.836879
+Code:
+: square dup * ;
+: spot y - square swap x - square + >
+          x y atan2 20 * sin abs * ;
+0.2 0.1 t sin spot
+0.1 0.6 t cos spot
+0.15 0.4 0.7 spot
+
+
+------------------------------------
+Title: Tower
+Author: Anonymous
+Score: 0
+When: 2011-06-20 19:54:36.733392
+Code:
+x 5 * 1.2 -
+sin y x * 22 * sin
+atan2 dup sin y sqrt
+
+
+
+------------------------------------
+Title: NTSC YIQ Colorspace
+Author: BradN
+Score: 0
+When: 2011-06-21 16:25:50.025146
+Code:
+: xx x 2 * 1 - ;
+: yy y 2 * 1 - ;
+1 xx 0.9563 * + yy 0.6210 * + 2 /
+1 xx -0.2721 * + yy -0.6474 * + 2 / 
+1 xx -1.1070 * + yy 1.7046 * + 2 /
+
+
+
+
+------------------------------------
+Title: 1 Redux Redux
+Author: Anonymous
+Score: 0
+When: 2011-06-24 05:37:16.996867
+Code:
+: square dup * ;
+: dist square swap square + sqrt ;
+: 2dup over over ;
+: spiral 0.1 - swap 0.1 - 2dup dist
+push atan2 0.01 * pop +
+3000 * sin ;
+x y spiral
+x y spiral
+x y spiral
+
+
+------------------------------------
+Title: red ball
+Author: BradN
+Score: 0
+When: 2011-06-01 22:04:31.490563
+Code:
+: xx x 0.5 - 2 * ;
+: yy y 0.5 - 2 * ;
+: square dup * ;
+1 xx 0.2 - square yy 0.1 - square + -
+xx square yy square + 0.6 < *
+1 xx 0.3 - square yy 0.3 - square + -
+xx square yy square + 0.6 < *
+20 pow
+dup
+
+
+
+------------------------------------
+Title: 1
+Author: 2
+Score: 0
+When: 2011-06-24 05:35:28.518401
+Code:
+: square dup * ;
+: dist square swap square + sqrt ;
+: 2dup over over ;
+: spiral 0.5 - swap 0.5 - 2dup dist
+push atan2 0.01 * pop +
+100 * sin ;
+x y spiral
+x y spiral
+x y spiral
+
+
+------------------------------------
+Title: Tower Redux
+Author: Stainless
+Score: 0
+When: 2011-06-25 16:17:46.102090
+Code:
+t x + 5 * 1.2 -
+sin y x * 22 * sin
+atan2 dup sin y sqrt
+
+
+
+------------------------------------
+Title: Circhequity Redux
+Author: Stainless
+Score: 0
+When: 2011-06-25 16:25:50.278940
+Code:
+: sincy  t * dup
+sin atan2 ; x sincy y sincy
+- sincy dup log dup
+
+
+------------------------------------
+Title: Rainbow Wave
+Author: BradN
+Score: 0
+When: 2011-06-25 20:20:33.355363
+Code:
+: trail t 4 * x + + sin y 2 * 1 - - abs 1 swap - ;
+0 trail
+1 trail
+2 trail
+
+
+------------------------------------
+Title: fount Redux
+Author: Stainless
+Score: 0
+When: 2011-06-26 11:10:22.295591
+Code:
+X 5 * t + sin y
+ mod 1 y x  z* over exp swap 2dup z* / x
+
+
+------------------------------------
+Title: oily
+Author: BradN
+Score: 0
+When: 2011-06-20 23:53:43.818331
+Code:
+: bar * sin + ;
+: barx x bar ;
+: bary y bar ;
+: foo
+0 11 barx 17 bary 19 barx
+0 3 bary 5 barx 7 bary * +
+7 * sin ;
+0 foo 1 foo 2 foo
+
+
+
+------------------------------------
+Title: sol Redux
+Author: Anonymous
+Score: 0
+When: 2011-06-25 07:20:11.600020
+Code:
+x t sin 5 / + 5 * sin y 5 * sin + t cos + dup x + swap
+dup 0.5 t sin dup * * *
+
+
+
+------------------------------------
+Title: 1 Redux
+Author: Anonymous
+Score: 0
+When: 2011-06-24 05:36:19.990624
+Code:
+: square dup * ;
+: dist square swap square + sqrt ;
+: 2dup over over ;
+: spiral 0.1 - swap 0.1 - 2dup dist
+push atan2 0.01 * pop +
+100 * sin ;
+x y spiral
+x y spiral
+x y spiral
+
+
+------------------------------------
+Title: nspire
+Author: BradN
+Score: 0
+When: 2011-06-25 06:52:11.091336
+Code:
+: x x t sin 2 + * ;
+: y y t sin 2 + * ;
+: x x t .2 * sin + ;
+x x 23 * sin 2 / y max / t + sin
+y x 23 * sin 2 / y max / t + sin
+over over / t + sin
+
+
+
+------------------------------------
+Title: bouncing iris
+Author: Anonymous
+Score: 0
+When: 2011-06-25 07:29:07.701728
+Code:
+: foo x 0.3 t cos abs * 4 *  - 2 * dup * y 0.55 t sin abs * - 2 * dup * + ;
+x foo / sin x +
+y foo / sin y +
+over over / sin
+
+
+
+------------------------------------
+Title: Fusion Redux Redux
+Author: Stainless
+Score: 0
+When: 2011-06-28 10:34:01.872188
+Code:
+x y x 5 * sin y
+7 * t + sin  z+ over
+over swap + swap 2dup z* exp dup
+
+
+------------------------------------
+Title: rippling
+Author: Anonymous
+Score: 0
+When: 2011-06-25 07:02:21.647776
+Code:
+: sinc dup sin swap / ;
+: square dup * ;
+: len square swap square + sqrt ;
+: 2dup over over ;
+: burst x - swap y - 2dup len push atan2 pop 10 * + sin  ;
+: junk 2dup 0.2 + swap 0.3 + burst push
+2dup 0.7 + swap 0.2 + burst push
+0.4 + swap 0.7 + burst pop pop
+* * ;
+t sin 0 junk x y * + dup
+0.2 t 1.1 * sin + 0.7 junk y + 0.7 * + dup
+0.7 0.2 t 1.3 * sin + junk x + +
+
+
+------------------------------------
+Title: Hypnotism 1
+Author: Stainless
+Score: 0
+When: 2011-06-26 10:50:01.884291
+Code:
+: square dup * ;
+: dist square swap square + sqrt ;
+: 2dup over over ;
+: spiral 0.5 - swap 0.5 - 2dup dist
+push atan2 0.01 * pop + t +
+100 * sin ;
+x y spiral
+x y spiral
+x y spiral
+
+
+------------------------------------
+Title: clock
+Author: BradN
+Score: 0
+When: 2011-06-25 18:25:14.614965
+Code:
+: xy x 0.5 - y 0.5 - ;
+: ang xy atan2 pi / 1 + 2 / .5 + 1 mod ;
+: second t 60 mod floor 60 / ;
+: minute t 60 / 60 mod floor 60 / ;
+: hour t 60 / 60 / 12 mod floor 12 / ;
+: incircle xy dup * swap dup * + .25 < * ;
+: hand ang - abs 0.01 < incircle ;
+second hand
+minute hand
+hour hand
+
+
+
+------------------------------------
+Title: Swell
+Author: BradN
+Score: 0
+When: 2011-06-25 20:14:14.150448
+Code:
+t x + sin t
+y + cos x / sin swap
+y / sin 2dup /
+
+
+
+------------------------------------
+Title: sinc Redux Redux
+Author: Stainless
+Score: 0
+When: 2011-06-26 11:03:02.926836
+Code:
+: sinc dup t + sin swap / ;
+x 0.5 - 31 * sinc 0.7 + 2 / y - abs 0.03 <
+x 0.5 - 23 * sinc 0.7 + 2 / y - abs 0.03 <
+x 0.5 - 17 * sinc 0.7 + 2 / y - abs 0.03 <
+
+
+
+------------------------------------
+Title: flag prototype
+Author: BradN
+Score: 0
+When: 2011-07-20 18:04:28.610871
+Code:
+: ox x ;
+: oy y ;
+: x x 1.1 * ;
+: y y 1.5 * 0.25 - ;
+: x x t + .7 * sin y x min 1.3 * t + 1.1 * sin * dup * 10 / x + ;
+: y y t + 1.1 * sin x .7 * sin * dup * y + ;
+: clip x 0 > x 1 < *
+y 0 > * y 1 < * * ;
+x clip y clip x y * 10 * 1 mod clip
+1 1 clip - .7 * + 
+
+
+------------------------------------
+Title: test -- DEPRECATED
+Author: Anonymous
+Score: 0
+When: 2010-08-01 20:45:22.835361
+Code:
+x y 
+audio
+t 500 * sin t 10 * sin *
+
+
+------------------------------------
+Title: nh1
+Author: Anonymous
+Score: 0
+When: 2011-08-10 00:32:45.259348
+Code:
+: x' x 0.5 - 2 * ;
+: y' y 0.5 - 2 * ;
+: len dup * swap dup * + sqrt ;
+: polar x' y' atan2 x' y' len ;
+polar 130 * 100 swap - sqrt + 3 + cos .4 + 
+polar 132 * 102 swap - sqrt + 3.1 + cos .4 + 
+polar 134 * 104 swap - sqrt + 3.2 + cos .4 + 
+x 0.5 - dup * y 0.5 - dup * + .25 / 10 pow 1 swap -
+
+
+------------------------------------
+Title: flag prototype Redux
+Author: BradN
+Score: 0
+When: 2011-07-20 18:17:29.320956
+Code:
+: ox x ;
+: oy y ;
+: x x 1.1 * ;
+: y y 1.5 * 0.25 - ;
+: x x t + .7 * sin y x min 1.3 * t + 1.1 * sin * dup * 10 / x + ;
+: y y t + 1.1 * sin x .7 * sin * dup * y + ;
+: clip x 0 > x 1 < * y 0 > * y 1 < * * ;
+: iclip 1 1 clip - * ;
+: sun ox 0.5 + oy * 4 pow ;
+
+x clip 
+1 oy ox 0.4 * + - sun + iclip +
+
+y clip 
+1 oy ox 0.3 * + - sun + iclip +
+
+x y * 10 * 1 mod clip
+1 oy ox 0.2 * + - y + sun - iclip +
+
+
+
+------------------------------------
+Title: Glimpse
+Author: BradN
+Score: 0
+When: 2011-07-22 22:51:14.023791
+Code:
+x y t sin x
+y - z* t 2 * sin
+y z* 2dup - exp
+
+
+------------------------------------
+Title: Japan
+Author: CH Ting
+Score: 0
+When: 2011-07-22 21:38:51.983671
+Code:
+: ox x ;
+: oy y ;
+: x x 1.1 * ;
+: y y 1.5 * 0.25 - ;
+: x x t + .7 * sin y x min 1.3 * t + 1.1 * sin * dup * 10 / x + ;
+: y y t + 1.1 * sin x .7 * sin * dup * y + ;
+: clip x 0 > x 1 < * y 0 > * y 1 < * * ;
+: iclip 1 1 clip - * ;
+: sun ox 0.5 + oy * 4 pow ;
+
+: tenth 10 / ;
+: hundredth 100 / ;
+: xor <> ;
+
+: japan 
+	1.0	
+	x 5 tenth - dup * y 5 tenth - dup * + 7 hundredth > 
+	dup
+	; 
+
+japan
+
+ push push push
+
+pop clip
+pop clip
+pop clip
+
+
+
+------------------------------------
+Title: Armenia
+Author: CH Ting
+Score: 0
+When: 2011-07-22 21:41:33.200436
+Code:
+: ox x ;
+: oy y ;
+: x x 1.1 * ;
+: y y 1.5 * 0.25 - ;
+: x x t + .7 * sin y x min 1.3 * t + 1.1 * sin * dup * 10 / x + ;
+: y y t + 1.1 * sin x .7 * sin * dup * y + ;
+: clip x 0 > x 1 < * y 0 > * y 1 < * * ;
+: iclip 1 1 clip - * ;
+: sun ox 0.5 + oy * 4 pow ;
+
+: tenth 10 / ;
+: hundredth 100 / ;
+: xor <> ;
+
+: armenia
+	y 33 hundredth < y 66 hundredth > or
+	y 33 hundredth < 2 /
+	over 0 =
+	;
+
+armenia
+
+ push push push
+
+pop clip ox oy * 3 / +
+pop clip oy 3 / +
+pop clip ox 3 / +
+
+
+
+------------------------------------
+Title: USA
+Author: CH Ting
+Score: 0
+When: 2011-07-22 21:57:14.345856
+Code:
+: ox x ;
+: oy y ;
+: x x 1.1 * ;
+: y y 1.5 * 0.25 - ;
+: x x t + .7 * sin y x min 1.3 * t + 1.1 * sin * dup * 10 / x + ;
+: y y t + 1.1 * sin x .7 * sin * dup * y + ;
+: clip x 0 > x 1 < * y 0 > * y 1 < * * ;
+: iclip 1 1 clip - * ;
+: sun ox 0.5 + oy * 4 pow ;
+
+: tenth 10 / ;
+: hundredth 100 / ;
+: xor <> ;
+
+
+: stripe
+	y 4100 hundredth * sin 0.0 < ;
+: star 
+	x 71 * sin  9 tenth > y 54 * sin  9 tenth > and
+	x 71 * sin -9 tenth < y 54 * sin -9 tenth < and
+	or ;
+: stripes 1.0 stripe stripe ;
+: stars star star 1.0 ;
+: usa
+	x 5 tenth > 
+	y 46 hundredth < or
+      dup  stripes push push over * swap pop over * swap pop swap *
+      push push push
+     1 swap -
+     stars push push over * swap pop over * swap pop swap *
+     ( add 3 )
+    pop swap push swap push +
+    pop pop pop swap push +
+    pop pop + 
+;
+
+usa
+
+ push push push
+
+pop clip ox oy * 3 / +
+pop clip oy 3 / +
+pop clip ox 3 / +
+
+
+
+------------------------------------
+Title: Drifter
+Author: BradN
+Score: 0
+When: 2011-07-22 22:40:21.468144
+Code:
+x t + sin abs
+x y * sin 2dup z* cos
+y t + sin abs
+
+
+------------------------------------
+Title: Jumble
+Author: BradN
+Score: 0
+When: 2011-07-22 22:09:24.723091
+Code:
+t x + 9.1 * cos y / cos
+t y + 9.2 * cos x / cos
+t x y - + 9.3 * cos x y + / cos 
+2dup z* push 2dup z* pop
+
+
+------------------------------------
+Title: Singularity
+Author: BradN
+Score: 0
+When: 2011-07-22 22:57:07.187980
+Code:
+: x x 0.3 - ;
+: y y 0.4 - ;
+x y atan2
+dup t sin - abs 0.1 - sin  swap
+dup t 1.1 * sin - abs 0.2 - sin swap
+t 1.3 * sin - abs 0.3 - sin
+
+
+------------------------------------
+Title: Blinding
+Author: Anonymous
+Score: 0
+When: 2011-07-22 22:24:06.111645
+Code:
+: grid 7 * sin swap 7 * cos * dup * ;
+: led 
+x 1 + y grid
+x y grid x +
+x y grid ;
+led
++ + t sin - abs
+dup 0.3 -
+swap dup 0.2 -
+swap 0.1 -
+led + + t 11 * cos * sin +
+
+
+------------------------------------
+Title: On Off
+Author: BradN
+Score: 0
+When: 2011-07-22 22:48:05.749445
+Code:
+t 2 * sin 15
+* x 6.2 * sin / log
+sin y 2dup z* dup
+
+
+------------------------------------
+Title: La de da -- DEPRECATED
+Author: BradN
+Score: 0
+When: 2010-08-02 03:18:42.938594
+Code:
+audio
+: hz t * pi * 2 * sin ;
+: note 2 swap 12 / pow 110 * hz ;
+t sin 3 * floor 3 * 10 +  note
+
+
+------------------------------------
+Title: Dial Tone -- DEPRECATED
+Author: BradN
+Score: 0
+When: 2010-08-25 19:41:53.736963
+Code:
+: wave x t 3 * + * sin .3 * 0.5 + y - 0.1 - abs ;
+3 wave 4 wave 5 wave
+audio
+: hz pi * 2 * t * sin ;
+350 hz 440 hz + 2 /
+
+
+
+------------------------------------
+Title: Dialing -- DEPRECATED
+Author: BradN
+Score: 0
+When: 2010-08-25 20:08:16.805990
+Code:
+audio
+: hz pi * 2 * t * sin ;
+: dualtone hz swap hz + 2 / ;
+: tone0  941 1336 dualtone ;
+: tone1  697 1209 dualtone ;
+: tone2  697 1336 dualtone ;
+: tone3  697 1477 dualtone ;
+: tone4  770 1209 dualtone ;
+: tone5  770 1336 dualtone ;
+: tone6  770 1477 dualtone ;
+: tone7  852 1209 dualtone ;
+: tone8  852 1336 dualtone ;
+: tone9  852 1477 dualtone ;
+tone0 t 3 * 4 mod floor 0 = *
+tone2 t 3 * 4 mod floor 2 = * +
+
+
+
+------------------------------------
+Title: Ding Ding Ding -- DEPRECATED
+Author: BradN
+Score: 0
+When: 2010-08-27 17:55:47.464607
+Code:
+audio
+
+: x t 2 * 1 mod ;
+: shape
+x pi * 4 * sin abs .4 pow x .125 < *
+1 x - x .125 > * + ;
+
+: hz pi * 2 * t * sin ;
+ 440 hz
+shape *
+
+
+------------------------------------
+Title: Busy -- DEPRECATED
+Author: BradN
+Score: 0
+When: 2010-08-25 19:49:56.306340
+Code:
+: wave x t 3 * + * sin .3 * 0.5 + y - 0.1 - abs ;
+7 wave 1 wave 3 wave
+audio
+: hz pi * 2 * t * sin ;
+480 hz 620 hz + 2 /
+t 1 mod 0.5 > *
+
+
+------------------------------------
+Title: Envelope -- DEPRECATED
+Author: BradN
+Score: 0
+When: 2010-08-27 17:51:50.307299
+Code:
+x pi * 4 * sin abs .4 pow x .125 < *
+1 x - x .125 > * +
+
+y >
+
+
+------------------------------------
+Title: Dialing Redux -- DEPRECATED
+Author: BradN
+Score: 0
+When: 2010-08-26 19:31:03.902338
+Code:
+audio
+: hz pi * 2 * t * sin ;
+: t t 4 * ;
+941 hz t sin 0 > *
+697 hz t sin 0 < * + t 2 * sin 0 > *
+770 hz t sin 0 > *
+852 hz t sin 0 < * + t 2 * sin 0 < * +
+1336 hz t 4 * sin 0 > *
+1209 hz t 4 * sin 0 < * +
++ 2 /
+t 8 * sin 0 > *
+
+
+
+------------------------------------
+Title: Beat -- DEPRECATED
+Author: BradN
+Score: 0
+When: 2010-08-26 19:34:05.594422
+Code:
+audio
+: part t 1 mod ;
+: part1 1 part - ;
+500 t * sin part *
+1000 t * sin part1 * +
+
+
+------------------------------------
+Title: Bang Bang Bang -- DEPRECATED
+Author: BradN
+Score: 0
+When: 2010-08-27 17:53:02.629156
+Code:
+audio
+
+: x t 4 * 1 mod ;
+: shape
+x pi * 4 * sin abs .4 pow x .125 < *
+1 x - x .125 > * + ;
+
+random shape *
+
+
+------------------------------------
+Title: Ah Bell -- DEPRECATED
+Author: BradN
+Score: 0
+When: 2010-08-27 17:47:04.233606
+Code:
+audio
+: hz pi * 2 * t * sin ;
+
+: ah 730 hz .5 * 1090 hz .4 * 2440 hz .1 * + + ;
+
+: shape t 3 / 1 mod 1 swap - 2 pow * ;
+
+ah shape
+
+
+------------------------------------
+Title: Scale -- DEPRECATED
+Author: BradN
+Score: 0
+When: 2010-08-27 18:07:58.127389
+Code:
+audio
+: hz 2 * t * pi * sin ;
+: tone 12 / 2 swap pow 220 * hz ;
+
+t 3 * 20 mod floor tone
+
+
+------------------------------------
+Title: Hammond Organ -- DEPRECATED
+Author: BradN
+Score: 0
+When: 2010-08-27 18:16:34.958999
+Code:
+audio
+: hz pi * 2 * t * sin ;
+
+220 hz .6 * 440 hz .3 * 880 hz .1 * + +
+
+
+------------------------------------
+Title: Left Right -- DEPRECATED
+Author: BradN
+Score: 0
+When: 2010-08-27 18:02:53.199349
+Code:
+audio
+: hz 2 * t * sin ;
+440 hz 0 >
+t 4 * sin x * 0 max *
+
+
+
+------------------------------------
+Title: By 3 -- DEPRECATED
+Author: BradN
+Score: 0
+When: 2010-08-27 18:08:33.011844
+Code:
+audio
+: hz 2 * t * pi * sin ;
+: tone 12 / 2 swap pow 220 * hz ;
+
+t 3 * 10 mod floor  3 * tone
+
+
+------------------------------------
+Title: squeeze ready Redux
+Author: Stainless
+Score: 0
+When: 2011-09-09 18:59:43.498046
+Code:
+: z** 2dup z* ;
+X y z** sqrt z** t + sin z**
+Y z** t + cos z** z**
+
+
+------------------------------------
+Title: nh1 Redux
+Author: Stainless
+Score: 0
+When: 2011-09-24 15:03:41.309094
+Code:
+: x' x 0.5 - 2 * ;
+: y' y 0.5 - 2 * ;
+: len dup * swap dup * + sqrt ;
+: polar x' y' atan2 x' y' len ;
+polar 130 * 100 swap - sqrt + 3 + t + cos .4 + 
+polar 132 * 102 swap - sqrt + 3.1 + t + cos .4 + 
+polar 134 * 104 swap - sqrt + 3.2 + t + cos .4 + 
+x 0.5 - dup * y 0.5 - dup * + .25 / 10 pow 1 swap -
+
+
+------------------------------------
+Title: Blinded by the Light
+Author: BradN
+Score: 0
+When: 2011-10-26 23:39:17.995648
+Code:
+t sin t 5 / sin mod x +
+t cos over 2dup z*
+2dup y * 2dup z* +
+
+
+------------------------------------
+Title: Penta
+Author: BradN
+Score: 0
+When: 2011-10-27 00:23:47.588170
+Code:
+t 3 / x - 
+sin t 5 / x + cos
+abs max y t sin
+
+
+------------------------------------
+Title: Blinded by the Light Redux
+Author: Anonymous
+Score: 0
+When: 2011-10-26 23:41:58.478565
+Code:
+t sin t 5 / sin mod x + 1 mod 1 x - +
+t cos over 2dup z* 1 mod
+2dup y * 2dup z* + 1 mod
+
+
+------------------------------------
+Title: Fit
+Author: BradN
+Score: 0
+When: 2011-10-27 01:01:07.395954
+Code:
+t 3 / 11 mod floor
+t 5 / 13 mod floor +
+t 7 / 17 mod floor +
+10 mod 10 /  1 x - *
+
+t 3 * 13 mod sin
+t 5 / 17 mod cos +
+t 7 * 11 mod sin +
+10 mod 10 /  x * .6 + +
+
+dup y min 2dup -
+
+
+
+
+------------------------------------
+Title: Blue
+Author: BradN
+Score: 0
+When: 2011-10-27 00:07:25.981864
+Code:
+t 5 / sin
+t 4 / x + sin max
+t 7 / sin abs min
+t 3 / x - cos abs max
+dup x 3 * sin *
+2dup z*
+y 2dup z*
+
+
+------------------------------------
+Title: naclforth
+Author: BradN
+Score: 0
+When: 2011-11-02 22:20:30.066234
+Code:
+: dot x - 10 * dup * swap y - 10 * dup * +   1 swap - 0 max - ;
+: edge 1 x .5 - 2 * dup * y .5 - 2 * dup * + 20 pow - * ;
+: dots .35 .35 dot .35 .65 dot .65 .35 dot .65 .65 dot edge ;
+1 x .3 - dup dup * * y .2 - dup * + - dots
+1 x .2 - dup dup * * y .1 - dup * + - dots .95 *
+2dup + 5 /
+x 2 pow y * 2 / +
+1 x .5 - 2 * dup * y .5 - 2 * dup * + 8 pow -
+
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2011-11-16 14:43:40.115241
+Code:
+0.5 x - 5 * cos
+0.5 y - 5 * cos
+
+
+
+
+
+------------------------------------
+Title: Solid
+Author: BradN
+Score: 0
+When: 2011-11-16 22:29:53.592329
+Code:
+t sin 4 * floor 4 /  1 mod
+t sin 3 * floor 3 /  1 mod
+t 3 * floor 3 /  1 mod
+dup push over push + +
+x +
+pop pop
+
+
+
+------------------------------------
+Title: Arecibo
+Author: BradN
+Score: 0
+When: 2011-11-16 22:25:00.548730
+Code:
+: d t over * floor swap / ;
+3 d .7 d + .11 d + .13 d +
+1 mod x +
+x 0 = x 1 = or * x y .2 - * 5 * sin +
+x .3 + t 10 * * sin y /
+y .4 + t 11 * * sin x /
+
+
+
+------------------------------------
+Title: Penta Redux
+Author: Anonymous
+Score: 0
+When: 2011-11-16 16:38:17.056064
+Code:
+t 3 / x - 
+sin t 4 / x + cos
+abs max y t sin
+
+
+------------------------------------
+Title: Fit Redux
+Author: Anonymous
+Score: 0
+When: 2011-11-16 16:39:51.121845
+Code:
+t 4 / 11 mod floor
+t 8 / 13 mod floor +
+t 7 / 17 mod floor +
+10 mod 10 /  1 x - *
+
+t 3 * 13 mod sin
+t 5 / 17 mod cos +
+t 7 * 11 mod sin +
+10 mod 10 /  x * .6 + +
+
+dup y min 2dup -
+
+
+
+
+------------------------------------
+Title: electrified larva Redux
+Author: Anonymous
+Score: 0
+When: 2011-12-03 17:15:33.585039
+Code:
+: bar * sin + ;
+: barx x bar ;
+: bary y bar ;
+: foo
+t sin 17 barx 3 bary 5 barx
+t sin 7 bary 11 barx 13 bary * atan2 4 * cos ;
+1 foo 2 foo \ 3 foo
+
+
+
+------------------------------------
+Title: Dawn
+Author: Stainless
+Score: 0
+When: 2011-12-27 11:29:23.783055
+Code:
+: sunangle t sin 3.141592653 * ;
+: angle 1 y - 1 atan2 ;
+angle sunangle - dup 0.25 * sunangle 0 max 
+
+
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2011-12-30 11:11:30.158166
+Code:
+square
+
+
+------------------------------------
+Title: Row
+Author: Anonymous
+Score: 0
+When: 2011-12-30 11:14:05.427682
+Code:
+: x y t 50 / sin + ;
+: foil x 31 *
+Sin y 33 * sin z* ;
+y t cos + X foil y sin
+
+
+------------------------------------
+Title: light drop Redux
+Author: Anonymous
+Score: 0
+When: 2012-01-01 07:12:57.945636
+Code:
+: iii x y z*
+Sin ; x t * x y
+- iii exp y iii
+
+
+------------------------------------
+Title: streak Redux
+Author: Anonymous
+Score: 0
+When: 2012-01-01 20:38:11.498832
+Code:
+: web push push 
+         x 0.5 + y 0.9 + * pop * sin 0 max
+         x 0.3 + y 0.5 + * pop * sin 0 max + ;
+31 23 web 17 17 web * x +
+23 31 web 19 19 web * y x * +
+31 31 web 7 7 web * y +
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2012-01-02 06:19:54.185484
+Code:
+: square dup * ;
+: dist square swap square + sqrt ;
+: 2dup over over ;
+: spiral 0.5 - swap 0.5 - 2dup dist
+push atan2 0.01 * pop +
+100 * sin ;
+x y spiral
+x y spiral
+x y spiral
+
+
+
+------------------------------------
+Title: nh2
+Author: Anonymous
+Score: 0
+When: 2012-01-13 21:37:09.539919
+Code:
+: x' x 0.5 - 1.6 * ;
+: y' y 0.5 - 1.6 * ;
+: len dup * swap dup * + sqrt ;
+: polar x' y' atan2 x' y' len ;
+polar 130 * 100 swap - sqrt + 3 + cos .4 + 
+polar 132 * 102 swap - sqrt + 3.1 + cos .4 + 
+polar 134 * 104 swap - sqrt + 3.2 + cos .4 + 
+
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2012-01-23 21:37:11.116570
+Code:
+22
+
+
+------------------------------------
+Title: C Minor Mid 
+Author: C. H. Ting
+Score: 0
+When: 2012-01-26 01:21:56.162626
+Code:
+130 x * sin
+156 x * sin
+196 x * sin
+
+
+------------------------------------
+Title: C Major
+Author: C. H. Ting
+Score: 0
+When: 2012-01-26 01:07:39.968225
+Code:
+26.1 sin
+33 sin
+39.2 sin
+
+
+------------------------------------
+Title: C Minor high
+Author: C. H. Ting
+Score: 0
+When: 2012-01-26 01:12:56.838013
+Code:
+261 x * sin
+311 x * sin
+392 x * sin
+
+
+------------------------------------
+Title: C Major 1+2/
+Author: C. H. Ting
+Score: 0
+When: 2012-01-26 04:01:16.161047
+Code:
+26.1 x * sin 1 + 2 /
+33 x * sin 1 + 2 /
+39.2 x * sin 1 + 2 /
+
+
+------------------------------------
+Title: C Major Redux
+Author: C. H. Ting
+Score: 0
+When: 2012-01-26 01:09:17.452948
+Code:
+26.1 x * sin
+33 x * sin
+39.2 x * sin
+
+
+------------------------------------
+Title: C Major Mid
+Author: c
+Score: 0
+When: 2012-01-26 01:21:09.156259
+Code:
+130 x * sin
+165 x * sin
+196 x * sin
+
+
+------------------------------------
+Title: C Minor
+Author: C. H. Ting
+Score: 0
+When: 2012-01-26 01:10:30.279021
+Code:
+26.1 x * sin
+31.1 x * sin
+39.2 x * sin
+
+
+------------------------------------
+Title: C Major high
+Author: C. H. Ting
+Score: 0
+When: 2012-01-26 01:13:35.369014
+Code:
+261 x * sin
+330 x * sin
+392 x * sin
+
+
+------------------------------------
+Title: C Major
+Author: C. H. Ting
+Score: 0
+When: 2012-01-26 01:14:34.064338
+Code:
+26.1 x * sin
+33 x * sin
+39.2 x * sin
+
+
+------------------------------------
+Title: naclforth Redux
+Author: Stainless
+Score: 0
+When: 2012-02-24 11:20:21.779689
+Code:
+: dot x - 10 * dup * swap y - 10 * dup * +   1 swap - 0 max - ;
+: edge 1 x .5 - 2 * dup * y .5 - 2 * dup * + 20 pow - * ;
+: dots .35 .35 dot .35 .65 dot .65 .35 dot .65 .65 dot edge ;
+: x2 x t cos * y t sin * + ;
+: y2 y t cos * x t sin * - ;
+1 x2 .3 - dup dup * * y2 .2 - dup * + - dots
+1 x2 .2 - dup dup * * y2 .1 - dup * + - dots .95 *
+2dup + 5 /
+x2 2 pow y * 2 / +
+1 x2 .5 - 2 * dup * y2 .5 - 2 * dup * + 8 pow -
+
+
+
+------------------------------------
+Title: burn Redux
+Author: Stainless
+Score: 0
+When: 2012-02-25 09:28:59.608069
+Code:
+: square dup * ;
+: 2dup over over ;
+: len square swap square + sqrt ;
+: spiral x - swap y - 
+          2dup len push atan2 pop + 20 * sin ;
+0.2 t + 0.2 t + spiral
+0.7 t + 0.3 t + spiral
+0.4 0.6 spiral * *
+dup x *
+1 x - 1 y - + 0.25 * 
+
+
+------------------------------------
+Title: warpspeed Redux
+Author: Stainless
+Score: 0
+When: 2012-02-25 09:27:39.651408
+Code:
+: ang y 0.5 - x 0.5 - atan2 20 * ; 
+ang t + cos x * 
+ang 2 t * + cos y * 
+ang dup * t t + + cos
+
+
+
+------------------------------------
+Title: sjhjqiue
+Author: ounqbmrsqx
+Score: 0
+When: 2012-02-28 09:38:46.425780
+Code:
+yxrnegpsuitbmpo, <a href="http://www.klgqmbsjxd.com">ygjauxxedl</a> , [url=http://www.ulvpogtopn.com]iuofmecsos[/url], http://www.fboefnrtxy.com ygjauxxedl
+
+
+------------------------------------
+Title: miibjghd
+Author: mbvvzetsza
+Score: 0
+When: 2012-02-28 23:00:19.100451
+Code:
+redtugpsuitbmpo, <a href="http://www.ntxivggkgw.com">qcmyilzlib</a> 
+
+
+------------------------------------
+Title: zujlmtwv
+Author: bqnqtdlxnh
+Score: 0
+When: 2012-02-29 09:30:14.301758
+Code:
+wtorlgpsuitbmpo, http://www.mrrwucbpok.com voqvmxlieo 
+
+
+------------------------------------
+Title: inkblot mandelbrot Redux 4
+Author: Stainless
+Score: 0
+When: 2012-03-06 14:40:10.749708
+Code:
+: z^2 2dup z* ;
+: layer push push z^2 pop pop 2dup push push z+ pop pop ;
+: many layer layer layer layer layer layer layer layer layer layer ;
+: len dup * swap dup * + ;
+: x2 t sin 0.001 + x * 0.5 + ;
+: y2 t sin 0.001 + y * 0.5 + ;
+: mant y2 0.7 - 3 * x2 0.5 - 3 * many drop drop len dup 1 < * ;
+0 0 mant
+0.1 0.1 mant
+0.2 0.2 mant
+
+
+------------------------------------
+Title: inkblot mandelbrot Redux 2
+Author: Stainless
+Score: 0
+When: 2012-03-06 14:22:56.882010
+Code:
+: z^2 2dup z* ;
+: layer push push z^2 pop pop 2dup push push z+ pop pop ;
+: many layer layer layer layer layer layer layer layer layer layer ;
+: len dup * swap dup * + ;
+: mant y 0.7 - 3 * x 0.5 - 3 * many drop drop len dup 1 < * ;
+t cos 1 t cos - mant
+dup dup 
+
+
+
+------------------------------------
+Title: inkblot mandelbrot Redux 3
+Author: Stainless
+Score: 0
+When: 2012-03-06 14:26:27.200538
+Code:
+: z^2 2dup z* ;
+: layer push push z^2 pop pop 2dup push push z+ pop pop ;
+: many layer layer layer layer layer layer layer layer layer layer ;
+: len dup * swap dup * + ;
+: mant y 0.5 + t sin * 0.7 - 3 * x 0.5 + t sin * 0.5 - 3 * many drop drop len dup 1 < * ;
+0 0 mant
+0.1 0.1 mant
+0.2 0.2 mant
+
+
+
+------------------------------------
+Title: inkblot mandelbrot Redux
+Author: Anonymous
+Score: 0
+When: 2012-03-08 06:58:58.285172
+Code:
+: z^2 2dup z* ;
+: layer push push z^2 pop pop 2dup push push z+ pop pop ;
+: many layer layer layer layer layer layer layer layer layer layer ;
+: len dup * swap dup * + ;
+: mant y 0.7 - 3 * x 0.5 - 3 * many drop drop len dup 1 < * ;
+0.1 0.1 mant
+
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2012-03-26 01:11:01.267992
+Code:
+x
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2012-04-22 01:02:47.328091
+Code:
+atan (45)
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2012-04-22 23:42:18.876364
+Code:
+x y +
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2012-05-31 06:46:31.897245
+Code:
+a/
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2012-06-03 13:54:52.512378
+Code:
+dup sin swap
+dup cos swap
+dup log swap
+
+
+------------------------------------
+Title: falling icon Redux - test
+Author: Anonymous
+Score: 0
+When: 2012-07-28 20:14:13.457202
+Code:
+: x' x 0.8 - 2 * ;
+: y' y 0.5 - 2 * ;
+: len dup * swap dup * + sqrt ;
+: polar x' y' atan2 x' y' len ;
+polar swap 11 * + sin 
+polar 10 * + cos
+polar 30 * + negate sin
+x 0.5 - dup * y 0.5 - dup * + 0.25 / 1 swap -
+
+
+------------------------------------
+Title: gdmgm
+Author: gmdgdhmgdhm
+Score: 0
+When: 2012-09-08 08:37:00.933573
+Code:
+hmghmdhm
+
+
+------------------------------------
+Title: membrane shorn
+Author: Anonymous
+Score: 0
+When: 2012-09-28 05:07:40.308633
+Code:
+: square dup * ;
+: 2dup over over ;
+: len square swap square + sqrt ;
+: spiral x - swap y - 
+          2dup len push atan2 pop + 1.7 * tan ;
+t 0.2 + 0.2 spiral
+0.7 t 0.3 + spiral
+t 0.4 / t 0.6 / spiral * * tan
+x over /
+y over /
+
+
+
+------------------------------------
+Title: streak Redux
+Author: Anonymous
+Score: 0
+When: 2012-10-02 21:03:14.813459
+Code:
+: web push push 
+         x 0.5 + y 0.3 + * pop * sin 0 max
+         x 0.1 + y 0.5 + * pop * sin 0 max + ;
+31 23 web 17 17 web * x +
+23 31 web 19 19 web * y x * +
+31 31 web 7 7 web * y +
+
+
+------------------------------------
+Title: streak Redux
+Author: Anonymous
+Score: 0
+When: 2012-10-02 21:04:37.253114
+Code:
+: web push push 
+         x 0.1 + y 0.5 + * pop * sin 1 max
+         x 0.1 + y 0.1 + * pop * sin 1
+ max + ;
+31 23 web 17 17 web * x +
+23 31 web 19 19 web * y x * +
+31 31 web 7 7 web * y +
+
+
+------------------------------------
+Title: warpspeed Redux
+Author: Anonymous
+Score: 0
+When: 2012-10-02 21:07:35.433425
+Code:
+: ang y 0.5 - x 0.5 - atan2 20 * ; 
+ang 10 + sin y * 
+ang 2 + cos y * 
+ang1 dup * cos
+
+
+
+------------------------------------
+Title: warpspeed Redux Redux
+Author: Anonymous
+Score: 0
+When: 2012-10-02 21:12:34.361007
+Code:
+: ang y 0.5
+ - x 0.3 - atan2 20 * ; 
+ang 10 + sin y * 
+ang 2 + cos y * 
+sin1 dup * cos
+
+
+
+------------------------------------
+Title: TriLobe
+Author: Stainless
+Score: 0
+When: 2012-10-23 14:39:24.608869
+Code:
+: ds dup * 2 * swap 3 * + sin 0.5 * 1 + ;
+: fc 2dup ds - swap drop ;
+: x2 x 0.5 - 2 * ;
+: y2 y 0.5 - 2 * ;
+y2 x2 atan2 x2 x2 * y2 y2 * + sqrt fc abs
+ 
+
+
+------------------------------------
+Title: TriLobe Redux
+Author: Stainless
+Score: 0
+When: 2012-10-23 14:40:17.475343
+Code:
+: ds dup * 2 * swap 3 * + sin 0.5 * 1 + ;
+: fc 2dup ds - swap drop ;
+: x2 x 0.5 - 2 * ;
+: y2 y 0.5 - 2 * ;
+y2 x2 atan2 x2 x2 * y2 y2 * + sqrt fc abs dup *
+ 
+
+
+------------------------------------
+Title: Limited
+Author: Stainless
+Score: 0
+When: 2012-10-23 15:00:02.076689
+Code:
+: t1 t sin 1 - ;
+: t2 t cos ;
+x t + cos y + t1 + cos
+y t1 + cos x + t + cos
+x t2 + cos y + t1 + cos
+
+
+------------------------------------
+Title: Limited Redux
+Author: Stainless
+Score: 0
+When: 2012-10-23 15:02:43.058774
+Code:
+: t1 t sin 1 - ;
+: t2 t cos ;
+x t + cos y + t1 + cos
+y t1 + cos x + t + cos
+x t2 + cos y + t1 + cos
+y t - cos x + t2 + cos
+z+
+x t2 + cos y + t1 + cos
+
+
+
+------------------------------------
+Title: QuadLobe
+Author: Stainless
+Score: 0
+When: 2012-10-26 23:52:23.790946
+Code:
+: ds dup * 2 * swap 4 * + sin 0.5 * 1 + ;
+: fc 2dup ds - swap drop ;
+: x2 x 0.5 - 2 * ;
+: y2 y 0.5 - 2 * ;
+y2 x2 atan2 x2 x2 * y2 y2 * + sqrt fc abs
+ 
+
+
+------------------------------------
+Title: Twead
+Author: Stainless
+Score: 0
+When: 2012-10-27 00:45:28.579368
+Code:
+y 60 * x 30 * + dup cos swap sin >
+x 60 * y 30 * + dup cos swap sin >
+x 60 * y 30 * + dup cos swap sin <
+
+
+
+------------------------------------
+Title: Continuity Redux
+Author: Anonymous
+Score: 0
+When: 2012-11-09 17:13:13.498601
+Code:
+: x x y 11 * sin .1 * + 1.1 * ;
+: y y x 13 * sin .1 * + 1.1 * ;
+: x x y 13 * cos .1 * + 1.1 * .1 - ;
+: y y x 11 * cos .1 * + 1.3 * .2 - ;
+: xc  x .5 - ;
+: yc  y .5 - ;
+: yt  y .7 - ;
+: yb  y .3 - ;
+: r1 .16 ;
+: r2 .04 ;
+: r3 .005 ;
+: len  dup * swap dup * + ;
+: c1  xc yc len  r1 swap / ;
+: c2  xc yc len  r1 - dup .008 / swap .012 swap / min ;
+: lr 0.5 x - 0.5 y - 6 / - pi * 2 / sin 1 + 10 pow ;
+: wb  xc yt len  r2 swap / ;
+: bb  xc yb len  r2 / ;
+: ws  xc yb len  r3 swap / ;
+: bs  xc yt len  r3 / ;
+
+c1 lr min
+bb min wb max bs min ws max
+c2 max
+
+0.1 -
+dup dup x 0.6 + *
+
+
+------------------------------------
+Title: gforth7
+Author: Anonymous
+Score: 0
+When: 2012-11-10 06:29:28.032873
+Code:
+: sm x pi * sin * 1 min .6 * ;
+: x x 0.5 + 1.7 / ;
+: y y 0.4 + 1.7 / ;
+: ox x 0.5 - ;
+: oy y 0.6 - ;
+: x x 0.3 - 11 * y * sin ;
+: y y 1.1 - 7 * x * cos ;
+: bb x ox - y oy - min * ;
+x 21 * sin
+y 23 * bb cos
+x y * 11 * bb cos
+x x * y y * + 1.1 -
+ox ox * oy oy * + 0.08 swap - dup push 0 > * pop 35 * *
+0 max 1 min
+swap over * push
+swap over * push
+* pop pop
+x + push y - pop
+2dup bb z*
+push push sm pop sm pop sm
+
+
+------------------------------------
+Title: QuadLobe Redux
+Author: Stainless
+Score: 0
+When: 2012-10-26 23:57:43.302347
+Code:
+: lobes t sin 16 * abs 3 + ;
+: ds dup * 2 * swap lobes * sin + sin 0.5 * 1 + ;
+: fc 2dup ds - swap drop ;
+: x2 x 0.5 - 2 * ;
+: y2 y 0.5 - 2 * ;
+y2 x2 atan2 x2 x2 * y2 y2 * + sqrt fc abs
+ 
+
+
+------------------------------------
+Title: QuadLobe Redux 2
+Author: Stainless
+Score: 0
+When: 2012-10-26 23:59:50.737162
+Code:
+: ds dup * 2 * swap 4 * + sin 0.5 * 1 + ;
+: fc 2dup ds - swap drop ;
+: x2 x 0.5 - 2 * ;
+: y2 y 0.5 - 2 * ;
+y2 x2 atan2 x2 x2 * y2 y2 * + sqrt fc abs
+
+x2 y2 atan2 x2 x2 * y2 y2 * + sqrt fc abs
+ 
+
+
+------------------------------------
+Title: TriLobe Redux 2
+Author: Stainless
+Score: 0
+When: 2012-10-27 00:06:13.468482
+Code:
+: ds dup * 2 * swap 3 * + sin 0.5 * 1 + ;
+: fc 2dup ds - swap drop ;
+: x2 x 0.5 - 2 * ;
+: y2 y 0.5 - 2 * ;
+y2 x2 atan2 x2 x2 * y2 y2 * + sqrt fc abs 0.5 <= 
+
+
+------------------------------------
+Title: QuadLobe Redux 2 Redux
+Author: Stainless
+Score: 0
+When: 2012-10-27 00:02:07.084995
+Code:
+: ds dup * 2 * swap 4 * + sin 0.5 * 1 + ;
+: dc dup * 2 * swap 8 * + sin 0.5 * 1 + ;
+: gc 2dup dc - swap drop ;
+: fc 2dup ds - swap drop ;
+: x2 x 0.5 - 2 * ;
+: y2 y 0.5 - 2 * ;
+y2 x2 atan2 x2 x2 * y2 y2 * + sqrt fc abs
+x2 y2 atan2 x2 x2 * y2 y2 * + sqrt fc abs
+x2 y2 atan2 x2 x2 * y2 y2 * + sqrt gc abs
+
+
+ 
+
+
+------------------------------------
+Title: Ahhh a flower Redux
+Author: Stainless
+Score: 0
+When: 2012-10-27 10:21:34.048116
+Code:
+: x2 x 0.5 - ;
+: y2 y 0.5 - ;
+: radius x2 x2 * y2 y2 * + sqrt ;
+: angle x2 y2 atan2 ;
+angle cos abs radius /
+angle sin abs radius /
+radius 0.2 <
+
+
+
+
+
+
+------------------------------------
+Title: gforth background Redux
+Author: Anonymous
+Score: 0
+When: 2012-11-09 17:03:14.961052
+Code:
+: x x 0.5 + 1.7 / ;
+: y y 0.4 + 1.7 / ;
+: ox x 0.5 - ;
+: oy y 0.6 - ;
+: x x 0.3 - 11 * y * sin ;
+: y y 1.1 - 7 * x * cos ;
+x 21 * sin
+y 23 * cos
+x y * 11 * cos
+x x * y y * + 1.1 -
+ox ox * oy oy * + 0.08 swap - dup push 0 > * pop 35 * *
+0 max 1 min
+swap over * push
+swap over * push
+* pop pop
+x + push y - pop
+
+
+------------------------------------
+Title: gforth4
+Author: Anonymous
+Score: 0
+When: 2012-11-10 06:24:43.274985
+Code:
+: sm x pi * sin * 1 min .6 * ;
+: bb x / ;
+: x x 0.5 + 1.7 / ;
+: y y 0.4 + 1.7 / ;
+: ox x 0.5 - ;
+: oy y 0.6 - ;
+: x x 0.3 - 11 * y * sin ;
+: y y 1.1 - 7 * x * cos ;
+x 21 * sin
+y 23 * bb cos
+x y * 11 * bb cos
+x x * y y * + 1.1 -
+ox ox * oy oy * + 0.08 swap - dup push 0 > * pop 35 * *
+0 max 1 min
+swap over * push
+swap over * push
+* pop pop
+x + push y - pop
+2dup bb z*
+push push sm pop sm pop sm
+
+
+------------------------------------
+Title: gforth6
+Author: Anonymous
+Score: 0
+When: 2012-11-10 06:28:13.455885
+Code:
+: sm x pi * sin * 1 min .6 * ;
+: x x 0.5 + 1.7 / ;
+: y y 0.4 + 1.7 / ;
+: ox x 0.5 - ;
+: oy y 0.6 - ;
+: x x 0.3 - 11 * y * sin ;
+: y y 1.1 - 7 * x * cos ;
+: bb x y * 3 * sin * ;
+x 21 * sin
+y 23 * bb cos
+x y * 11 * bb cos
+x x * y y * + 1.1 -
+ox ox * oy oy * + 0.08 swap - dup push 0 > * pop 35 * *
+0 max 1 min
+swap over * push
+swap over * push
+* pop pop
+x + push y - pop
+2dup bb z*
+push push sm pop sm pop sm
+
+
+------------------------------------
+Title: TriLobe Redux 2 Redux
+Author: Stainless
+Score: 0
+When: 2012-10-27 00:07:09.516028
+Code:
+: ds dup * 2 * swap 3 * + sin 0.5 * 1 + ;
+: fc 2dup ds - swap drop ;
+: x2 x 0.5 - 2 * ;
+: y2 y 0.5 - 2 * ;
+y2 x2 atan2 x2 x2 * y2 y2 * + sqrt fc abs t sin abs <=
+
+
+------------------------------------
+Title: gforth icon
+Author: BradN
+Score: 0
+When: 2012-11-07 19:52:54.909305
+Code:
+: x x 0.5 + 1.7 / ;
+: y y 0.4 + 1.7 / ;
+: ox x 0.5 - ;
+: oy y 0.6 - ;
+: x x 0.3 - 11 * y * sin ;
+: y y 1.1 - 7 * x * cos ;
+x 21 * sin
+y 23 * cos
+x y * 11 * cos
+x x * y y * + 1.1 -
+ox ox * oy oy * + 0.08 swap - dup push 0 > * pop 35 * *
+
+
+------------------------------------
+Title: gforth background Redux Redux
+Author: Anonymous
+Score: 0
+When: 2012-11-09 17:06:36.358877
+Code:
+: x x y 7 * cos .1 * - ;
+: y y x 13 * sin .1 * + 0.2 + ;
+: x x 0.5 + 1.7 / ;
+: y y 0.4 + 1.7 / ;
+: ox x 0.5 - ;
+: oy y 0.6 - ;
+: x x 0.3 - 11 * y * sin ;
+: y y 1.1 - 7 * x * cos ;
+x 21 * sin
+y 23 * cos
+x y * 11 * cos
+x x * y y * + 1.1 -
+ox ox * oy oy * + 0.08 swap - dup push 0 > * pop 35 * *
+0 max 1 min
+swap over * push
+swap over * push
+* pop pop
+x + push y - pop
+
+
+------------------------------------
+Title: membrane Redux
+Author: Stainless
+Score: 0
+When: 2012-10-27 00:11:14.827699
+Code:
+: square dup * ;
+: 2dup over over ;
+: len square swap square + sqrt ;
+: spiral x - swap y - 
+          2dup len push atan2 pop + 10 * tan ;
+0.2 t spiral
+0.7 0.3 spiral
+0.4 t 0,5 * spiral * *
+dup x *
+0.5 x - 0.3 y - + 0.95 * 
+
+
+------------------------------------
+Title: gforth icon
+Author: BradN
+Score: 0
+When: 2012-11-07 20:11:00.031132
+Code:
+: x x 0.5 + 1.7 / ;
+: y y 0.4 + 1.7 / ;
+: ox x 0.5 - ;
+: oy y 0.6 - ;
+: x x 0.3 - 11 * y * sin ;
+: y y 1.1 - 7 * x * cos ;
+x 21 * sin
+y 23 * cos
+x y * 11 * cos
+x x * y y * + 1.1 -
+ox ox * oy oy * + 0.08 swap - dup push 0 > * pop 35 * *
+
+
+------------------------------------
+Title: gforth icon
+Author: BradN
+Score: 0
+When: 2012-11-07 19:56:43.164260
+Code:
+: x x 0.5 + 1.7 / ;
+: y y 0.4 + 1.7 / ;
+: ox x 0.5 - ;
+: oy y 0.6 - ;
+: x x 0.3 - 11 * y * sin ;
+: y y 1.1 - 7 * x * cos ;
+x 21 * sin
+y 23 * cos
+x y * 11 * cos
+x x * y y * + 1.1 -
+ox ox * oy oy * + 0.08 swap - dup push 0 > * pop 35 * *
+
+
+------------------------------------
+Title: gforth1
+Author: Anonymous
+Score: 0
+When: 2012-11-10 06:22:51.409764
+Code:
+: sm x pi * sin * 1 min .6 * ;
+: bb x y / * ;
+: x x 0.5 + 1.7 / ;
+: y y 0.4 + 1.7 / ;
+: ox x 0.5 - ;
+: oy y 0.6 - ;
+: x x 0.3 - 11 * y * sin ;
+: y y 1.1 - 7 * x * cos ;
+x 21 * sin
+y 23 * bb cos
+x y * 11 * bb cos
+x x * y y * + 1.1 -
+ox ox * oy oy * + 0.08 swap - dup push 0 > * pop 35 * *
+0 max 1 min
+swap over * push
+swap over * push
+* pop pop
+x + push y - pop
+2dup bb z*
+push push sm pop sm pop sm
+
+
+------------------------------------
+Title: Ahhh a flower
+Author: Stainless
+Score: 0
+When: 2012-10-27 10:20:38.827268
+Code:
+: x2 x 0.5 - ;
+: y2 y 0.5 - ;
+: radius x2 x2 * y2 y2 * + sqrt ;
+: angle x2 y2 atan2 ;
+angle cos abs radius /
+angle sin abs radius /
+
+
+
+
+
+
+------------------------------------
+Title: gforth icon
+Author: BradN
+Score: 0
+When: 2012-11-07 19:53:34.466449
+Code:
+: x x 0.5 + 1.7 / ;
+: y y 0.4 + 1.7 / ;
+: ox x 0.5 - ;
+: oy y 0.6 - ;
+: x x 0.3 - 11 * y * sin ;
+: y y 1.1 - 7 * x * cos ;
+x 21 * sin
+y 23 * cos
+x y * 11 * cos
+x x * y y * + 1.1 -
+ox ox * oy oy * + 0.08 swap - dup push 0 > * pop 35 * *
+
+
+------------------------------------
+Title: ContinuityNegate
+Author: Anonymous
+Score: 0
+When: 2012-11-07 19:58:09.094304
+Code:
+: xc  x .5 - ;
+: yc  y .5 - ;
+: yt  y .7 - ;
+: yb  y .3 - ;
+: r1 .16 ;
+: r2 .04 ;
+: r3 .005 ;
+: len  dup * swap dup * + ;
+: c1  xc yc len  r1 swap / ;
+: c2  xc yc len  r1 - dup .008 / swap .012 swap / min ;
+: lr 0.5 x - 0.5 y - 6 / - pi * 2 / sin 1 + 10 pow ;
+: wb  xc yt len  r2 swap / ;
+: bb  xc yb len  r2 / ;
+: ws  xc yb len  r3 swap / ;
+: bs  xc yt len  r3 / ;
+
+c1 lr min
+bb min wb max bs min ws max
+c2 max
+
+0.1 -
+dup dup x 0.6 + *
++ + 3 / 1 swap - 
+
+
+------------------------------------
+Title: Continuity Redux
+Author: Anonymous
+Score: 0
+When: 2012-11-07 19:59:30.831081
+Code:
+: xc  x .5 - ;
+: yc  y .5 - ;
+: yt  y .7 - ;
+: yb  y .3 - ;
+: r1 .16 ;
+: r2 .04 ;
+: r3 .005 ;
+: len  dup * swap dup * + ;
+: c1  xc yc len  r1 swap / ;
+: c2  xc yc len  r1 - dup .008 / swap .012 swap / min ;
+: lr 0.5 x - 0.5 y - 6 / - pi * 2 / sin 1 + 10 pow ;
+: wb  xc yt len  r2 swap / ;
+: bb  xc yb len  r2 / ;
+: ws  xc yb len  r3 swap / ;
+: bs  xc yt len  r3 / ;
+
+c1 lr min
+bb min wb max bs min ws max
+c2 max
+
+0.1 -
+dup dup x 0.6 + *
+swap
+
+
+------------------------------------
+Title: Basic butterfly
+Author: Stainless
+Score: 0
+When: 2012-11-07 20:56:41.730112
+Code:
+: scale 20 t sin * ;
+: z x scale * ;
+: w y scale * ;
+z z * w w * +
+50 z w + / sin 
+z z * w w * - 
+* /
+
+
+
+------------------------------------
+Title: Basic swirl
+Author: Stainless
+Score: 0
+When: 2012-11-07 21:11:24.184112
+Code:
+: z x 0.5 - 4 * ;
+: w y 0.5 - 4 * ;
+: r z z * w w * + sqrt ;
+: a w z atan2 ;
+: n t cos 16 * floor ;
+r n a * - cos 6 * sin 
+
+
+------------------------------------
+Title: Basic swirl Redux
+Author: Stainless
+Score: 0
+When: 2012-11-07 21:13:21.082768
+Code:
+: z x 0.5 - 4 * ;
+: w y 0.5 - 4 * ;
+: r z z * w w * + sqrt ;
+: a w z atan2 ;
+: n 2 ;
+r n a * - cos 6 * sin 
+r n a * - cos 12 * sin 
+r n a * - cos 3 * sin 
+
+
+------------------------------------
+Title: Basic gauss map
+Author: Stainless
+Score: 0
+When: 2012-11-07 21:26:31.694038
+Code:
+: z x 100 / ;
+1 z / dup floor -
+
+
+------------------------------------
+Title: Gaussian noise ish
+Author: Stainless
+Score: 0
+When: 2012-11-07 21:30:37.878402
+Code:
+: z x 100 t sin * / ;
+: w y 100 t cos * / ;
+1 z / dup floor -
+1 w / dup floor -
+1 z w + / dup floor - 
+
+
+------------------------------------
+Title: Gaussian noise
+Author: Stainless
+Score: 0
+When: 2012-11-07 22:00:51.517157
+Code:
+: z x y atan2 60000 / ;
+: noise 1 z / dup floor - ;
+noise  
+
+
+------------------------------------
+Title: gforth background
+Author: BradN
+Score: 0
+When: 2012-11-09 16:59:30.475398
+Code:
+: x x 0.5 + 1.7 / ;
+: y y 0.4 + 1.7 / ;
+: ox x 0.5 - ;
+: oy y 0.6 - ;
+: x x 0.3 - 11 * y * sin ;
+: y y 1.1 - 7 * x * cos ;
+x 21 * sin
+y 23 * cos
+x y * 11 * cos
+x x * y y * + 1.1 -
+ox ox * oy oy * + 0.08 swap - dup push 0 > * pop 35 * *
+0 max 1 min
+swap over * push
+swap over * push
+* pop pop
+
+
+------------------------------------
+Title: streak tile Redux
+Author: BradN
+Score: 0
+When: 2012-11-17 17:27:01.755509
+Code:
+: x x pi * 2 * ;
+: y y pi * 2 * ;
+
+: x x y cos + sin ;
+: y y x sin + sin ;
+
+: web push push 
+         x 0.5 + y 0.3 + * pop * sin 0 max
+         x 0.3 + y 0.5 + * pop * sin 0 max + ;
+31 23 web 17 17 web * x +
+23 31 web 19 19 web * y x * +
+31 31 web 7 7 web * y +
+
+: scale .3 * .5 min ;
+scale push scale push scale pop pop
+
+
+------------------------------------
+Title: gforth background blend
+Author: BradN
+Score: 0
+When: 2012-11-10 06:11:26.590649
+Code:
+: sm x pi * sin * 1 min .6 * ;
+: x x 0.5 + 1.7 / ;
+: y y 0.4 + 1.7 / ;
+: ox x 0.5 - ;
+: oy y 0.6 - ;
+: x x 0.3 - 11 * y * sin ;
+: y y 1.1 - 7 * x * cos ;
+x 21 * sin
+y 23 * cos
+x y * 11 * cos
+x x * y y * + 1.1 -
+ox ox * oy oy * + 0.08 swap - dup push 0 > * pop 35 * *
+0 max 1 min
+swap over * push
+swap over * push
+* pop pop
+x + push y - pop
+push push sm pop sm pop sm
+
+
+------------------------------------
+Title: gforth2
+Author: Anonymous
+Score: 0
+When: 2012-11-10 06:23:21.864898
+Code:
+: sm x pi * sin * 1 min .6 * ;
+: bb x * ;
+: x x 0.5 + 1.7 / ;
+: y y 0.4 + 1.7 / ;
+: ox x 0.5 - ;
+: oy y 0.6 - ;
+: x x 0.3 - 11 * y * sin ;
+: y y 1.1 - 7 * x * cos ;
+x 21 * sin
+y 23 * bb cos
+x y * 11 * bb cos
+x x * y y * + 1.1 -
+ox ox * oy oy * + 0.08 swap - dup push 0 > * pop 35 * *
+0 max 1 min
+swap over * push
+swap over * push
+* pop pop
+x + push y - pop
+2dup bb z*
+push push sm pop sm pop sm
+
+
+------------------------------------
+Title: gforth3
+Author: Anonymous
+Score: 0
+When: 2012-11-10 06:23:56.822242
+Code:
+: sm x pi * sin * 1 min .6 * ;
+: bb y * ;
+: x x 0.5 + 1.7 / ;
+: y y 0.4 + 1.7 / ;
+: ox x 0.5 - ;
+: oy y 0.6 - ;
+: x x 0.3 - 11 * y * sin ;
+: y y 1.1 - 7 * x * cos ;
+x 21 * sin
+y 23 * bb cos
+x y * 11 * bb cos
+x x * y y * + 1.1 -
+ox ox * oy oy * + 0.08 swap - dup push 0 > * pop 35 * *
+0 max 1 min
+swap over * push
+swap over * push
+* pop pop
+x + push y - pop
+2dup bb z*
+push push sm pop sm pop sm
+
+
+------------------------------------
+Title: gforth5
+Author: Anonymous
+Score: 0
+When: 2012-11-10 06:26:24.759595
+Code:
+: sm x pi * sin * 1 min .6 * ;
+: bb y x * cos / ;
+: x x 0.5 + 1.7 / ;
+: y y 0.4 + 1.7 / ;
+: ox x 0.5 - ;
+: oy y 0.6 - ;
+: x x 0.3 - 11 * y * sin ;
+: y y 1.1 - 7 * x * cos ;
+x 21 * sin
+y 23 * bb cos
+x y * 11 * bb cos
+x x * y y * + 1.1 -
+ox ox * oy oy * + 0.08 swap - dup push 0 > * pop 35 * *
+0 max 1 min
+swap over * push
+swap over * push
+* pop pop
+x + push y - pop
+2dup bb z*
+push push sm pop sm pop sm
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2012-11-15 22:49:07.567635
+Code:
+vcxzc
+xcv
+cv
+
+
+------------------------------------
+Title: streak tile throb
+Author: Stainless
+Score: 0
+When: 2012-12-17 13:48:37.046603
+Code:
+: x x pi * 2 * ;
+: y y pi * 2 * ;
+
+: x x y cos + sin ;
+: y y x sin + sin ;
+
+: web push push 
+         x 0.5 + y 0.3 + * pop * sin 0 max
+         x 0.3 + y 0.5 + * pop * sin 0 max + ;
+31 23 web 17 17 web * x +
+23 31 web 19 19 web * y x * +
+31 31 web 7 7 web * y +
+
+: scale t sin * .5 min ;
+scale push scale push scale pop pop
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2013-01-13 01:07:53.971777
+Code:
+dtrew
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2013-01-18 22:14:23.522894
+Code:
+: square dup * ;
+: dist square swap square + sqrt ;
+: 2dup over over ;
+: spiral 0.5 - swap 0.5 - 2dup dist
+push atan2 0.01 * pop +
+100 * sin cos 2 * ;
+x y spiral
+x y spiral
+x y spiral
+
+
+------------------------------------
+Title: Orbiting Eclipse
+Author: Anonymous
+Score: 0
+When: 2013-01-25 01:15:23.752115
+Code:
+: xc  x .5 - ;
+: yc  y .5 - ;
+: yt  y .7 - ;
+: yb  y .3 - ;
+: r1 .16 ;
+: r2 .04 ;
+: r3 .005 ;
+: len  dup * swap dup * + ;
+: c1^2  xc yc len  r1 swap / ;
+: c2^3  xc yc len  r1 - dup .008 / swap .012 swap / min ;
+: lr 0.5 x - 0.5 y - 6 / - pi * 2 / sin 1 + 10 pow ;
+: wb  xc yt len  r2 swap / ;
+: bb  xc yb len  r2 / ;
+: ws  xc yb len  r3 swap / ;
+: bs  xc yt len  r3 / ;
+
+c1 lr min
+bb min wb max bs min ws max
+c2 max
+
+0.1 -
+dup dup x 0.6 + *
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: 0
+When: 2013-04-16 23:09:40.622743
+Code:
+rr3
+
+
+------------------------------------
+Title: green
+Author: Anonymous
+Score: -1
+When: 2011-04-22 01:47:14.427448
+Code:
+0 1 0
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: -1
+When: 2011-06-11 15:12:35.074302
+Code:
+1 1 +
+
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: -1
+When: 2011-06-10 08:01:21.271967
+Code:
+x y x y * 
+
+
+------------------------------------
+Title: Northern Lights
+Author: BradN
+Score: -1
+When: 2011-07-22 22:35:50.194353
+Code:
+: x x 0.5 - ;
+: y y 0.5 - ;
+: too t sin dup * ;
+: tee t 7 * sin dup * ;
+too x * tee y * -
+too 1 y - * tee x * - sin
+tee too - x * y tee * -
+
+
+
+------------------------------------
+Title: asunder Redux
+Author: Stainless
+Score: -1
+When: 2011-09-09 19:06:49.221640
+Code:
+x 20 * t sin swap /
+0.6 + y 2dup >
+push max pop max x 2dup z*
+
+
+
+------------------------------------
+Title: Untitled Redux
+Author: Anonymous
+Score: -1
+When: 2011-11-16 14:45:50.407230
+Code:
+t x - 5 * cos
+t y - 5 * cos
+
+
+
+
+
+------------------------------------
+Title: falling icon Redux
+Author: Anonymous
+Score: -1
+When: 2011-12-30 16:21:25.353874
+Code:
+: x' x 0.5 - 2 * ;
+: y' y 0.5 - 2 * ;
+: len dup * swap dup * + sqrt ;
+: polar x' y' atan2 x' y' len ;
+polar swap 11 * + sin 
+polar 10 * + cos
+polar 30 * + negate sin t -
+x 0.5 - dup * y 0.5 - dup * + 0.25 / 1 swap -
+
+
+
+------------------------------------
+Title: whgqolwz
+Author: prmmkamzkj
+Score: -1
+When: 2012-02-27 22:54:26.192743
+Code:
+zyaijgpsuitbmpo, <a href="http://www.kipdixtvuh.com">zdvhymjlon</a> , [url=http://www.klghsfqfag.com]vhveniclwh[/url], http://www.ltmreznlbz.com zdvhymjlon
+
+
+------------------------------------
+Title: Channel 4 logo
+Author: Stainless
+Score: -1
+When: 2012-11-13 17:17:01.261150
+Code:
+: permute dup 34 * 5 + * 289 mod ;
+: scale 0.5 - ;
+1 x - scale permute
+y scale permute
+1 x - scale y scale + scale permute
+
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: -2
+When: 2011-06-12 02:01:15.137631
+Code:
+x dup * y dup * + 15 and
+
+
+
+------------------------------------
+Title: Fusion Redux Redux
+Author: Anonymous
+Score: -2
+When: 2011-06-09 14:24:54.693571
+Code:
+x 0.5 <
+x 0.5 <
+x 0.5 < if 0.5 ;
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: -3
+When: 2011-06-12 02:06:47.248728
+Code:
+x dup *
+y dup *
++
+dup 1 and swap
+dup 2 and swap
+4 and 1
+
+
+------------------------------------
+Title: Untitled
+Author: Anonymous
+Score: -3
+When: 2011-06-12 01:59:21.567727
+Code:
+x y *
+
+
