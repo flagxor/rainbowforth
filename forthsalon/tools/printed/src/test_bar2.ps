@@ -1,0 +1,64 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%Creator: Brad Nelson
+%%Title: Haiku Forth Dice
+%%DocumentData: Clean7Bit
+%%Origin: 0 0
+%%BoundingBox: 0 0 612 792
+%%LanguageLevel: 2
+%%Pages: 1
+%%Page: 1 1
+
+/mm {
+  720 mul 224 div
+} def
+
+/onebit {
+  dup 2 div truncate 2 mul sub
+} def
+
+/dropbit {
+  2 div truncate
+} def
+
+/box {
+  save
+  5 1 roll
+  4 2 roll
+  translate
+  scale
+  newpath
+  0 0 moveto
+  0 1 rlineto
+  1 0 rlineto
+  0 -1 rlineto
+  closepath
+  fill
+  restore
+} def
+
+/barcode {
+  save 
+  exch
+  1 0 1 setrgbcolor
+  0 mm 0 mm 18 mm 3 mm box
+  1 1 1 setrgbcolor
+  1 mm 1 mm 16 mm 1 mm box
+  0 mm 1 mm translate
+  16 {
+    1 mm 0 mm translate
+    dup onebit dup dup setrgbcolor
+    dropbit
+    0 mm 0 mm 1 mm 1 mm box
+  } repeat
+  pop
+  restore 
+} def
+
+20 mm 20 mm translate
+30546 barcode
+40 mm 40 mm translate
+22222 barcode
+40 mm 40 mm translate
+1 barcode
+
+%%EOF

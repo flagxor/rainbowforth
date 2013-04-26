@@ -1,0 +1,191 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%Creator: Brad Nelson
+%%Title: Haiku Forth Dice
+%%DocumentData: Clean7Bit
+%%Origin: 0 0
+%%BoundingBox: 0 0 612 792
+%%LanguageLevel: 2
+%%Pages: 1
+%%Page: 1 1
+
+/mm {
+  720 mul 224 div
+} def
+
+/side {
+  22 mm
+} def
+
+/halfside {
+  side 2 div
+} def
+
+/quarterside {
+  side 4 div
+} def
+
+/trackersize {
+  side 32 div
+} def
+
+/trackeroffset {
+  halfside 7 mul 8 div
+} def
+
+/trackdot {
+  save
+  1 0 1 setrgbcolor
+  trackeroffset trackeroffset moveto
+  trackeroffset trackeroffset trackersize 0 360 arc closepath fill
+  restore
+} def
+
+/trackdots {
+  gsave
+  trackdot
+  90 rotate
+  trackdot
+  90 rotate
+  trackdot
+  90 rotate
+  trackdot
+  grestore
+} def
+
+/face {
+  trackdots
+  gsave
+  halfside -1 mul dup translate
+  newpath
+  0 0 moveto
+  side 0 lineto
+  side side lineto
+  0 side lineto
+  0 0 lineto
+  0.1 setlinewidth
+  stroke
+  grestore
+  exec
+} def
+
+/textface {
+  /Helvetica-Bold findfont   12 scalefont   setfont
+  newpath
+  0 -3 moveto
+  dup stringwidth pop 2 div neg 0 rmoveto show
+} def
+
+/edge {
+  gsave
+  halfside -1 mul dup translate
+  newpath
+  side 0 moveto
+  halfside quarterside rlineto
+  0 halfside rlineto
+  halfside -1 mul quarterside rlineto
+  [3 3] 0 setdash
+  0.1 setlinewidth
+  stroke
+  grestore
+} def
+
+/cube {
+  gsave
+  side 0 translate
+  face
+  gsave edge -90 rotate edge -90 rotate edge grestore
+  0 side translate
+  face
+  gsave edge 180 rotate edge grestore
+  0 side translate
+  face
+  0 side translate
+  face
+  gsave edge 180 rotate edge grestore
+  side side -1 mul translate
+  face
+  side -2 mul 0 translate
+  face
+  grestore
+} def
+
+/dial {
+  gsave
+  -360 24 div mul rotate
+  newpath
+  0 0 moveto
+  0 halfside lineto
+  3 setlinewidth
+  stroke
+  
+  24 {
+    newpath
+    0 quarterside moveto
+    0 halfside lineto
+    1 setlinewidth
+    stroke
+    360 24 div rotate
+  } repeat
+  grestore
+} def
+
+/stackops {
+  { (DUP) textface }
+  { (SWAP) textface }
+  { (DROP) textface }
+  { (OVER) textface }
+  { (>R) textface }
+  { (R>) textface }
+  cube
+} def
+
+/math1 {
+  { (SIN) textface }
+  { (COS) textface }
+  { (TAN) textface }
+  { (ATAN2) textface }
+  { (PI) textface }
+  { (ABS) textface }
+  cube
+} def
+
+/math2 {
+  { (LOG) textface }
+  { (EXP) textface }
+  { (POW) textface }
+  { (SQRT) textface }
+  { (FLOOR) textface }
+  { (CEIL) textface }
+  cube
+} def
+
+/arith {
+  { (+) textface }
+  { (-) textface }
+  { (*) textface }
+  { (/) textface }
+  { (MOD) textface }
+  { (NEGATE) textface }
+  cube
+} def
+
+/constants {
+  { 0 dial }
+  { 1 dial }
+  { 2 dial }
+  { 3 dial }
+  { 4 dial }
+  { 5 dial }
+  cube
+} def
+
+72 72 2 mul translate
+stackops
+72 4 mul 0 translate
+constants
+-72 4 mul 72 5 mul translate
+arith
+72 4 mul 0 translate
+math1
+
+%%EOF

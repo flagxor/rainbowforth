@@ -1,0 +1,229 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%Creator: Brad Nelson
+%%Title: Haiku Forth Dice
+%%DocumentData: Clean7Bit
+%%Origin: 0 0
+%%BoundingBox: 0 0 612 792
+%%LanguageLevel: 2
+%%Orientation: Landscape
+%%Pages: 1
+%%Page: 1 1
+
+/rows {
+  7 
+} def
+
+/columns {
+  7 
+} def
+
+/mm {
+  720 mul 224 div
+} def
+
+/side {
+  22 mm
+} def
+
+/halfside {
+  side 2 div
+} def
+
+/trackdot {
+  save
+  1 0 1 setrgbcolor
+  halfside halfside halfside 0 360 arc closepath fill
+  restore
+} def
+
+/dotat {
+  gsave
+  side mul exch side mul exch translate
+  trackdot
+  grestore
+} def
+
+/textface {
+  gsave
+  halfside halfside translate
+  90 rotate
+  /Helvetica-Bold findfont   14 scalefont   setfont
+  newpath
+  0 -3 moveto
+  dup stringwidth pop 2 div neg 0 rmoveto show
+  grestore
+} def
+
+/labels [
+  (x)
+  (y)
+  (t)
+  (push)
+  (pop)
+  (dup)
+  (over)
+  (2dup)
+  (drop)
+  (swap)
+  (=)
+  (<>)
+  (<)
+  (>)
+  (<=)
+  (>=)
+  (and)
+  (or)
+  (not)
+  (min)
+  (max)
+  (+)
+  (-)
+  (*)
+  (/)
+  (mod)
+  (pow)
+  (atan2)
+  (negate)
+  (sin)
+  (cos)
+  (tan)
+  (log)
+  (exp)
+  (sqrt)
+  (floor)
+  (ceil)
+  (abs)
+  (pi)
+  (z+)
+  (z-)
+  (z*)
+  (random)
+  (:)
+  (;)
+  (A)
+  (B)
+  (C)
+  (D)
+  (0)
+  (0.1)
+  (0.2)
+  (0.3)
+  (0.4)
+  (0.5)
+  (0.6)
+  (0.7)
+  (0.8)
+  (0.9)
+  (1)
+  (2)
+  (3)
+  (4)
+  (5)
+  (6)
+  (7)
+  (8)
+  (9)
+  (10)
+  (11)
+  (12)
+  (13)
+  (14)
+  (15)
+  (16)
+  (17)
+  (18)
+  (19)
+  (20)
+  (21)
+  (22)
+  (23)
+  (24)
+  (25)
+] def
+
+/code 0 def
+
+/gimme {
+  labels code get
+  /code code 1 add def
+} def
+
+/square {
+  gsave
+  newpath
+  0 0 moveto
+  side 0 lineto
+  side side lineto
+  0 side lineto
+  0 0 lineto
+  0.1 setlinewidth
+  stroke
+  grestore
+  gimme textface
+} def
+
+/fillsquare {
+  save
+  0.95 0.95 0.95 setrgbcolor
+  newpath
+  0 0 moveto
+  side 0 lineto
+  side side lineto
+  0 side lineto
+  0 0 lineto
+  0.1 setlinewidth
+  fill
+  restore
+} def
+
+/column {
+  gsave
+  rows {
+    square
+    side 0 translate
+  } repeat
+  grestore
+} def
+
+/grid {
+  gsave
+  columns {
+    column
+    0 side translate
+  } repeat
+  grestore
+} def
+
+/haikucol {
+  gsave
+  {
+    fillsquare
+    0 side translate
+  } repeat
+  grestore
+} def
+
+/haiku {
+  gsave
+  side 2 mul side translate
+  5 haikucol
+  side side -1 mul translate
+  7 haikucol
+  side side translate
+  5 haikucol
+  grestore
+} def
+
+/board {
+  haiku
+  grid
+  0 0 dotat
+  0 columns 1 sub  dotat
+  rows 1 sub 0 dotat
+  rows 1 sub columns 1 sub dotat
+} def
+
+60 150 translate
+board
+
+%%EOF

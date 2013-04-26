@@ -1,0 +1,52 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%Creator: Brad Nelson
+%%Title: Haiku Forth Dice
+%%DocumentData: Clean7Bit
+%%Origin: 0 0
+%%BoundingBox: 0 0 612 792
+%%LanguageLevel: 2
+%%Pages: 1
+%%Page: 1 1
+
+/mm {
+  720 mul 224 div
+} def
+
+/dot {
+  save
+  0 0 moveto
+  0 0 1 mm 0 360 arc closepath fill
+  restore
+} def
+
+/dotrow {
+  save
+  0 0 0 setrgbcolor
+  dot 5 mm 0 mm translate
+  1 0 0 setrgbcolor
+  dot 5 mm 0 mm translate
+  0 1 0 setrgbcolor
+  dot 5 mm 0 mm translate
+  1 1 0 setrgbcolor
+  dot 5 mm 0 mm translate
+  0 0 1 setrgbcolor
+  dot 5 mm 0 mm translate
+  1 0 1 setrgbcolor
+  dot 5 mm 0 mm translate
+  0 1 1 setrgbcolor
+  dot 5 mm 0 mm translate
+restore
+} def
+
+20 mm 20 mm translate
+dotrow
+0 mm 10 mm translate
+dotrow
+0 mm 10 mm translate
+dotrow
+0 mm 10 mm translate
+dotrow
+0 mm 10 mm translate
+dotrow
+
+%%EOF
