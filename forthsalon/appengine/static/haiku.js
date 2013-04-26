@@ -288,6 +288,10 @@ function compile(src, result_limit) {
     }
   }
   code.push('return dstack; }; go');
+
+  // Dump code to console.
+  console.log('----------UNOPTIMIZED JSCRIPT:\n' + code.join('\n') + '\n\n\n');
+
   // Limit number of steps.
   if (code.length > 2000) return BOGUS;
   code = optimize(code, result_limit);
