@@ -188,7 +188,7 @@ function optimize(code, result_limit) {
           i = -1;
           retry = true;
           break;
-       }
+        }
         if (code[j].match(/^dstack\.push\((.*)\);$/)) break;
         if (code[j].match(/[{}]/)) break;
       }
