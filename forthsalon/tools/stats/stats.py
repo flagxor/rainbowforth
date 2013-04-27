@@ -84,6 +84,11 @@ def stats(items):
       midpoint(items, THRESHOLD / 100.0),
       )
 
+
+#haikus = [i for i in haikus if len(i) <= 17]
+
+
+print 'Haiku count: %d' % len(haikus)
 print 'Haiku Size> ' + stats([len(i) for i in haikus])
 
 

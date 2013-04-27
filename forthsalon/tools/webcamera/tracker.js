@@ -20,7 +20,7 @@ function is_marker(data, pos) {
   var red = data[pos + 0];
   var green = data[pos + 1];
   var blue = data[pos + 2];
-  return green * 1.4 < Math.min(red, blue) && red > 80 && blue > 50;
+  return green * 1.7 < Math.min(red, blue) && red > 50 && blue > 50;
 }
 
 function is_marker_loose(data, pos) {
@@ -129,6 +129,35 @@ function DropSmall(markers) {
   return ret;
 }
 
+function BiggestFour(markers) {
+  var ret = []; 
+  for (var i = 0; i < markers.length; i++) {
+    ret.push(markers[i]);
+  }
+  ret.sort(function(a, b) { return b[2] - a[2]; });
+  ret = ret.slice(0, 4);
+  return ret;
+}
+
+function PickByQuadrant(markers, x, y) {
+  for (var i = 0; i < markers.length; i++) {
+    if ((markers[i][0] - 320) * x > 0 &&
+        (markers[i][1] - 240) * y > 0) {
+      return markers[i];
+    }
+  }
+  return markers[0];
+}
+
+function OrderFour(markers) {
+  var ret = [];
+  ret.push(PickByQuadrant(markers, -1, -1));
+  ret.push(PickByQuadrant(markers, 1, -1));
+  ret.push(PickByQuadrant(markers, -1, 1));
+  ret.push(PickByQuadrant(markers, 1, 1));
+  return ret;
+}
+
 function Sample(data, width, height, i, j) {
   if (i < 0 || j < 0 || i >= width || j >= height) {
     return 0;
@@ -227,14 +256,41 @@ function snap() {
   }
 
   markers = MergeClose(markers);
-  markers = DropSmall(markers); 
+  markers = DropSmall(markers);
+  markers = BiggestFour(markers);
 
   c2.fillStyle= 'black';
   c2.fillRect(0, 0, snapshot.width, snapshot.height);
   c2.putImageData(idata, 0, 0);
   for (var i = 0; i < markers.length; i++) {
     c2.fillStyle= 'blue';
-    c2.fillRect(markers[i][0] - 2, markers[i][1] - 2, 4, 4);
+    c2.fillRect(markers[i][0] - 2, markers[i][1] - 2, 4 + i * 3 , 4 + i * 3);
+  }
+  if (markers.length == 4) {
+    markers = OrderFour(markers);
+    c2.beginPath();
+    c2.moveTo(markers[0][0], markers[0][1]);
+    c2.lineTo(markers[1][0], markers[1][1]);
+    c2.lineTo(markers[2][0], markers[2][1]);
+    c2.lineTo(markers[3][0], markers[3][1]);
+    c2.lineTo(markers[0][0], markers[0][1]);
+    c2.stroke();
+    for (var i = 0; i < 7; i++) {
+      var ii = i / 6.0;
+      for (var j = 0; j < 7; j++) {
+        var jj = j / 6.0;
+        var x = markers[0][0] * (1 - ii) * (1 - jj) +
+                markers[1][0] * ii * (1 - jj) +
+                markers[2][0] * (1 - ii) * jj +
+                markers[3][0] * ii * jj;
+        var y = markers[0][1] * (1 - ii) * (1 - jj) +
+                markers[1][1] * ii * (1 - jj) +
+                markers[2][1] * (1 - ii) * jj +
+                markers[3][1] * ii * jj;
+        c2.fillStyle= 'cyan';
+        c2.fillRect(x - 2, y - 2, 4, 4);
+      }
+    }
   }
 
   setTimeout(snap, 30);
