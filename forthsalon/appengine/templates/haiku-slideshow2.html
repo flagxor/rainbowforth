@@ -55,26 +55,50 @@ div.haiku_text {
 
 <script type="text/javascript" src="/static/haiku.js"></script>
 <script type="text/javascript">
+
+var haiku_count = {{ haiku_count }};
+var last_tm = new Date().getTime();
+var current_slide = 0;
+var slide_order = [];
+
 function init() {
+  // Pick a random order.
+  for (var i = 0; i < haiku_count; i++) {
+    slide_order.push([Math.random(), i]);
+  }
+  slide_order.sort();
+
+  // Update haikus and switch.
   update_haikus(function() {});
   setInterval(change, 30);
+
+  window.onkeydown = function(e) {
+    if (e.which == 37) {
+      current_slide = (current_slide + haiku_count - 1) % haiku_count;
+      pick_slide(current_slide);
+    } else if (e.which == 39) {
+      current_slide = (current_slide + 1) % haiku_count;
+      pick_slide(current_slide);
+    }
+  };
 }
-
-
-var last_tm = new Date().getTime();
-
 
 function change() {
   var tm = new Date().getTime();
   if (tm - last_tm < {{ speed }} * 1000) return;
-  last_tm = tm;
+
+  current_slide = (current_slide + 1) % haiku_count;
+  pick_slide(current_slide);
+}
+
+function pick_slide(index) {
+  last_tm = new Date().getTime();
 
   var tag = document.getElementById('loading');
   tag.style.visibility = 'hidden';
   tag.style.display = 'none';
 
-  var haiku_count = {{ haiku_count }};
-  var pick = Math.floor(Math.random() * haiku_count);
+  var pick = slide_order[index][1];
   for (var i = 0; i < haiku_count; i++) {
     var tag = document.getElementById('item' + i);
     if (i == pick) {
