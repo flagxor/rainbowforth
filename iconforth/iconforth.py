@@ -170,9 +170,15 @@ class ListWord(webapp.RequestHandler):
   def get(self):
     # Get the source.
     lookup_id = self.request.get('id', '')
-    query = db.GqlQuery('SELECT * FROM WordSource WHERE ANCESTOR is :1',
-                        lookup_id)
-    src = query.fetch(1)
+    try:
+      query = db.GqlQuery('SELECT * FROM WordSource WHERE ANCESTOR is :1',
+                          lookup_id)
+      src = query.fetch(1)
+    except:
+      query = db.GqlQuery(
+          'SELECT * FROM WordSource WHERE ANCESTOR is :1',
+          db.Key.from_path(*db.Key(lookup_id).to_path()))
+      src = query.fetch(1)
     if src:
       source = DecodeSource(lookup_id, src[0].source)
     else:
@@ -302,8 +308,14 @@ class ReadIcon(webapp.RequestHandler):
       self.response.out.write(img)
     else:
       c = pngcanvas.PNGCanvas(32, 32)
-      query = db.GqlQuery('SELECT * FROM WordIcon WHERE ANCESTOR is :1', id)
-      w = query.fetch(1)
+      try:
+        query = db.GqlQuery('SELECT * FROM WordIcon WHERE ANCESTOR is :1', id)
+        w = query.fetch(1)
+      except:
+        query = db.GqlQuery(
+            'SELECT * FROM WordIcon WHERE ANCESTOR is :1',
+            db.Key.from_path(*db.Key(id).to_path()))
+        w = query.fetch(1)
       if w:
         data = w[0].icon
         for y in range(0, 16):
