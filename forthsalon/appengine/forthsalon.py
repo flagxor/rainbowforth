@@ -6,11 +6,19 @@ import re
 
 import glossary
 
+import jinja2
+import webapp2
+
 from google.appengine.api import users
 from google.appengine.ext import db
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp import template
-from google.appengine.ext.webapp.util import run_wsgi_app
+
+
+#JINJA_ENVIRONMENT = jinja2.Environment(
+#    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+#    extensions=['jinja2.ext.autoescape'],
+#    autoescape=True)
+JINJA_ENVIRONMENT = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
 
 
 def IsAgentOk(request):
@@ -85,45 +93,45 @@ def LoginStatus():
     return '<a href="' + users.create_logout_url('/') + '">Sign out</a>'
 
 
-class HaikuViewPage(webapp.RequestHandler):
+class HaikuViewPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
     id = self.request.path.split('/')[2]
     haiku = Haiku.get(db.Key(id))
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'haiku-view.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/haiku-view.html')
+    self.response.out.write(template.render({
         'login_status': LoginStatus(),
         'haiku': haiku.ToDict(),
         'haiku_size': self.request.get('size', 256),
     }))
 
 
-class HaikuPrintPage(webapp.RequestHandler):
+class HaikuPrintPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
     id = self.request.path.split('/')[2]
     haiku = Haiku.get(db.Key(id))
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'haiku-print.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/haiku-print.html')
+    self.response.out.write(template.render({
         'login_status': LoginStatus(),
         'haiku': haiku.ToDict(),
         'haiku_size': self.request.get('size', 600),
     }))
 
 
-class HaikuSlideshowPage(webapp.RequestHandler):
+class HaikuSlideshowPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
     haikus = Haiku.all().fetch(1000)
     haiku = haikus[random.randrange(len(haikus))]
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'haiku-slideshow.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/haiku-slideshow.html')
+    self.response.out.write(template.render({
         'login_status': LoginStatus(),
         'haiku': haiku.ToDict(),
         'haiku_size': self.request.get('size', 400),
@@ -131,15 +139,15 @@ class HaikuSlideshowPage(webapp.RequestHandler):
     }))
 
 
-class HaikuSlideshow2Page(webapp.RequestHandler):
+class HaikuSlideshow2Page(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
     q = Haiku.gql('ORDER BY score DESC')
     haikus = q.fetch(int(self.request.get('limit', 1000)))
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'haiku-slideshow2.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/haiku-slideshow2.html')
+    self.response.out.write(template.render({
         'login_status': LoginStatus(),
         'haikus': [h.ToDict() for h in haikus],
         'haiku_count': len(haikus),
@@ -148,7 +156,7 @@ class HaikuSlideshow2Page(webapp.RequestHandler):
     }))
 
 
-class HaikuDumpPage(webapp.RequestHandler):
+class HaikuDumpPage(webapp2.RequestHandler):
   def get(self):
     q = Haiku.gql('ORDER BY score DESC')
     haikus = q.fetch(int(self.request.get('limit', 1000)))
@@ -162,41 +170,41 @@ class HaikuDumpPage(webapp.RequestHandler):
       self.response.out.write('Code:\n' + haiku.code + '\n\n\n')
 
 
-class HaikuAboutPage(webapp.RequestHandler):
+class HaikuAboutPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'haiku-about.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/haiku-about.html')
+    self.response.out.write(template.render({
         'login_status': LoginStatus(),
         'words': glossary.core_words,
     }))
 
 
-class HaikuAnimatedPage(webapp.RequestHandler):
+class HaikuAnimatedPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'haiku-animated.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/haiku-animated.html')
+    self.response.out.write(template.render({
         'login_status': LoginStatus(),
     }))
 
 
-class HaikuSoundPage(webapp.RequestHandler):
+class HaikuSoundPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'haiku-sound.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/haiku-sound.html')
+    self.response.out.write(template.render({
         'login_status': LoginStatus(),
     }))
 
 
-class HaikuVotePage(webapp.RequestHandler):
+class HaikuVotePage(webapp2.RequestHandler):
   def post(self):
     if BrowserRedirect(self): return
 
@@ -214,48 +222,48 @@ class HaikuVotePage(webapp.RequestHandler):
     self.redirect('/')
 
 
-class WordListPage(webapp.RequestHandler):
+class WordListPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'word-list.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/word-list.html')
+    self.response.out.write(template.render({
         'login_status': LoginStatus(),
         'words': glossary.core_words,
     }))
 
 
-class WordViewPage(webapp.RequestHandler):
+class WordViewPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
     name = self.request.path.split('/')[2]
     entry = glossary.LookupEntryById(name)
     assert entry
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'word-view.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/word-view.html')
+    self.response.out.write(template.render({
         'login_status': LoginStatus(),
         'entry': entry,
     }))
 
 
-class ArticleViewPage(webapp.RequestHandler):
+class ArticleViewPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
     id = self.request.path.split('/')[2]
     article = Article.get(db.Key(id))
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'article-view.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/article-view.html')
+    self.response.out.write(template.render({
         'login_status': LoginStatus(),
         'article': article.ToDict(),
     }))
 
 
-class HaikuListPage(webapp.RequestHandler):
+class HaikuListPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
@@ -266,15 +274,15 @@ class HaikuListPage(webapp.RequestHandler):
     haikus = q.fetch(1000)
     haikus = [h.ToDict() for h in haikus]
 
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'haiku-list.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/haiku-list.html')
+    self.response.out.write(template.render({
         'login_status': LoginStatus(),
         'haikus': haikus,
     }))
 
 
-class ArticleListPage(webapp.RequestHandler):
+class ArticleListPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
@@ -282,15 +290,15 @@ class ArticleListPage(webapp.RequestHandler):
     articles = q.fetch(1000)
     articles = [a.ToDict() for a in articles]
 
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'article-list.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/article-list.html')
+    self.response.out.write(template.render({
         'login_status': LoginStatus(),
         'articles': articles,
     }))
 
 
-class HaikuEditorPage(webapp.RequestHandler):
+class HaikuEditorPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
@@ -302,9 +310,9 @@ class HaikuEditorPage(webapp.RequestHandler):
     else:
       title = ''
       code = ''
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'haiku-editor.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/haiku-editor.html')
+    self.response.out.write(template.render({
         'login_status': LoginStatus(),
         'code': code,
         'title': title,
@@ -312,18 +320,18 @@ class HaikuEditorPage(webapp.RequestHandler):
     }))
 
 
-class ArticleEditorPage(webapp.RequestHandler):
+class ArticleEditorPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'article-editor.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/article-editor.html')
+    self.response.out.write(template.render({
         'login_status': LoginStatus(),
     }))
 
 
-class HaikuSubmitPage(webapp.RequestHandler):
+class HaikuSubmitPage(webapp2.RequestHandler):
   def post(self):
     if BrowserRedirect(self): return
 
@@ -343,7 +351,7 @@ class HaikuSubmitPage(webapp.RequestHandler):
     self.redirect('/')
 
 
-class HaikuUploadSnapshotPage(webapp.RequestHandler):
+class HaikuUploadSnapshotPage(webapp2.RequestHandler):
   data_pattern = re.compile('data:image/(png|jpeg);base64,(.*)$')
 
   def post(self):
@@ -370,7 +378,7 @@ class HaikuUploadSnapshotPage(webapp.RequestHandler):
     snap.put()
 
 
-class HaikuSweepPage(webapp.RequestHandler):
+class HaikuSweepPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
@@ -378,14 +386,14 @@ class HaikuSweepPage(webapp.RequestHandler):
     haikus = q.fetch(1000)
     haikus = [h.ToDict() for h in haikus]
 
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'haiku-sweep.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/haiku-sweep.html')
+    self.response.out.write(template.render({
         'haikus': haikus,
     }))
 
 
-class ArticleSubmitPage(webapp.RequestHandler):
+class ArticleSubmitPage(webapp2.RequestHandler):
   def post(self):
     if BrowserRedirect(self): return
 
@@ -404,14 +412,14 @@ class ArticleSubmitPage(webapp.RequestHandler):
     self.redirect('/')
 
 
-class BrowsersPage(webapp.RequestHandler):
+class BrowsersPage(webapp2.RequestHandler):
   def get(self):
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates', 'browsers.html')
-    self.response.out.write(template.render(path, {}))
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/browsers.html')
+    self.response.out.write(template.render({}))
 
 
-class MainPage(webapp.RequestHandler):
+class MainPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
@@ -425,8 +433,9 @@ class MainPage(webapp.RequestHandler):
     recent_articles = q.fetch(5)
     recent_articles = [a.ToDict() for a in recent_articles]
 
-    path = os.path.join(os.path.dirname(__file__), 'templates', 'main.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template(
+        'templates/main.html')
+    self.response.out.write(template.render({
         'login_status': LoginStatus(),
         'top_haikus': top_haikus,
         'recent_haikus': recent_haikus,
@@ -434,7 +443,7 @@ class MainPage(webapp.RequestHandler):
     }))
 
 
-application = webapp.WSGIApplication([
+app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/browsers', BrowsersPage),
     ('/haiku-editor', HaikuEditorPage),
@@ -458,11 +467,3 @@ application = webapp.WSGIApplication([
     ('/admin/haiku-upload-snapshot', HaikuUploadSnapshotPage),
     ('/admin/haiku-sweep', HaikuSweepPage),
 ], debug=False)
-
-
-def main():
-    run_wsgi_app(application)
-
-
-if __name__ == "__main__":
-    main()
