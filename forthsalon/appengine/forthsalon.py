@@ -10,7 +10,7 @@ import jinja2
 import webapp2
 
 from google.appengine.api import users
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 
 
 #JINJA_ENVIRONMENT = jinja2.Environment(
@@ -40,15 +40,15 @@ def BrowserRedirect(handler):
   return False
 
 
-class Article(db.Model):
-  when = db.DateTimeProperty(auto_now_add=True)
-  title = db.StringProperty()
-  summary = db.StringProperty()
-  body = db.TextProperty()
+class Article(ndb.Model):
+  when = ndb.DateTimeProperty(auto_now_add=True)
+  title = ndb.StringProperty()
+  summary = ndb.StringProperty()
+  body = ndb.TextProperty()
 
   def ToDict(self):
     return {
-        'id': self.key(),
+        'id': self.key.urlsafe(),
         'when': self.when,
         'title': self.title,
         'summary': self.summary,
@@ -56,16 +56,16 @@ class Article(db.Model):
     }
 
 
-class Haiku(db.Model):
-  when = db.DateTimeProperty(auto_now_add=True)
-  title = db.StringProperty()
-  author = db.StringProperty()
-  code = db.TextProperty()
-  score = db.IntegerProperty()
+class Haiku(ndb.Model):
+  when = ndb.DateTimeProperty(auto_now_add=True)
+  title = ndb.StringProperty()
+  author = ndb.StringProperty()
+  code = ndb.TextProperty()
+  score = ndb.IntegerProperty()
 
   def ToDict(self):
     return {
-        'id': self.key(),
+        'id': self.key.urlsafe(),
         'when': self.when,
         'title': self.title,
         'author': self.author,
@@ -74,12 +74,6 @@ class Haiku(db.Model):
         'code_formatted': glossary.FormatHtml(self.code),
         'code_formatted_print': glossary.FormatHtmlPrint(self.code),
     }
-
-
-class HaikuSnapshot(db.Model):
-  width = db.IntegerProperty()
-  height = db.IntegerProperty()
-  image = db.BlobProperty()
 
 
 def LoginStatus():
@@ -98,7 +92,7 @@ class HaikuViewPage(webapp2.RequestHandler):
     if BrowserRedirect(self): return
 
     id = self.request.path.split('/')[2]
-    haiku = Haiku.get(db.Key(id))
+    haiku = ndb.Key(urlsafe=id).get()
     template = JINJA_ENVIRONMENT.get_template(
         'templates/haiku-view.html')
     self.response.out.write(template.render({
@@ -113,7 +107,7 @@ class HaikuPrintPage(webapp2.RequestHandler):
     if BrowserRedirect(self): return
 
     id = self.request.path.split('/')[2]
-    haiku = Haiku.get(db.Key(id))
+    haiku = ndb.Key(urlsafe=id).get()
     template = JINJA_ENVIRONMENT.get_template(
         'templates/haiku-print.html')
     self.response.out.write(template.render({
@@ -127,7 +121,8 @@ class HaikuSlideshowPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
-    haikus = Haiku.all().fetch(1000)
+    q = Haiku.gql('ORDER BY score DESC')
+    haikus = q.fetch(int(self.request.get('limit', 1000)))
     haiku = haikus[random.randrange(len(haikus))]
     template = JINJA_ENVIRONMENT.get_template(
         'templates/haiku-slideshow.html')
@@ -216,7 +211,7 @@ class HaikuVotePage(webapp2.RequestHandler):
     else:
       vote = 0
     if vote in [1, -1]:
-      haiku = Haiku.get(db.Key(id))
+      haiku = ndb.Key(urlsafe=id).get()
       haiku.score += vote
       haiku.put()
     self.redirect('/')
@@ -254,7 +249,7 @@ class ArticleViewPage(webapp2.RequestHandler):
     if BrowserRedirect(self): return
 
     id = self.request.path.split('/')[2]
-    article = Article.get(db.Key(id))
+    article = ndb.Key(urlsafe=id).get()
     template = JINJA_ENVIRONMENT.get_template(
         'templates/article-view.html')
     self.response.out.write(template.render({
@@ -304,7 +299,7 @@ class HaikuEditorPage(webapp2.RequestHandler):
 
     id = self.request.get('id')
     if id:
-      haiku = Haiku.get(db.Key(id))
+      haiku = ndb.Key(urlsafe=id).get()
       title = haiku.title + ' Redux'
       code = haiku.code
     else:
@@ -349,48 +344,6 @@ class HaikuSubmitPage(webapp2.RequestHandler):
     haiku.score = 0
     haiku.put()
     self.redirect('/')
-
-
-class HaikuUploadSnapshotPage(webapp2.RequestHandler):
-  data_pattern = re.compile('data:image/(png|jpeg);base64,(.*)$')
-
-  def post(self):
-    if BrowserRedirect(self): return
-
-    id = self.reqest.get('id')
-    width = self.request.get('width')
-    height = self.request.get('height')
-    
-    image = self.request.get('image')
-    image = self.data_pattern.match(image).group(2)
-    if image is None and len(image) > 0:
-      return
-    image = db.Blob(base64.b64decode(image))
-
-    snap = HaikuSnapshot.gql('WHERE ancestor=:1 and width=:2 and height=:3',
-                             db.Key(id), width, height).get()
-    if not snap:
-      snap = HaikuSnapshot(parent=db.Key(id))
-
-    snap.width = width
-    snap.height = height
-    snap.image = image
-    snap.put()
-
-
-class HaikuSweepPage(webapp2.RequestHandler):
-  def get(self):
-    if BrowserRedirect(self): return
-
-    q = Haiku.all()
-    haikus = q.fetch(1000)
-    haikus = [h.ToDict() for h in haikus]
-
-    template = JINJA_ENVIRONMENT.get_template(
-        'templates/haiku-sweep.html')
-    self.response.out.write(template.render({
-        'haikus': haikus,
-    }))
 
 
 class ArticleSubmitPage(webapp2.RequestHandler):
@@ -464,6 +417,4 @@ app = webapp2.WSGIApplication([
     ('/word-view/.*', WordViewPage),
     ('/admin/article-editor', ArticleEditorPage),
     ('/admin/article-submit', ArticleSubmitPage),
-    ('/admin/haiku-upload-snapshot', HaikuUploadSnapshotPage),
-    ('/admin/haiku-sweep', HaikuSweepPage),
 ], debug=False)

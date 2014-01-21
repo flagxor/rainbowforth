@@ -25,7 +25,7 @@ boolean_text = (
     'Boolean values in Haiku Forth are returned as 1 (true) or 0 (false). '
     'This is in contrast to traditional Forth in which -1 is used for true. '
     'This choice to go 1 for true was made to facilitate using boolean value '
-    'as multiplicative masks. For example: _x 0.5 _< _* .'
+    'as multiplicative masks. For example: _x 0.5 _< _* . '
     'The Forth/C convention that anything non-zero is considered an alternate '
     'stand-in for true is carried over. '
 )
@@ -178,7 +178,7 @@ core_words = [
         floating_point_text
     ],
     'examples': [
-        ['1 2 3 _rot', '3 1 2'],
+        ['1 2 3 _-rot', '3 1 2'],
     ],
   },
   {
@@ -658,23 +658,6 @@ core_words = [
 ]
 
 
-# Precompute the words ids and entry map.
-word_ids = {}
-entry_map = {}
-for entry in core_words:
-  ids = []
-  for name in entry['names']:
-    id = base64.b16encode(name)
-    word_ids[name] = id
-    entry_map[id] = entry
-    ids.append(id)
-  entry['stack'] = entry.get('stack', '')
-  entry['description'] = entry.get('description', [])
-  entry['ids'] = ids
-  entry['id'] = ids[0]
-  entry['name'] = ' '.join(entry['names'])
-
-
 def LookupWordId(word):
   return word_ids.get(word)
 
@@ -690,8 +673,15 @@ HTML_ENCODING = {
 }
 
 
-def FormatWord(word):
-  id = LookupWordId(word)
+def FormatWord(word, is_haiku=True):
+  if is_haiku:
+    id = LookupWordId(word)
+  elif word.startswith('_'):
+    word = word[1:]
+    id = LookupWordId(word)
+    assert id is not None
+  else:
+    id = None
   result = []
   if id:
     result.append('<a href="/word-view/' + id + '">')
@@ -701,24 +691,51 @@ def FormatWord(word):
   return ''.join(result)
 
 
-def FormatHtml(str):
+def FormatHtml(str, is_haiku=True):
   result = []
   word = ''
   for ch in str:
     if ch in '\r\n\t ':
       if word:
-        result.append(FormatWord(word))
+        result.append(FormatWord(word, is_haiku=is_haiku))
         word = ''
       result.append(HTML_ENCODING.get(ch, ch))
     else:
       word += ch
   if word:
-    result.append(FormatWord(word))
+    result.append(FormatWord(word, is_haiku=is_haiku))
   return ''.join(result)
 
 
 def FormatHtmlPrint(str):
   return ''.join(HTML_ENCODING.get(ch, ch) for ch in str)
+
+
+# Precompute the words ids and entry map.
+word_ids = {}
+entry_map = {}
+for entry in core_words:
+  ids = []
+  for name in entry['names']:
+    id = base64.b16encode(name)
+    word_ids[name] = id
+    entry_map[id] = entry
+    ids.append(id)
+  entry['stack'] = entry.get('stack', '')
+  entry['description'] = entry.get('description', [])
+  entry['ids'] = ids
+  entry['id'] = ids[0]
+  entry['name'] = ' '.join(entry['names'])
+for entry in core_words:
+  entry['description'] = [FormatHtml(d, is_haiku=False) for d in entry['description']]
+  if 'examples' in entry:
+    nexamples = []
+    for example in entry['examples']:
+      nexample = []
+      for part in example:
+        nexample.append(FormatHtml(part, is_haiku=False))
+      nexamples.append(nexample)
+    entry['examples'] = nexamples
 
 
 def LookupEntryById(id):

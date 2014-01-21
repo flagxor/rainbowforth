@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>{{ haiku.title }}</title>
+<title>Slideshow</title>
 <meta http-equiv="X-UA-Compatible" content="chrome=1"> 
 
 <style type="text/css">
@@ -35,7 +35,7 @@ div.haiku_text {
 <h1 id="loading">Loading...</h1>
 
 {% for haiku in haikus %}
-<center id="item{{ forloop.counter0 }}">
+<center id="item{{ loop.index }}">
 
 <div class="haiku">
 <span name="haiku" width="{{ haiku_size }}" height="{{ haiku_size }}">
@@ -99,7 +99,7 @@ function pick_slide(index) {
   tag.style.display = 'none';
 
   var pick = slide_order[index][1];
-  for (var i = 0; i < haiku_count; i++) {
+  for (var i = 1; i <= haiku_count; i++) {
     var tag = document.getElementById('item' + i);
     if (i == pick) {
       tag.style.visibility = 'visible';

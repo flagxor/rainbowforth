@@ -36,7 +36,7 @@
 Examples:
 <ul>
 {% for example in entry.examples %}
-<li>{{ example|first }} &rarr; {{ example|slice:"1:"|first }}</li>
+<li>{{ example|first }} &rarr; {{ example|last }}</li>
 {% endfor %}
 </ul>
 </p>
