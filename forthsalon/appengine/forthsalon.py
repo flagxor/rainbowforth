@@ -14,6 +14,9 @@ from google.appengine.ext import ndb
 from google.appengine.api import users
 
 
+CACHE_TIMEOUT = 120
+
+
 #JINJA_ENVIRONMENT = jinja2.Environment(
 #    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
 #    extensions=['jinja2.ext.autoescape'],
@@ -150,7 +153,7 @@ class HaikuSlideshow2Page(webapp2.RequestHandler):
     if haikus is None:
       haikus = q.fetch(int(self.request.get('limit', 1000)))
       haikus = [h.ToDict() for h in haikus]
-      memcache.add('slideshow2', haikus, 600)
+      memcache.add('slideshow2', haikus, CACHE_TIMEOUT)
     template = JINJA_ENVIRONMENT.get_template(
         'templates/haiku-slideshow2.html')
     self.response.out.write(template.render({
@@ -178,7 +181,7 @@ class HaikuDumpPage(webapp2.RequestHandler):
         content.append('When: ' + str(haiku.when) + '\n')
         content.append('Code:\n' + haiku.code + '\n\n\n')
       content = ''.join(content)
-      memcache.add('dump', content, 600)
+      memcache.add('dump', content, CACHE_TIMEOUT)
     self.response.out.write(content)
 
 
@@ -290,7 +293,7 @@ class HaikuListPage(webapp2.RequestHandler):
         q = Haiku.gql('ORDER BY when DESC')
       haikus = q.fetch(1000)
       haikus = [h.ToDict() for h in haikus]
-      memcache.add('list_' + order, haikus, 600)
+      memcache.add('list_' + order, haikus, CACHE_TIMEOUT)
 
     template = JINJA_ENVIRONMENT.get_template(
         'templates/haiku-list.html')
@@ -411,7 +414,7 @@ class MainPage(webapp2.RequestHandler):
       recent_articles = q.fetch(5)
       recent_articles = [a.ToDict() for a in recent_articles]
       main_items = [top_haikus, recent_haikus, recent_articles]
-      memcache.add('main_items', main_items, 600)
+      memcache.add('main_items', main_items, CACHE_TIMEOUT)
     else:
       top_haikus, recent_haikus, recent_articles = main_items
 
