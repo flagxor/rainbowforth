@@ -9,8 +9,9 @@ import glossary
 import jinja2
 import webapp2
 
-from google.appengine.api import users
+from google.appengine.api import memcache
 from google.appengine.ext import ndb
+from google.appengine.api import users
 
 
 #JINJA_ENVIRONMENT = jinja2.Environment(
@@ -92,12 +93,15 @@ class HaikuViewPage(webapp2.RequestHandler):
     if BrowserRedirect(self): return
 
     id = self.request.path.split('/')[2]
-    haiku = ndb.Key(urlsafe=id).get()
+    haiku = memcache.get('haiku_' + id)
+    if haiku is None:
+      haiku = ndb.Key(urlsafe=id).get().ToDict()
+      memcache.add('haiku_' + id, haiku)
     template = JINJA_ENVIRONMENT.get_template(
         'templates/haiku-view.html')
     self.response.out.write(template.render({
         'login_status': LoginStatus(),
-        'haiku': haiku.ToDict(),
+        'haiku': haiku,
         'haiku_size': self.request.get('size', 256),
     }))
 
@@ -107,12 +111,15 @@ class HaikuPrintPage(webapp2.RequestHandler):
     if BrowserRedirect(self): return
 
     id = self.request.path.split('/')[2]
-    haiku = ndb.Key(urlsafe=id).get()
+    haiku = memcache.get('haiku_' + id)
+    if haiku is None:
+      haiku = ndb.Key(urlsafe=id).get().ToDict()
+      memcache.add('haiku_' + id, haiku)
     template = JINJA_ENVIRONMENT.get_template(
         'templates/haiku-print.html')
     self.response.out.write(template.render({
         'login_status': LoginStatus(),
-        'haiku': haiku.ToDict(),
+        'haiku': haiku,
         'haiku_size': self.request.get('size', 600),
     }))
 
@@ -153,16 +160,22 @@ class HaikuSlideshow2Page(webapp2.RequestHandler):
 
 class HaikuDumpPage(webapp2.RequestHandler):
   def get(self):
-    q = Haiku.gql('ORDER BY score DESC')
-    haikus = q.fetch(int(self.request.get('limit', 1000)))
     self.response.headers['Content-type'] = 'text/plain'
-    for haiku in haikus:
-      self.response.out.write('------------------------------------\n')
-      self.response.out.write('Title: ' + haiku.title + '\n')
-      self.response.out.write('Author: ' + haiku.author + '\n')
-      self.response.out.write('Score: ' + str(haiku.score) + '\n')
-      self.response.out.write('When: ' + str(haiku.when) + '\n')
-      self.response.out.write('Code:\n' + haiku.code + '\n\n\n')
+    content = memcache.get('dump')
+    if content is None:
+      q = Haiku.gql('ORDER BY score DESC')
+      haikus = q.fetch(int(self.request.get('limit', 1000)))
+      content = []
+      for haiku in haikus:
+        content.push('------------------------------------\n')
+        content.push('Title: ' + haiku.title + '\n')
+        content.push('Author: ' + haiku.author + '\n')
+        content.push('Score: ' + str(haiku.score) + '\n')
+        content.push('When: ' + str(haiku.when) + '\n')
+        content.push('Code:\n' + haiku.code + '\n\n\n')
+      content = ''.join(content)
+      memcache.add('dump', content, 600)
+    self.response.out.write(content)
 
 
 class HaikuAboutPage(webapp2.RequestHandler):
@@ -262,12 +275,18 @@ class HaikuListPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
-    if self.request.get('order', '') == 'score':
-      q = Haiku.gql('ORDER BY score DESC')
-    else:
-      q = Haiku.gql('ORDER BY when DESC')
-    haikus = q.fetch(1000)
-    haikus = [h.ToDict() for h in haikus]
+    order = self.request.get('order', '')
+    if order != 'score':
+      order = 'age'
+    haikus = memcache.get('list_' + order)
+    if haikus is None:
+      if order == 'score':
+        q = Haiku.gql('ORDER BY score DESC')
+      else:
+        q = Haiku.gql('ORDER BY when DESC')
+      haikus = q.fetch(1000)
+      haikus = [h.ToDict() for h in haikus]
+      memcache.add('list_' + order, haikus, 600)
 
     template = JINJA_ENVIRONMENT.get_template(
         'templates/haiku-list.html')
@@ -376,15 +395,21 @@ class MainPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
-    q = Haiku.gql('ORDER BY score DESC')
-    top_haikus = q.fetch(8)
-    top_haikus = [h.ToDict() for h in top_haikus]
-    q = Haiku.gql('ORDER BY when DESC')
-    recent_haikus = q.fetch(8)
-    recent_haikus = [h.ToDict() for h in recent_haikus]
-    q = Article.gql('ORDER BY when DESC')
-    recent_articles = q.fetch(5)
-    recent_articles = [a.ToDict() for a in recent_articles]
+    main_items = memcache.get('main_items')
+    if main_items is None:
+      q = Haiku.gql('ORDER BY score DESC')
+      top_haikus = q.fetch(8)
+      top_haikus = [h.ToDict() for h in top_haikus]
+      q = Haiku.gql('ORDER BY when DESC')
+      recent_haikus = q.fetch(8)
+      recent_haikus = [h.ToDict() for h in recent_haikus]
+      q = Article.gql('ORDER BY when DESC')
+      recent_articles = q.fetch(5)
+      recent_articles = [a.ToDict() for a in recent_articles]
+      main_items = [top_haikus, recent_haikus, recent_articles]
+      memcache.add('main_items', main_items, 600)
+    else:
+      top_haikus, recent_haikus, recent_articles = main_items
 
     template = JINJA_ENVIRONMENT.get_template(
         'templates/main.html')
