@@ -171,12 +171,12 @@ class HaikuDumpPage(webapp2.RequestHandler):
       haikus = q.fetch(int(self.request.get('limit', 1000)))
       content = []
       for haiku in haikus:
-        content.push('------------------------------------\n')
-        content.push('Title: ' + haiku.title + '\n')
-        content.push('Author: ' + haiku.author + '\n')
-        content.push('Score: ' + str(haiku.score) + '\n')
-        content.push('When: ' + str(haiku.when) + '\n')
-        content.push('Code:\n' + haiku.code + '\n\n\n')
+        content.append('------------------------------------\n')
+        content.append('Title: ' + haiku.title + '\n')
+        content.append('Author: ' + haiku.author + '\n')
+        content.append('Score: ' + str(haiku.score) + '\n')
+        content.append('When: ' + str(haiku.when) + '\n')
+        content.append('Code:\n' + haiku.code + '\n\n\n')
       content = ''.join(content)
       memcache.add('dump', content, 600)
     self.response.out.write(content)
