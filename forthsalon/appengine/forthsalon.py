@@ -146,12 +146,16 @@ class HaikuSlideshow2Page(webapp2.RequestHandler):
     if BrowserRedirect(self): return
 
     q = Haiku.gql('ORDER BY score DESC')
-    haikus = q.fetch(int(self.request.get('limit', 1000)))
+    haikus = memcache.get('slideshow2')
+    if haikus is None:
+      haikus = q.fetch(int(self.request.get('limit', 1000)))
+      haikus = [h.ToDict() for h in haikus]
+      memcache.add('slideshow2', haikus, 600)
     template = JINJA_ENVIRONMENT.get_template(
         'templates/haiku-slideshow2.html')
     self.response.out.write(template.render({
         'login_status': LoginStatus(),
-        'haikus': [h.ToDict() for h in haikus],
+        'haikus': haikus,
         'haiku_count': len(haikus),
         'haiku_size': self.request.get('size', 400),
         'speed': self.request.get('speed', 10),
@@ -433,7 +437,7 @@ app = webapp2.WSGIApplication([
     ('/haiku-about', HaikuAboutPage),
     ('/haiku-animated', HaikuAnimatedPage),
     ('/haiku-sound', HaikuSoundPage),
-    ('/haiku-slideshow', HaikuSlideshowPage),
+    ('/haiku-slideshow', HaikuSlideshow2Page),
     ('/haiku-slideshow2', HaikuSlideshow2Page),
     ('/haiku-dump', HaikuDumpPage),
     ('/article-list', ArticleListPage),
