@@ -132,7 +132,7 @@ class HaikuSlideshowPage(webapp2.RequestHandler):
     if BrowserRedirect(self): return
 
     q = Haiku.gql('ORDER BY score DESC')
-    haikus = q.fetch(int(self.request.get('limit', 1000)))
+    haikus = q.fetch(int(self.request.get('limit', 200)))
     haiku = haikus[random.randrange(len(haikus))]
     template = JINJA_ENVIRONMENT.get_template(
         'templates/haiku-slideshow.html')
@@ -151,7 +151,7 @@ class HaikuSlideshow2Page(webapp2.RequestHandler):
     q = Haiku.gql('ORDER BY score DESC')
     haikus = memcache.get('slideshow2')
     if haikus is None:
-      haikus = q.fetch(int(self.request.get('limit', 1000)))
+      haikus = q.fetch(int(self.request.get('limit', 200)))
       haikus = [h.ToDict() for h in haikus]
       memcache.add('slideshow2', haikus, CACHE_TIMEOUT)
     template = JINJA_ENVIRONMENT.get_template(
@@ -291,7 +291,7 @@ class HaikuListPage(webapp2.RequestHandler):
         q = Haiku.gql('ORDER BY score DESC')
       else:
         q = Haiku.gql('ORDER BY when DESC')
-      haikus = q.fetch(1000)
+      haikus = q.fetch(200)
       haikus = [h.ToDict() for h in haikus]
       memcache.add('list_' + order, haikus, CACHE_TIMEOUT)
 
@@ -308,7 +308,7 @@ class ArticleListPage(webapp2.RequestHandler):
     if BrowserRedirect(self): return
 
     q = Article.gql('ORDER BY when DESC')
-    articles = q.fetch(1000)
+    articles = q.fetch(200)
     articles = [a.ToDict() for a in articles]
 
     template = JINJA_ENVIRONMENT.get_template(
