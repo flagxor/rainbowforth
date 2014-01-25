@@ -16,7 +16,7 @@
  content="black-translucent"/>                      
 </head>
 
-<body onload="init();" bgcolor="#000000">
+<body onload="init();">
 <div id="wrapper">
 
 <div id="header">
@@ -24,40 +24,12 @@
 </div>
 
 <div class="section">
-
-<h2>
-Top Haikus
-<a href="/haiku-list?order=score" class="more">More...</a>
-</h2>
-{% for haiku in top_haikus %}
-<a href="/haiku-view/{{ haiku.id }}">
-<div class="haiku"
- onclick="window.location.href='/haiku-view/{{ haiku.id }}';"
- style="cursor: pointer;">
-<span name="haiku" width="64" height="64">
-<textarea style="display: none">{{ haiku.code|escape }}</textarea>
-</span>
-<b>{{ haiku.title|escape }}</b></a>
-<i>{{ haiku.author|escape }}</i>
-</div>
-{% endfor %}
-
-<h2>
-Recent Haikus
-<a href="/haiku-list?order=date" class="more">More...</a>
-</h2>
-{% for haiku in recent_haikus %}
-<a href="/haiku-view/{{ haiku.id }}">
-<div class="haiku"
- onclick="window.location.href='/haiku-view/{{ haiku.id }}';"
- style="cursor: pointer;">
-<span name="haiku" width="64" height="64">
-<textarea style="display: none">{{ haiku.code|escape }}</textarea>
-</span>
-<b>{{ haiku.title|escape }}</b></a>
-<i>{{ haiku.author|escape }}</i>
-</div>
-{% endfor %}
+[<span name="ticker">0</span>]
+Recent
+-
+<a href="/haiku-list?order=score" class="more">Best Rated</a>
+<br/>
+<div name="haikulist"></div>
 </div>
 
 <div id="footer">
@@ -69,20 +41,19 @@ Recent Haikus
 </div>
 
 <div class="section">
-<h2>Recent Articles</h2>
-{% for article in recent_articles %}
+
 <div class="article">
-<h3><a href="/article-view/{{ article.id }}">{{ article.title|escape }}</a></h3>
-<p>{{ article.summary|escape }}</p>
+<h3><a href="/article-view/xxxxx">Article 1</a></h3>
+<p>A number of recently added standard Forth words have been dropped from the core vocabulary: ! @ IF ELSE THEN VARIABLE ALLOT HERE. Surprisingly few haikus had to be updated to accommodate, suggesting not much has been lost.</p>
 </div>
-{% endfor %}
+
 <a href="/article-list" class="more">More...</a>
+
 </div>
 
 <div id="footer">
 <span>Home</span>
 <a href="/haiku-editor">Haiku Editor</a>
-{{ login_status }}
 </div>
 
 </div>
@@ -90,7 +61,6 @@ Recent Haikus
 <script type="text/javascript" src="/static/haiku.js"></script>
 <script type="text/javascript">
 function init() {
-  start_fetcher();  
   update_haikus(function() {});
 }
 </script>

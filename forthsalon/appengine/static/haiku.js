@@ -2,6 +2,26 @@ var NOTES = 10;
 var NOTE_BASE = 10;
 var STEP = 2048;
 
+var all_haikus = {};
+
+var fetcher;
+
+function start_fetch() {
+  fetcher = new Worker('fetch.js');
+  fetcher.addEventListener('message', function(e) {
+    for (var i = 0; i < e.data.length; i++) {
+      all_haikus[e.data[i].id] = e.data[i];
+    }
+    var count = 0;
+    for (var haiku in all_haikus) {
+      count++;
+    }
+    var tickers = document.getElementsByName('ticker');
+    for (var i = 0; i < tickers.length; i++) {
+      tickers[i].innerText = '' + count;
+    }
+  }, false);
+}
 
 function core_words() {
   var dict = new Object();
@@ -528,14 +548,23 @@ function render(cv, cv3, animated, code, next) {
   });
 }
 
-function find_tag_name(base, tag, name) {
+function find_tags_named(base, tag, name) {
   tag = tag.toUpperCase();
+  found = [];
   for (var i = 0; i < base.childNodes.length; i++) {
     var child = base.childNodes[i];
     if (child.tagName == tag &&
-        (name == null || name == child.name)) return child;
+        (name == null || name == child.name)) {
+      found.push(child);
+    }
   }
-  return null;
+  return found;
+}
+
+function find_tag_name(base, tag, name) {
+  var found = find_tags_named(base, tag, name);
+  if (found.length == 0) return null;
+  return found[0]; 
 }
 
 function find_tag(base, tag) {
@@ -557,7 +586,40 @@ function update_haikus_one(work, next) {
   });
 }
 
+function update_haiku_lists() {
+  var haiku_lists = document.getElementsByName('haikulist');
+  for (var i = 0; i < haiku_lists.length; i++) {
+    var haiku_list = haiku_lists[i];
+    var children = find_tags_named(haiku_list, 'a', null);
+    if (children.length != 0) continue;
+    for (var j = 0; j < 6; j++) {
+      var anchor = document.createElement('a');
+      anchor.href = 'xxxxx';
+      var div = document.createElement('div');
+      div.setAttribute('class', 'haiku');
+      var span = document.createElement('span');
+      span.setAttribute('name', 'haiku');
+      span.setAttribute('width', '64');
+      span.setAttribute('height', '64');
+      var textarea = document.createElement('textarea');
+      textarea.setAttribute('style', 'display:none');
+      textarea.innerText = 'x y';
+      span.appendChild(textarea);
+      div.appendChild(span);
+      var title = document.createElement('b');
+      title.innerText = 'Haiku1';
+      div.appendChild(title);
+      var author = document.createElement('i');
+      author.innerText = 'Author Name';
+      div.appendChild(author);
+      anchor.appendChild(div);
+      haiku_list.appendChild(anchor);
+    }
+  }
+}
+
 function update_haikus(next) {
+  update_haiku_lists();
   var haikus = document.getElementsByName('haiku');
   var first_code;
   var work = [];
