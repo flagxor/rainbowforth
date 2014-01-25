@@ -28,7 +28,7 @@
 {% for haiku in haikus %}
 <a href="/haiku-view/{{ haiku.id }}">
 <div class="haiku"
- onclick="window.location.href='/haiku-view/{{ haiku.id }}';"
+ onclick="window.location.href='/haiku-view/{{ haiku.id|escape }}';"
  style="cursor: pointer;">
 <span name="haiku" width="128" height="128">
 <textarea style="display: none">{{ haiku.code|escape }}</textarea>
@@ -37,6 +37,13 @@
 <i>{{ haiku.author|escape }}</i>
 </div>
 {% endfor %}
+
+{% if more and cursor %}
+<br/>
+<h3>
+<a href="/haiku-list?order={{ order|escape }}&cursor={{ cursor|escape }}">Next</a>
+</h3>
+{% endif %}
 
 </div>
 

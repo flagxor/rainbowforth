@@ -9,17 +9,13 @@ import jinja2
 import webapp2
 
 from google.appengine.api import memcache
+from google.appengine.datastore.datastore_query import Cursor
 from google.appengine.ext import ndb
 from google.appengine.api import users
-
 
 CACHE_TIMEOUT = 120
 
 
-#JINJA_ENVIRONMENT = jinja2.Environment(
-#    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
-#    extensions=['jinja2.ext.autoescape'],
-#    autoescape=True)
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
 
@@ -344,21 +340,26 @@ class HaikuListPage(webapp2.RequestHandler):
     order = self.request.get('order', '')
     if order != 'score':
       order = 'age'
-    haikus = memcache.get('list_' + order)
-    if haikus is None:
-      if order == 'score':
-        q = Haiku.gql('ORDER BY score DESC')
-      else:
-        q = Haiku.gql('ORDER BY when DESC')
-      haikus = q.fetch(200)
-      haikus = [h.ToDict() for h in haikus]
-      memcache.add('list_' + order, haikus, CACHE_TIMEOUT)
+    cursorv = self.request.get('cursor', '')
+    if order == 'score':
+      qorder = 'ORDER BY score DESC'
+      norder = 'score'
+    else:
+      qorder = 'ORDER BY when DESC'
+      norder = 'when'
+    cursor = Cursor(urlsafe=cursorv)
+    q = Haiku.gql(qorder)
+    haikus, next_cursor, more = q.fetch_page(40, start_cursor=cursor)
+    haikus = [h.ToDict() for h in haikus]
 
     template = JINJA_ENVIRONMENT.get_template(
         'templates/haiku-list.html')
     self.response.out.write(template.render({
         'login_status': LoginStatus(),
         'haikus': haikus,
+        'order': order,
+        'more': more,
+        'cursor': next_cursor.urlsafe(),
     }))
 
 
