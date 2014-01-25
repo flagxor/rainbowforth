@@ -281,8 +281,6 @@ class HaikuVotePage(webapp2.RequestHandler):
       haiku = ndb.Key(urlsafe=id).get()
       haiku.score += vote
       haiku.put()
-           
-    self.response.out.write(content)
     self.redirect('/')
 
 
