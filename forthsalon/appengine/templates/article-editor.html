@@ -15,7 +15,7 @@
 <meta name="apple-mobile-web-app-status-bar-style"            
  content="black-translucent"/>                      
 </head>
-<body onload="init()" bgcolor="#000000">
+<body bgcolor="#000000">
 <div id="wrapper">
 
 <div id="header">
@@ -26,13 +26,14 @@
 
 <form method="post" action="/admin/article-submit">
 Title:<br>
-<input type="text" style="width: 256;" name="title"><br>
+<input type="hidden" name="id" value="{{ article.id|escape }}"/>
+<input type="text" style="width: 256;" name="title" value="{{ article.title|escape }}"><br>
 Summary:<br>
 <textarea style="width: 256; height:150; resize: none"
-    name="summary"></textarea><br>
+    name="summary">{{ article.summary|escape }}</textarea><br>
 Body:<br>
 <textarea style="width: 256; height:150; resize: none"
-    name="body"></textarea><br>
+    name="body">{{ article.body|escape }}</textarea><br>
 <br>
 <input type="submit" value="Submit">
 </form>

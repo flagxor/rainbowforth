@@ -292,8 +292,6 @@ class HaikuVotePage(webapp2.RequestHandler):
       haiku.put()
            
     self.response.out.write(content)
-
-
     self.redirect('/')
 
 
@@ -335,6 +333,7 @@ class ArticleViewPage(webapp2.RequestHandler):
     self.response.out.write(template.render({
         'login_status': LoginStatus(),
         'article': article.ToDict(),
+        'is_admin': users.is_current_user_admin(),
     }))
 
 
@@ -407,9 +406,23 @@ class ArticleEditorPage(webapp2.RequestHandler):
 
     template = JINJA_ENVIRONMENT.get_template(
         'templates/article-editor.html')
-    self.response.out.write(template.render({
-        'login_status': LoginStatus(),
-    }))
+    item_id = self.request.get('id', '')
+    if item_id:
+      article = ndb.Key(urlsafe=item_id).get()
+      self.response.out.write(template.render({
+          'login_status': LoginStatus(),
+          'article': article.ToDict(),
+      }))
+    else:      
+      self.response.out.write(template.render({
+          'login_status': LoginStatus(),
+          'article': {
+              'id': '',
+              'title': '',
+              'summary': '',
+              'body': '',
+          },
+      }))
 
 
 class HaikuSubmitPage(webapp2.RequestHandler):
@@ -443,7 +456,11 @@ class ArticleSubmitPage(webapp2.RequestHandler):
     if not summary:
       title = 'No summary.'
 
-    article = Article()
+    item_id = self.request.get('id')
+    if item_id:
+      article = ndb.Key(urlsafe=item_id).get()
+    else:
+      article = Article()
     article.title = title
     article.summary = summary
     article.body = self.request.get('body', '') 
