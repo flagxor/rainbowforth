@@ -1,21 +1,29 @@
 a:link {
-  color: blue;
+  color: white;
+  text-decoration: none;
 }
 
 a:visited {
-  color: blue;
+  color: white;
+  text-decoration: none;
+}
+
+a:hover {
+  color: white;
+  text-decoration: underline;
 }
 
 body {
   font-family: Verdana, Arial, Helvetica, sans-serif;
   font-size: 13px;
   background-color: #000000;
+  color: #cccccc;
   padding: 0;
   margin: 0;
 }
 
 #wrapper { 
-  background-color: #000000;;
+  background-color: #000000;
 }
 
 #wrapper h1 {
@@ -23,43 +31,18 @@ body {
 }
 
 #header {
-  background-color: #0000cc;
-  color: #ffffff;
-
-  margin-bottom: 2px;
+  background-color: #333333;
+  color: #cccccc;
+  text-align: left;
   padding: 0.5em;
-  text-align: center;
-  border-top-right-radius: 24px;
-  -webkit-border-top-right-radius: 24px;
-  -moz-border-radius-topright: 1em;
-  border-top-left-radius: 24px;
-  -webkit-border-top-left-radius: 24px;
-  -moz-border-radius-topleft: 1em;
-/*
-  box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
-  -moz-box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
-  -webkit-box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
-*/
 }
 
 #footer {
-  background-color: #0000cc;
-  color: #ffffff;
-
-  margin-top: 2px;
-  padding: 0.5em;
+  background-color: #333333;
+  color: #cccccc;
+  margin-top: 0px;
+  padding: 0px;
   text-align: left;
-  border-bottom-right-radius: 24px;
-  -webkit-border-bottom-right-radius: 24px;
-  -moz-border-radius-bottomright: 1em;
-  border-bottom-left-radius: 24px;
-  -webkit-border-bottom-left-radius: 24px;
-  -moz-border-radius-bottomleft: 1em;
-/*
-  box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
-  -moz-box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
-  -webkit-box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
-*/
 }
 
 div.links a {
@@ -72,30 +55,22 @@ div.links a {
   display: inline-block;
 }
 
-#footer a:link {
-  color: white;
-}
-
-#footer a:visited {
-  color: white;
-}
-
 #footer span {
   padding: 1em;
   display: inline-block;
 }
 
 div.section {
-  margin: 1em;
-  padding: 0.5em;
-  background-color: #eeeeff;
+  background-color: #777777;
   border-style: solid;
-  border-width: 1px;
-  border-color: #cccccc;
+  border-width: 0;
+  border-color: #000000;
+  margin: 2px 0px;
+  padding: 1em;
 }
 
 div.article {
-  margin: 1em;
+  margin: .5em;
 }
 
 div.haiku_text {
@@ -105,18 +80,6 @@ div.haiku_text {
                "Fixed"
                "Lucidatypewriter"
                monospace;
-}
-
-div.haiku_text a:link {
-  text-decoration: none;
-}
-
-div.haiku_text a:visited {
-  text-decoration: none;
-}
-
-div.haiku_text a:hover {
-  text-decoration: underline;
 }
 
 div.haiku {
@@ -140,4 +103,8 @@ div.haiku {
 
 .more {
   font-size: 12px;
+}
+
+div.publish {
+  float: right;
 }
