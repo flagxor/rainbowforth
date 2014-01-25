@@ -90,8 +90,7 @@ function core_words() {
                'dstack.push(dstack.pop() / work1);'];
   dict['mod'] = ['work1 = dstack.pop();',
                  'work2 = dstack.pop();',
-                 'work2 %= work1;',
-                 'dstack.push(work2);'];
+                 'dstack.push(mod(work2, work1));'];
   dict['pow'] = ['work1 = dstack.pop();',
                  'dstack.push(Math.pow(dstack.pop(), work1));'];
   dict['**'] = dict['pow'];
@@ -111,7 +110,7 @@ function core_words() {
   dict['sin'] = ['dstack.push(Math.sin(dstack.pop()));'];
   dict['cos'] = ['dstack.push(Math.cos(dstack.pop()));'];
   dict['tan'] = ['dstack.push(Math.tan(dstack.pop()));'];
-  dict['log'] = ['dstack.push(Math.log(dstack.pop()));'];
+  dict['log'] = ['dstack.push(log(dstack.pop()));'];
   dict['exp'] = ['dstack.push(Math.exp(dstack.pop()));'];
   dict['sqrt'] = ['dstack.push(Math.sqrt(dstack.pop()));'];
   dict['floor'] = ['dstack.push(Math.floor(dstack.pop()));'];
@@ -123,6 +122,14 @@ function core_words() {
   dict['random'] = ['dstack.push(Math.random());'];
 
   return dict;
+}
+
+function log(v) {
+  return Math.log(Math.abs(v));
+}
+
+function mod(v1, v2) {
+  return v1 - v2 * Math.floor(v1 / v2);
 }
 
 function code_tags(src) {
@@ -464,7 +471,6 @@ function make_fragment_shader(code) {
     code[i] = code[i].replace(/ypos/g, 'tpos.y');
     code[i] = code[i].replace(/Math\./g, '');
     code[i] = code[i].replace(/atan2/g, 'atan');
-    code[i] = code[i].replace('work2 %= work1;', 'work2 = mod(work2, work1);');
     code[i] = code[i].replace(/PI/g, '3.1415926535897931');
     code[i] = code[i].replace(/NaN/g, '0.0');
     code[i] = code[i].replace(/random\(\)/g,
