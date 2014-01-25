@@ -16,46 +16,6 @@ handlers:
   upload: static/favicon.ico
   mime_type: text/html
 
-- url: /haiku-view/ahBzfmZvsb24taHJkcg0LEgVIYWlrdRj46RYM
-  static_files: canned/ahBzfmZvsb24taHJkcg0LEgVIYWlrdRj46RYM
-  upload: canned/ahBzfmZvsb24taHJkcg0LEgVIYWlrdRj46RYM
-  mime_type: text/html
-
-- url: /haiku-view/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRj16RYM
-  static_files: canned/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRj16RYM
-  upload: canned/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRj16RYM
-  mime_type: text/html
-
-- url: /haiku-view/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRiCqRwM
-  static_files: canned/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRiCqRwM
-  upload: canned/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRiCqRwM
-  mime_type: text/html
-
-- url: /haiku-view/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRiCuBcM
-  static_files: canned/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRiCuBcM
-  upload: canned/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRiCuBcM
-  mime_type: text/html
-
-- url: /haiku-view/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRiHuBcM
-  static_files: canned/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRiHuBcM
-  upload: canned/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRiHuBcM
-  mime_type: text/html
-
-- url: /haiku-view/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRiYlRMM
-  static_files: canned/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRiYlRMM
-  upload: canned/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRiYlRMM
-  mime_type: text/html
-
-- url: /haiku-view/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRjG_xQM
-  static_files: canned/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRjG_xQM
-  upload: canned/ahBzfmZvcnRoc2Fsb24taHJkcg0LEgVIYWlrdRjG_xQM
-  mime_type: text/html
-
-- url: /haiku-view/ahBzfmZvsb24taHJkcg0LEgVIYWlrdRj46RYM
-  static_files: canned/ahBzfmZvsb24taHJkcg0LEgVIYWlrdRj46RYM
-  upload: canned/ahBzfmZvsb24taHJkcg0LEgVIYWlrdRj46RYM
-  mime_type: text/html
-
 - url: /favicon.png
   static_files: static/favicon.png
   upload: static/favicon.png
