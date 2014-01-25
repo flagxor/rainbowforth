@@ -41,7 +41,7 @@ function FetchUpdates() {
         last_update = items[i].last_modified;
       }
     }
-    setTimeout(FetchUpdates, fetch_timeout);
+    setTimeout(FetchUpdates, 0);
   });
 }
 

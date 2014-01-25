@@ -217,7 +217,7 @@ class HaikuFetchPage(webapp2.RequestHandler):
       haikus = [ndb.Key(urlsafe=item_id).get().ToDict()]
     else:
       start = ToDatetime(self.request.get('start', '0'))
-      q = Haiku.gql('where last_modified >= :1 ORDER BY last_modified',
+      q = Haiku.gql('where last_modified > :1 ORDER BY last_modified',
                     start)
       haikus = q.fetch(int(self.request.get('limit', 40)))
     content = []
