@@ -14,9 +14,7 @@
 
 {% for haiku in haikus %}
 <a href="/haiku-view/{{ haiku.id }}">
-<div class="haiku"
- onclick="window.location.href='/haiku-view/{{ haiku.id }}';"
- style="cursor: pointer;">
+<div class="haiku" style="cursor: pointer;">
 <span name="haiku" width="128" height="128">
 <textarea style="display: none">{{ haiku.code|escape }}</textarea>
 </span>

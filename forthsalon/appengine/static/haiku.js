@@ -654,6 +654,12 @@ function update_haikus(next) {
       haiku.appendChild(canvas3d);
       canvas3d.setAttribute('width', haiku.getAttribute('width'));
       canvas3d.setAttribute('height', haiku.getAttribute('height'));
+      canvas3d.addEventListener('webglcontextlost', function(e) {
+        e.preventDefault();
+      }, false);
+      canvas3d.addEventListener('webglcontextrestored', function(e) {
+        canvas3d.code = null;
+      }, false);
     }
     // Create animated tag.
     var animated = find_tag_name(haiku, 'a', 'animated');
