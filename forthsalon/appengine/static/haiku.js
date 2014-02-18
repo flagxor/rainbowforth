@@ -110,9 +110,9 @@ function core_words() {
   dict['sin'] = ['dstack.push(Math.sin(dstack.pop()));'];
   dict['cos'] = ['dstack.push(Math.cos(dstack.pop()));'];
   dict['tan'] = ['dstack.push(Math.tan(dstack.pop()));'];
-  dict['log'] = ['dstack.push(log(dstack.pop()));'];
+  dict['log'] = ['dstack.push(Math.log(Math.abs(dstack.pop())));'];
   dict['exp'] = ['dstack.push(Math.exp(dstack.pop()));'];
-  dict['sqrt'] = ['dstack.push(Math.sqrt(dstack.pop()));'];
+  dict['sqrt'] = ['dstack.push(Math.sqrt(Math.abs(dstack.pop())));'];
   dict['floor'] = ['dstack.push(Math.floor(dstack.pop()));'];
   dict['ceil'] = ['dstack.push(Math.ceil(dstack.pop()));'];
   dict['abs'] = ['dstack.push(Math.abs(dstack.pop()));'];
@@ -332,8 +332,8 @@ function render_rows(image, ctx, img, y, w, h, next) {
     if (navigator.userAgent.toLowerCase().search('android') < 0) {
       while (y < h) {
         var pos = w * (h - 1 - y) * 4;
-        for (var x = 0; x < w; x++) {
-          var col = image(x / w, y / h);
+        for (var x = 0.5; x < w; x++) {
+          var col = image(x / w, (y + 0.5) / h);
           img.data[pos++] = Math.floor(col[0] * 255);
           img.data[pos++] = Math.floor(col[1] * 255);
           img.data[pos++] = Math.floor(col[2] * 255);
@@ -346,8 +346,8 @@ function render_rows(image, ctx, img, y, w, h, next) {
       // Work around what seems to be an android canvas bug?
       while (y < h) {
         var pos = w * (h - 1 - y) * 4;
-        for (var x = 0; x < w; x++) {
-          var col = image(x / w, y / h);
+        for (var x = 0.5; x < w; x++) {
+          var col = image(x / w, (y + 0.5) / h);
           if (col[3] == null) col[3] = 1;
           if (isNaN(col[3])) col[3] = 0;
           var alpha = Math.min(Math.max(0.0, col[3]), 1.0);
