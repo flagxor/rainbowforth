@@ -101,7 +101,7 @@ function core_words() {
                  'dstack.push((dstack.pop()!=0.0 && work1!=0.0)?1.0:0.0);'];
   dict['or'] = ['work1 = dstack.pop();',
                 'dstack.push((dstack.pop()!=0.0 || work1!=0.0)?1.0:0.0);'];
-  dict['not'] = ['dstack.push(dstack.pop()!=0.0?1.0:0.0);'];
+  dict['not'] = ['dstack.push(dstack.pop()!=0.0?0.0:1.0);'];
 
   dict['min'] = ['dstack.push(Math.min(dstack.pop(), dstack.pop()));'];
   dict['max'] = ['dstack.push(Math.max(dstack.pop(), dstack.pop()));'];
@@ -122,10 +122,6 @@ function core_words() {
   dict['random'] = ['dstack.push(Math.random());'];
 
   return dict;
-}
-
-function log(v) {
-  return Math.log(Math.abs(v));
 }
 
 function mod(v1, v2) {
