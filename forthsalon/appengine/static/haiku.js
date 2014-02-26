@@ -458,34 +458,37 @@ function draw3d(cv, cv3) {
   ctx.drawImage(cv3, 0, 0);
 }
 
-function make_fragment_shader(code) {
-  code = code.slice(1);
-  code = ['precision highp float;',
-          'varying vec2 tpos;',
-          'uniform float time_val;',
-          'void main(void) {',
-          'float work1, work2, work3, work4, seed;',
-  ].concat(code);
-  var PI = '3.1415926535897931';
+function make_fragment_shader(input_code) {
+  var prefix = [
+      'precision highp float;',
+      'varying vec2 tpos;',
+      'uniform float time_val;',
+      'float PI = 3.1415926535897931;',
+      'float PI2 = PI * 2.0;',
+  ];
+  var main = [
+      'void main(void) {',
+      'float work1, work2, work3, work4, seed;',
+  ];
+  code = prefix.concat(main).concat(input_code.slice(1));
   for (var i = 0; i < code.length; i++) {
     code[i] = code[i].replace(/var /, 'float ');
     code[i] = code[i].replace(/xpos/g, 'tpos.x');
     code[i] = code[i].replace(/ypos/g, 'tpos.y');
     code[i] = code[i].replace(/Math\./g, '');
-    code[i] = code[i].replace(/sin/g, 'gsin');
-    code[i] = code[i].replace(/cos/g, 'gcos');
-    code[i] = code[i].replace(/tan/g, 'gtan');
     code[i] = code[i].replace(/atan2/g, 'atan');
-    code[i] = code[i].replace(/PI/g, PI);
     code[i] = code[i].replace(/NaN/g, '0.0');
     code[i] = code[i].replace(/random\(\)/g,
         '(seed=fract(sin(104053.0*seed+mod(time_val, 100003.0)+' +
         '101869.0*tpos.x+102533.0*tpos.y)*103723.0))');
+    code[i] = code[i].replace(/sin/g, 'gsin');
+    code[i] = code[i].replace(/cos/g, 'gcos');
+    code[i] = code[i].replace(/([^a])tan/g, '$1gtan');
   }
-  code.splice(1, 0,
-      'float gsin(float v) { return sin(mod(v, ' + PI + '*2.0)); }',
-      'float gcos(float v) { return cos(mod(v, ' + PI + '*2.0)); }',
-      'float gtan(float v) { return tan(mod(v, ' + PI + '*2.0)); }');
+  code.splice(prefix.length, 0,
+      'float gsin(float v) { return sin(mod(v, PI2)); }',
+      'float gcos(float v) { return cos(mod(v, PI2)); }',
+      'float gtan(float v) { return tan(mod(v, PI2)); }');
   code[code.length-1] = code[code.length-1].replace(
       ']; }; go', '); ' +
       'gl_FragColor.a = min(max(0.0, gl_FragColor.a), 1.0); ' +
