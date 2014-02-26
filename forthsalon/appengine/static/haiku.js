@@ -454,6 +454,7 @@ function draw3d(cv, cv3) {
   gl.drawArrays(gl.TRIANGLES, 0, 6);
 
   var ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, cv.width, cv.height);
   ctx.drawImage(cv3, 0, 0);
 }
 
