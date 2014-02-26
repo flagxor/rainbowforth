@@ -375,7 +375,7 @@ function render_rows(image, ctx, img, y, w, h, next) {
   }
 }
 
-function setup3d(cv3, code) {
+function setup3d(cv, cv3, code) {
   var force_nogpu = window.location.search.search('gpu=0') >= 0;
   if (force_nogpu) throw 'force no gpu';
 
@@ -416,7 +416,6 @@ function setup3d(cv3, code) {
   if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
     throw 'bad program';
   }
-  gl.useProgram(program);
 
   var vattrib = gl.getAttribLocation(program, 'ppos');
   if(vattrib == -1) throw 'ppos cannot get address';
@@ -429,7 +428,7 @@ function setup3d(cv3, code) {
   gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
   gl.vertexAttribPointer(vattrib, 2, gl.FLOAT, false, 0, 0);
 
-  cv3.program3d = program;
+  cv.program3d = program;
 }
 
 function GetTime() {
@@ -441,18 +440,21 @@ function GetTime() {
   return tm;
 }
 
-function draw3d(cv3) {
-  if (cv3.style.display == 'none') return;
-
-  gl = cv3.getContext('webgl') || cv3.getContext('experimental-webgl');
+function draw3d(cv, cv3) {
+  var gl = cv3.getContext('webgl') || cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
 
-  var time_val_loc = gl.getUniformLocation(cv3.program3d, 'time_val');
+  gl.useProgram(cv.program3d);
+
+  var time_val_loc = gl.getUniformLocation(cv.program3d, 'time_val');
   gl.uniform1f(time_val_loc, GetTime());
  
   gl.clearColor(0.0, 0.0, 0.0, 0.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+  var ctx = cv.getContext('2d');
+  ctx.drawImage(cv3, 0, 0);
 }
 
 function make_fragment_shader(code) {
@@ -499,12 +501,12 @@ function code_animated(code) {
 }
 
 function render(cv, cv3, animated, code, next) {
-  if (cv3.code == code) {
-    if (cv3.program3d != null) draw3d(cv3);
+  if (cv.code == code) {
+    if (cv.program3d != undefined) draw3d(cv, cv3);
     next();
     return;
   }
-  cv3.code = code;
+  cv.code = code;
 
   var compiled_code = compile(code, 4);
   var compiled_code_flat = compiled_code.join(' ');
@@ -522,19 +524,14 @@ function render(cv, cv3, animated, code, next) {
         cv3.width <= 128) {
       throw 'only use for time_val and large';
     }
-    setup3d(cv3, compiled_code);
-    cv.style.display = 'none';
-    cv3.style.display = 'block';
-    draw3d(cv3);
+    setup3d(cv, cv3, compiled_code);
+    draw3d(cv, cv3);
     setTimeout(next, 0);
     return;
   } catch (e) {
     // Fall back on software.
   }
  
-  cv.style.display = 'block';
-  cv3.style.display = 'none';
-
   try {
     var image = eval(compiled_code_flat);
     var ctx = cv.getContext('2d');
@@ -622,6 +619,8 @@ function update_haiku_lists() {
   }
 }
 
+var shared_canvas3d = null;
+
 function update_haikus(next) {
   update_haiku_lists();
   var haikus = document.getElementsByName('haiku');
@@ -638,6 +637,7 @@ function update_haikus(next) {
     if (canvas2d == null) {
       canvas2d = document.createElement('canvas');
       canvas2d.name = 'canvas2d';
+      canvas2d.style.display = 'block';
       // have 2d canvas initially visible for layout.
       haiku.appendChild(canvas2d);
       canvas2d.setAttribute('width', haiku.getAttribute('width'));
@@ -645,8 +645,11 @@ function update_haikus(next) {
     }
     // Create 3d canvas.
     var canvas3d = find_tag_name(haiku, 'canvas', 'canvas3d');
-    if (canvas3d == null) {
+    if (canvas3d == null && shared_canvas3d != null) {
+      canvas3d = shared_canvas3d;
+    } else if (canvas3d == null) {
       canvas3d = document.createElement('canvas');
+      shared_canvas3d = canvas3d;
       canvas3d.name = 'canvas3d';
       canvas3d.style.display = 'none';
       haiku.appendChild(canvas3d);
