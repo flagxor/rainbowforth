@@ -519,6 +519,7 @@ function render(cv, cv3, animated, code, next) {
     return;
   }
   cv.code = code;
+  cv.program3d = undefined;
 
   var compiled_code = compile(code, 4);
   var compiled_code_flat = compiled_code.join(' ');
