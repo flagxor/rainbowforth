@@ -631,7 +631,7 @@ function update_haiku_lists() {
   }
 }
 
-var shared_canvas3d = null;
+var shared_canvas3d = [];
 
 function update_haikus(next) {
   update_haiku_lists();
@@ -657,11 +657,12 @@ function update_haikus(next) {
     }
     // Create 3d canvas.
     var canvas3d = find_tag_name(haiku, 'canvas', 'canvas3d');
-    if (canvas3d == null && shared_canvas3d != null) {
-      canvas3d = shared_canvas3d;
+    if (canvas3d == null && shared_canvas3d.length >= 4) {
+      canvas3d = shared_canvas3d.pop();
+      shared_canvas3d.splice(0, 0, canvas3d);
     } else if (canvas3d == null) {
       canvas3d = document.createElement('canvas');
-      shared_canvas3d = canvas3d;
+      shared_canvas3d.splice(0, 0, canvas3d);
       canvas3d.name = 'canvas3d';
       canvas3d.style.display = 'none';
       haiku.appendChild(canvas3d);
