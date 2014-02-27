@@ -66,6 +66,7 @@ div.links a {
 
 div.section {
   background-color: #777777;
+  background-image: url('/static/back.png');
   border-style: solid;
   border-width: 0;
   border-color: #000000;
