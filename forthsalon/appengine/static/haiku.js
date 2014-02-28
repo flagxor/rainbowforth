@@ -92,7 +92,7 @@ function core_words() {
                  'work2 = dstack.pop();',
                  'dstack.push(mod(work2, work1));'];
   dict['pow'] = ['work1 = dstack.pop();',
-                 'dstack.push(Math.pow(dstack.pop(), work1));'];
+                 'dstack.push(Math.pow(Math.abs(dstack.pop()), work1));'];
   dict['**'] = dict['pow'];
   dict['atan2'] = ['work1 = dstack.pop();',
                    'dstack.push(Math.atan2(dstack.pop(), work1));'];
