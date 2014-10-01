@@ -113,3 +113,9 @@ div.haiku {
 div.publish {
   float: right;
 }
+
+iframe {
+  border: 0;
+  margin: 0;
+  padding: 0;
+};
