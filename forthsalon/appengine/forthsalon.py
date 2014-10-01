@@ -51,23 +51,6 @@ def FromDatetime(dt):
   return str((dt - epoch).total_seconds() * 1000.0)
 
 
-class Article(ndb.Model):
-  when = ndb.DateTimeProperty(auto_now_add=True)
-  title = ndb.StringProperty()
-  summary = ndb.StringProperty()
-  body = ndb.TextProperty()
-  last_modified = ndb.DateTimeProperty(auto_now=True)
-
-  def ToDict(self):
-    return {
-        'id': self.key.urlsafe(),
-        'when': self.when,
-        'title': self.title,
-        'summary': self.summary,
-        'body': self.body,
-    }
-
-
 class Haiku(ndb.Model):
   when = ndb.DateTimeProperty(auto_now_add=True)
   title = ndb.StringProperty()
@@ -103,17 +86,6 @@ class Haiku(ndb.Model):
     }
 
 
-def LoginStatus():
-  user = users.get_current_user()
-  if not user:
-    return '<a href="' + users.create_login_url('/') + '">Sign in</a>'
-  elif users.is_current_user_admin():
-    return ('<a href="/admin/article-editor">Article Editor</a> '
-            '<a href="' + users.create_logout_url('/') + '">Sign out</a>')
-  else:
-    return '<a href="' + users.create_logout_url('/') + '">Sign out</a>'
-
-
 class HaikuViewPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
@@ -125,7 +97,6 @@ class HaikuViewPage(webapp2.RequestHandler):
       memcache.add('haiku_' + id, haiku)
     template = JINJA_ENVIRONMENT.get_template('haiku-view.html')
     self.response.out.write(template.render({
-        'login_status': LoginStatus(),
         'haiku': haiku,
         'haiku_size': self.request.get('size', 256),
     }))
@@ -142,7 +113,6 @@ class HaikuPrintPage(webapp2.RequestHandler):
       memcache.add('haiku_' + id, haiku)
     template = JINJA_ENVIRONMENT.get_template('haiku-print.html')
     self.response.out.write(template.render({
-        'login_status': LoginStatus(),
         'haiku': haiku,
         'haiku_size': self.request.get('size', 600),
     }))
@@ -157,7 +127,6 @@ class HaikuSlideshowPage(webapp2.RequestHandler):
     haiku = haikus[random.randrange(len(haikus))]
     template = JINJA_ENVIRONMENT.get_template('haiku-slideshow.html')
     self.response.out.write(template.render({
-        'login_status': LoginStatus(),
         'haiku': haiku.ToDict(),
         'haiku_size': self.request.get('size', 400),
         'speed': self.request.get('speed', 15),
@@ -176,7 +145,6 @@ class HaikuSlideshow2Page(webapp2.RequestHandler):
       memcache.add('slideshow2', haikus, CACHE_TIMEOUT)
     template = JINJA_ENVIRONMENT.get_template('haiku-slideshow2.html')
     self.response.out.write(template.render({
-        'login_status': LoginStatus(),
         'haikus': haikus,
         'haiku_count': len(haikus),
         'haiku_size': self.request.get('size', 400),
@@ -241,7 +209,6 @@ class HaikuAboutPage(webapp2.RequestHandler):
 
     template = JINJA_ENVIRONMENT.get_template('haiku-about.html')
     self.response.out.write(template.render({
-        'login_status': LoginStatus(),
         'words': glossary.core_words,
     }))
 
@@ -252,7 +219,6 @@ class HaikuAnimatedPage(webapp2.RequestHandler):
 
     template = JINJA_ENVIRONMENT.get_template('haiku-animated.html')
     self.response.out.write(template.render({
-        'login_status': LoginStatus(),
     }))
 
 
@@ -262,7 +228,6 @@ class HaikuSoundPage(webapp2.RequestHandler):
 
     template = JINJA_ENVIRONMENT.get_template('haiku-sound.html')
     self.response.out.write(template.render({
-        'login_status': LoginStatus(),
     }))
 
 
@@ -290,7 +255,6 @@ class WordListPage(webapp2.RequestHandler):
 
     template = JINJA_ENVIRONMENT.get_template('word-list.html')
     self.response.out.write(template.render({
-        'login_status': LoginStatus(),
         'words': glossary.core_words,
     }))
 
@@ -304,22 +268,7 @@ class WordViewPage(webapp2.RequestHandler):
     assert entry
     template = JINJA_ENVIRONMENT.get_template('word-view.html')
     self.response.out.write(template.render({
-        'login_status': LoginStatus(),
         'entry': entry,
-    }))
-
-
-class ArticleViewPage(webapp2.RequestHandler):
-  def get(self):
-    if BrowserRedirect(self): return
-
-    id = self.request.path.split('/')[2]
-    article = ndb.Key(urlsafe=id).get()
-    template = JINJA_ENVIRONMENT.get_template('article-view.html')
-    self.response.out.write(template.render({
-        'login_status': LoginStatus(),
-        'article': article.ToDict(),
-        'is_admin': users.is_current_user_admin(),
     }))
 
 
@@ -344,26 +293,10 @@ class HaikuListPage(webapp2.RequestHandler):
 
     template = JINJA_ENVIRONMENT.get_template('haiku-list.html')
     self.response.out.write(template.render({
-        'login_status': LoginStatus(),
         'haikus': haikus,
         'order': order,
         'more': more,
         'cursor': next_cursor.urlsafe(),
-    }))
-
-
-class ArticleListPage(webapp2.RequestHandler):
-  def get(self):
-    if BrowserRedirect(self): return
-
-    q = Article.gql('ORDER BY when DESC')
-    articles = q.fetch(200)
-    articles = [a.ToDict() for a in articles]
-
-    template = JINJA_ENVIRONMENT.get_template('article-list.html')
-    self.response.out.write(template.render({
-        'login_status': LoginStatus(),
-        'articles': articles,
     }))
 
 
@@ -381,35 +314,10 @@ class HaikuEditorPage(webapp2.RequestHandler):
       code = ''
     template = JINJA_ENVIRONMENT.get_template('haiku-editor.html')
     self.response.out.write(template.render({
-        'login_status': LoginStatus(),
         'code': code,
         'title': title,
         'haiku_size': self.request.get('size', 256),
     }))
-
-
-class ArticleEditorPage(webapp2.RequestHandler):
-  def get(self):
-    if BrowserRedirect(self): return
-
-    template = JINJA_ENVIRONMENT.get_template('article-editor.html')
-    item_id = self.request.get('id', '')
-    if item_id:
-      article = ndb.Key(urlsafe=item_id).get()
-      self.response.out.write(template.render({
-          'login_status': LoginStatus(),
-          'article': article.ToDict(),
-      }))
-    else:      
-      self.response.out.write(template.render({
-          'login_status': LoginStatus(),
-          'article': {
-              'id': '',
-              'title': '',
-              'summary': '',
-              'body': '',
-          },
-      }))
 
 
 class HaikuSubmitPage(webapp2.RequestHandler):
@@ -432,29 +340,6 @@ class HaikuSubmitPage(webapp2.RequestHandler):
     self.redirect('/')
 
 
-class ArticleSubmitPage(webapp2.RequestHandler):
-  def post(self):
-    if BrowserRedirect(self): return
-
-    title = self.request.get('title')
-    if not title:
-      title = 'Untitled'
-    summary = self.request.get('summary')
-    if not summary:
-      title = 'No summary.'
-
-    item_id = self.request.get('id')
-    if item_id:
-      article = ndb.Key(urlsafe=item_id).get()
-    else:
-      article = Article()
-    article.title = title
-    article.summary = summary
-    article.body = self.request.get('body', '') 
-    article.put()
-    self.redirect('/')
-
-
 class BrowsersPage(webapp2.RequestHandler):
   def get(self):
     template = JINJA_ENVIRONMENT.get_template('browsers.html')
@@ -473,20 +358,15 @@ class MainPage(webapp2.RequestHandler):
       q = Haiku.gql('ORDER BY when DESC')
       recent_haikus = q.fetch(8)
       recent_haikus = [h.ToDict() for h in recent_haikus]
-      q = Article.gql('ORDER BY when DESC')
-      recent_articles = q.fetch(5)
-      recent_articles = [a.ToDict() for a in recent_articles]
-      main_items = [top_haikus, recent_haikus, recent_articles]
+      main_items = [top_haikus, recent_haikus]
       memcache.add('main_items', main_items, CACHE_TIMEOUT)
     else:
-      top_haikus, recent_haikus, recent_articles = main_items
+      top_haikus, recent_haikus = main_items
 
     template = JINJA_ENVIRONMENT.get_template('main.html')
     self.response.out.write(template.render({
-        'login_status': LoginStatus(),
         'top_haikus': top_haikus,
         'recent_haikus': recent_haikus,
-        'recent_articles': recent_articles,
     }))
 
 
@@ -507,10 +387,6 @@ app = webapp2.WSGIApplication([
     ('/haiku-dump', HaikuDumpPage),
     ('/haiku-fetch', HaikuFetchPage),
 #    ('/haiku-sweep', HaikuSweepPage),
-    ('/article-list', ArticleListPage),
-    ('/article-view/.*', ArticleViewPage),
     ('/word-list', WordListPage),
     ('/word-view/.*', WordViewPage),
-    ('/admin/article-editor', ArticleEditorPage),
-    ('/admin/article-submit', ArticleSubmitPage),
 ], debug=False)

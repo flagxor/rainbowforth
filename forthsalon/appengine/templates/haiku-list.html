@@ -13,7 +13,7 @@
 <div class="section">
 
 {% for haiku in haikus %}
-<a href="/haiku-view/{{ haiku.id }}">
+<a href="/haiku-view/{{ haiku.id|escape }}">
 <div class="haiku" style="cursor: pointer;">
 <span name="haiku" width="128" height="128">
 <textarea style="display: none">{{ haiku.code|escape }}</textarea>
@@ -35,7 +35,6 @@
 <div id="footer">
 <a href="/">Home</a>
 <a href="/haiku-editor">Haiku Editor</a>
-{{ login_status }}
 </div>
 
 </div>
