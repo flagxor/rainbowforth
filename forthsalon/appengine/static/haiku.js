@@ -735,7 +735,7 @@ var audio_time_offset = 0;
 var audio_time_base = GetTime();
 var audio_play = false;
 if (audio_context) {
-  var audio_src = audio_context.createJavaScriptNode(8192, 0, 1);
+  var audio_src = audio_context.createScriptProcessor(8192, 0, 1);
   audio_src.onaudioprocess = function(e) {
     try {
       var data = e.outputBuffer.getChannelData(0);
