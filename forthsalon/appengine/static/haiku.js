@@ -383,7 +383,7 @@ function getParam(name) {
       return parts[1];
     }
   }
-  return null;
+  return undefined;
 }
 
 function setup3d(cv, cv3, code) {

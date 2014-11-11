@@ -1,0 +1,55 @@
+<html>
+<head>
+<title>{{ haiku.title|escape }}</title>
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<style>
+body {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+div {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+span {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+canvas {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+a {
+  display: none;
+}
+</style>
+<link href="/favicon.ico" rel="SHORTCUT ICON">
+<link href="http://forthsalon.appspot.com/favicon.png"
+ rel="apple-touch-icon-precomposed">
+<meta name="viewport" content="width=600">
+<meta name="viewport" content="initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style"
+ content="black-translucent"/>
+</head>
+
+<body onload="init();" bgcolor="#000000">
+<div class="haiku">
+<span name="haiku" width="{{ haiku_width }}" height="{{ haiku_height }}">
+<textarea style="display: none">{{ haiku.code|escape }}</textarea>
+<a name="animated" style="display: none"></a>
+</span>
+</div>
+
+<script type="text/javascript" src="/static/haiku.js"></script>
+<script type="text/javascript">
+function init() {
+  animate_haikus(function() {});
+}
+</script>
+</body>
+</html>

@@ -106,6 +106,48 @@ class HaikuViewPage(webapp2.RequestHandler):
     }))
 
 
+class HaikuSlideshow3Page(webapp2.RequestHandler):
+  def get(self):
+    if BrowserRedirect(self): return
+
+    q = Haiku.gql('ORDER BY score DESC')
+    haikus = memcache.get('slideshow2')
+    if haikus is None:
+      haikus = q.fetch(int(self.request.get('limit', 200)))
+      haikus = [h.ToDict() for h in haikus]
+      memcache.add('slideshow2', haikus, CACHE_TIMEOUT)
+    template = JINJA_ENVIRONMENT.get_template('haiku-slideshow3.html')
+    haiku_size = self.request.get('size', 400)
+    haiku_width = self.request.get('width', haiku_size)
+    haiku_height = self.request.get('height', haiku_size)
+    self.response.out.write(template.render({
+        'haikus': haikus,
+        'haiku_count': len(haikus),
+        'haiku_width': haiku_width,
+        'haiku_height': haiku_height,
+    }))
+
+
+class HaikuBarePage(webapp2.RequestHandler):
+  def get(self):
+    if BrowserRedirect(self): return
+
+    id = self.request.path.split('/')[2]
+    haiku = memcache.get('haiku_' + id)
+    if haiku is None:
+      haiku = ndb.Key(urlsafe=id).get().ToDict()
+      memcache.add('haiku_' + id, haiku)
+    template = JINJA_ENVIRONMENT.get_template('haiku-bare.html')
+    haiku_size = self.request.get('size', 256)
+    haiku_width = self.request.get('width', haiku_size)
+    haiku_height = self.request.get('height', haiku_size)
+    self.response.out.write(template.render({
+        'haiku': haiku,
+        'haiku_width': haiku_width,
+        'haiku_height': haiku_height,
+    }))
+
+
 class HaikuPrintPage(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
@@ -397,6 +439,7 @@ app = webapp2.WSGIApplication([
     ('/haiku-submit', HaikuSubmitPage),
     ('/haiku-list', HaikuListPage),
     ('/haiku-view/.*', HaikuViewPage),
+    ('/haiku-bare/.*', HaikuBarePage),
     ('/haiku-print/.*', HaikuPrintPage),
     ('/haiku-vote/.*', HaikuVotePage),
     ('/haiku-about', HaikuAboutPage),
@@ -404,6 +447,7 @@ app = webapp2.WSGIApplication([
     ('/haiku-sound', HaikuSoundPage),
     ('/haiku-slideshow', HaikuSlideshow2Page),
     ('/haiku-slideshow2', HaikuSlideshow2Page),
+    ('/haiku-slideshow3', HaikuSlideshow3Page),
     ('/haiku-dump', HaikuDumpPage),
     ('/haiku-fetch', HaikuFetchPage),
 #    ('/haiku-sweep', HaikuSweepPage),
