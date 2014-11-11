@@ -96,9 +96,13 @@ class HaikuViewPage(webapp2.RequestHandler):
       haiku = ndb.Key(urlsafe=id).get().ToDict()
       memcache.add('haiku_' + id, haiku)
     template = JINJA_ENVIRONMENT.get_template('haiku-view.html')
+    haiku_size = self.request.get('size', 256)
+    haiku_width = self.request.get('width', haiku_size)
+    haiku_height = self.request.get('height', haiku_size)
     self.response.out.write(template.render({
         'haiku': haiku,
-        'haiku_size': self.request.get('size', 256),
+        'haiku_width': haiku_width,
+        'haiku_height': haiku_height,
     }))
 
 
@@ -112,9 +116,13 @@ class HaikuPrintPage(webapp2.RequestHandler):
       haiku = ndb.Key(urlsafe=id).get().ToDict()
       memcache.add('haiku_' + id, haiku)
     template = JINJA_ENVIRONMENT.get_template('haiku-print.html')
+    haiku_size = self.request.get('size', 600)
+    haiku_width = self.request.get('width', haiku_size)
+    haiku_height = self.request.get('height', haiku_size)
     self.response.out.write(template.render({
         'haiku': haiku,
-        'haiku_size': self.request.get('size', 600),
+        'haiku_width': haiku_width,
+        'haiku_height': haiku_height,
     }))
 
 
@@ -126,9 +134,13 @@ class HaikuSlideshowPage(webapp2.RequestHandler):
     haikus = q.fetch(int(self.request.get('limit', 200)))
     haiku = haikus[random.randrange(len(haikus))]
     template = JINJA_ENVIRONMENT.get_template('haiku-slideshow.html')
+    haiku_size = self.request.get('size', 400)
+    haiku_width = self.request.get('width', haiku_size)
+    haiku_height = self.request.get('height', haiku_size)
     self.response.out.write(template.render({
         'haiku': haiku.ToDict(),
-        'haiku_size': self.request.get('size', 400),
+        'haiku_width': haiku_width,
+        'haiku_height': haiku_height,
         'speed': self.request.get('speed', 15),
     }))
 
@@ -144,10 +156,14 @@ class HaikuSlideshow2Page(webapp2.RequestHandler):
       haikus = [h.ToDict() for h in haikus]
       memcache.add('slideshow2', haikus, CACHE_TIMEOUT)
     template = JINJA_ENVIRONMENT.get_template('haiku-slideshow2.html')
+    haiku_size = self.request.get('size', 400)
+    haiku_width = self.request.get('width', haiku_size)
+    haiku_height = self.request.get('height', haiku_size)
     self.response.out.write(template.render({
         'haikus': haikus,
         'haiku_count': len(haikus),
-        'haiku_size': self.request.get('size', 400),
+        'haiku_width': haiku_width,
+        'haiku_height': haiku_height,
         'speed': self.request.get('speed', 10),
     }))
 
@@ -313,10 +329,14 @@ class HaikuEditorPage(webapp2.RequestHandler):
       title = ''
       code = ''
     template = JINJA_ENVIRONMENT.get_template('haiku-editor.html')
+    haiku_size = self.request.get('size', 256)
+    haiku_width = self.request.get('width', haiku_size)
+    haiku_height = self.request.get('height', haiku_size)
     self.response.out.write(template.render({
         'code': code,
         'title': title,
-        'haiku_size': self.request.get('size', 256),
+        'haiku_width': haiku_width,
+        'haiku_height': haiku_height,
     }))
 
 

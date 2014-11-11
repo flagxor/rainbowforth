@@ -375,11 +375,41 @@ function render_rows(image, ctx, img, y, w, h, next) {
   }
 }
 
-function setup3d(cv, cv3, code) {
-  var force_nogpu = window.location.search.search('gpu=0') >= 0;
-  if (force_nogpu) throw 'force no gpu';
+function getParam(name) {
+  var params = location.search.substr(1).split('&');
+  for (var i = 0; i < params.length; i++) {
+    var parts = params[i].split('=', 2);
+    if (parts[0] === name) {
+      return parts[1];
+    }
+  }
+  return null;
+}
 
-  var force_gpu = window.location.search.search('gpu=1') >= 0;
+function setup3d(cv, cv3, code) {
+  // Decide if how we use the gpu.
+  var gpu = getParam('gpu');
+  if (gpu === '0') {
+    throw 'force no gpu';
+  }
+  var force_gpu = gpu === '1';
+
+  // Decide aspect ratio.
+  var size = getParam('size');
+  if (size === undefined) { size = 256; } else { size = parseFloat(size); }
+  var w = getParam('width');
+  if (w === undefined) { w = size; } else { w = parseFloat(w); }
+  var h = getParam('height');
+  if (h === undefined) { h = size; } else { h = parseFloat(h); }
+  if (w > h ) {
+    w = w / h;
+    h = 1.0;
+  } else {
+    h = h / w;
+    w = 1.0;
+  }
+  cv3.w = w;
+  cv3.h = h;
    
   gl = cv3.getContext('webgl') || cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
@@ -393,16 +423,18 @@ function setup3d(cv, cv3, code) {
   gl.shaderSource(fshader, make_fragment_shader(code));
   gl.compileShader(fshader);
   if (!gl.getShaderParameter(fshader, gl.COMPILE_STATUS)) throw 'bad fshader';
- 
+
   var vshader = gl.createShader(gl.VERTEX_SHADER);
-  gl.shaderSource(vshader, [
+  var vshaderCode = [
       'attribute vec2 ppos;',
+      'uniform vec2 aspect;',
       'varying highp vec2 tpos;',
       'void main(void) {',
+      'tpos.x = (ppos.x * aspect.x + 1.0) / 2.0;',
+      'tpos.y = (ppos.y * aspect.y + 1.0) / 2.0;',
       'gl_Position = vec4(ppos.x, ppos.y, 0.0, 1.0);',
-      'tpos.x = (ppos.x + 1.0) / 2.0;',
-      'tpos.y = (ppos.y + 1.0) / 2.0;',
-      '}'].join('\n'));
+      '}'].join('\n');
+  gl.shaderSource(vshader, vshaderCode);
   gl.compileShader(vshader);
   if (!gl.getShaderParameter(vshader, gl.COMPILE_STATUS)) throw 'bad vshader';
 
@@ -448,6 +480,9 @@ function draw3d(cv, cv3) {
 
   var time_val_loc = gl.getUniformLocation(cv.program3d, 'time_val');
   gl.uniform1f(time_val_loc, GetTime());
+
+  var aspect_val_loc = gl.getUniformLocation(cv.program3d, 'aspect');
+  gl.uniform2f(aspect_val_loc, cv3.w, cv3.h);
  
   gl.clearColor(0.0, 0.0, 0.0, 0.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
