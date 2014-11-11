@@ -39,24 +39,22 @@ a {
 
 <body onload="init();" bgcolor="#000000">
 
-{% for haiku in haikus %}
-<div id="item{{ loop.index }}">
-
 <div class="haiku">
 <span name="haiku" width="{{ haiku_width }}" height="{{ haiku_height }}">
-<textarea style="display: none">{{ haiku.code|escape }}</textarea>
+<textarea id="code" style="display: none"></textarea>
 <a name="animated" style="display: none"></a>
 </span>
 </div>
 
-</div>
+{% for haiku in haikus %}
+<textarea id="item{{ loop.index }}" style="display: none"
+ >{{ haiku.code|escape }}</textarea>
 {% endfor %}
 
 <script type="text/javascript" src="/static/haiku.js"></script>
 <script type="text/javascript">
 
 var haiku_count = {{ haiku_count }};
-var last_tm = new Date().getTime();
 var current_slide = 1;
 
 function init() {
@@ -71,20 +69,13 @@ function init() {
       pick_slide(current_slide);
     }
   };
+  pick_slide(current_slide);
 }
 
 function pick_slide(index) {
-  last_tm = new Date().getTime();
-
-  var pick = index + 1;
-  for (var i = 1; i <= haiku_count; i++) {
-    var tag = document.getElementById('item' + i);
-    if (i == pick) {
-      tag.style.display = 'inline';
-    } else {
-      tag.style.display = 'none';
-    }
-  }
+  var code = document.getElementById('code');
+  var tag = document.getElementById('item' + (index + 1));
+  code.value = tag.value;
 }
 </script>
 
