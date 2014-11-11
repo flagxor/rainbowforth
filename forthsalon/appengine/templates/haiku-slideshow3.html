@@ -23,9 +23,6 @@ canvas {
   margin: 0;
   padding: 0;
 }
-a {
-  display: none;
-}
 </style>
 <link href="/favicon.ico" rel="SHORTCUT ICON">
 <link href="http://forthsalon.appspot.com/favicon.png"
@@ -51,11 +48,18 @@ a {
  >{{ haiku.code|escape }}</textarea>
 {% endfor %}
 
+{% if more and cursor %}
+<br/>
+<h3>
+<a href="/haiku-slideshow3?order={{ order|escape }}&cursor={{ cursor|escape }}&width={{ haiku_width|escape }}&height={{ haiku_height|escape }}&limit={{ limit|escape }}">Next</a>
+</h3>
+{% endif %}
+
 <script type="text/javascript" src="/static/haiku.js"></script>
 <script type="text/javascript">
 
 var haiku_count = {{ haiku_count }};
-var current_slide = 1;
+var current_slide = 0;
 
 function init() {
   animate_haikus(function() {});

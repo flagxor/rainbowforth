@@ -110,14 +110,25 @@ class HaikuSlideshow3Page(webapp2.RequestHandler):
   def get(self):
     if BrowserRedirect(self): return
 
-    q = Haiku.gql('ORDER BY score DESC')
-    haikus = memcache.get('slideshow2')
-    if haikus is None:
-      haikus = q.fetch(int(self.request.get('limit', 200)))
-      haikus = [h.ToDict() for h in haikus]
-      memcache.add('slideshow2', haikus, CACHE_TIMEOUT)
+    limit = int(self.request.get('limit', 40))
+
+    order = self.request.get('order', '')
+    if order != 'score':
+      order = 'age'
+    cursorv = self.request.get('cursor', '')
+    if order == 'score':
+      qorder = 'ORDER BY score DESC'
+      norder = 'score'
+    else:
+      qorder = 'ORDER BY when DESC'
+      norder = 'when'
+    cursor = Cursor(urlsafe=cursorv)
+    q = Haiku.gql(qorder)
+    haikus, next_cursor, more = q.fetch_page(limit, start_cursor=cursor)
+    haikus = [h.ToDict() for h in haikus]
+
     template = JINJA_ENVIRONMENT.get_template('haiku-slideshow3.html')
-    haiku_size = self.request.get('size', 400)
+    haiku_size = self.request.get('size', 600)
     haiku_width = self.request.get('width', haiku_size)
     haiku_height = self.request.get('height', haiku_size)
     self.response.out.write(template.render({
@@ -125,6 +136,10 @@ class HaikuSlideshow3Page(webapp2.RequestHandler):
         'haiku_count': len(haikus),
         'haiku_width': haiku_width,
         'haiku_height': haiku_height,
+        'order': order,
+        'more': more,
+        'cursor': next_cursor.urlsafe(),
+        'limit': limit,
     }))
 
 
