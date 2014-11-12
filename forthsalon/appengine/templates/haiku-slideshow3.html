@@ -14,6 +14,7 @@ div {
   padding: 0;
 }
 span {
+  color: white;
   border: 0;
   margin: 0;
   padding: 0;
@@ -48,12 +49,13 @@ canvas {
  >{{ haiku.code|escape }}</textarea>
 {% endfor %}
 
-{% if more and cursor %}
 <br/>
 <h3>
+{% if more and cursor %}
 <a href="/haiku-slideshow3?order={{ order|escape }}&cursor={{ cursor|escape }}&width={{ haiku_width|escape }}&height={{ haiku_height|escape }}&limit={{ limit|escape }}">Next</a>
-</h3>
 {% endif %}
+<span id="status"></span>
+</h3>
 
 <script type="text/javascript" src="/static/haiku.js"></script>
 <script type="text/javascript">
@@ -80,6 +82,8 @@ function pick_slide(index) {
   var code = document.getElementById('code');
   var tag = document.getElementById('item' + (index + 1));
   code.value = tag.value;
+  var label = document.getElementById('status');
+  label.innerText = '' + (index + 1) + ' of ' + haiku_count;
 }
 </script>
 
