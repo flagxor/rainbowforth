@@ -21,25 +21,6 @@ JINJA_ENVIRONMENT = jinja2.Environment(
         os.path.join(os.path.dirname(__file__), 'templates')))
 
 
-def IsAgentOk(request):
-  user_agent = request.headers.get('User-Agent', '').lower()
-  return ('safari' in user_agent or
-          'chrome' in user_agent or
-          'chromium' in user_agent or
-          'android' in user_agent or
-          'firefox' in user_agent or
-          'gecko' in user_agent or
-          'iceweasel' in user_agent or
-          'webkit' in user_agent)
-
-
-def BrowserRedirect(handler):
-  if not IsAgentOk(handler.request):
-    handler.redirect('/browsers')
-    return True
-  return False
-
-
 def ToDatetime(s):
   # From a Date in JS do: new String(dt.getTime()).
   return datetime.datetime.utcfromtimestamp(float(s) / 1000.0)
@@ -88,8 +69,6 @@ class Haiku(ndb.Model):
 
 class HaikuViewPage(webapp2.RequestHandler):
   def get(self):
-    if BrowserRedirect(self): return
-
     id = self.request.path.split('/')[2]
     haiku = memcache.get('haiku_' + id)
     if haiku is None:
@@ -108,8 +87,6 @@ class HaikuViewPage(webapp2.RequestHandler):
 
 class HaikuSlideshow3Page(webapp2.RequestHandler):
   def get(self):
-    if BrowserRedirect(self): return
-
     limit = int(self.request.get('limit', 40))
 
     order = self.request.get('order', '')
@@ -145,8 +122,6 @@ class HaikuSlideshow3Page(webapp2.RequestHandler):
 
 class HaikuBarePage(webapp2.RequestHandler):
   def get(self):
-    if BrowserRedirect(self): return
-
     id = self.request.path.split('/')[2]
     haiku = memcache.get('haiku_' + id)
     if haiku is None:
@@ -165,8 +140,6 @@ class HaikuBarePage(webapp2.RequestHandler):
 
 class HaikuPrintPage(webapp2.RequestHandler):
   def get(self):
-    if BrowserRedirect(self): return
-
     id = self.request.path.split('/')[2]
     haiku = memcache.get('haiku_' + id)
     if haiku is None:
@@ -185,8 +158,6 @@ class HaikuPrintPage(webapp2.RequestHandler):
 
 class HaikuSlideshowPage(webapp2.RequestHandler):
   def get(self):
-    if BrowserRedirect(self): return
-
     q = Haiku.gql('ORDER BY score DESC')
     haikus = q.fetch(int(self.request.get('limit', 200)))
     haiku = haikus[random.randrange(len(haikus))]
@@ -204,8 +175,6 @@ class HaikuSlideshowPage(webapp2.RequestHandler):
 
 class HaikuSlideshow2Page(webapp2.RequestHandler):
   def get(self):
-    if BrowserRedirect(self): return
-
     q = Haiku.gql('ORDER BY score DESC')
     haikus = memcache.get('slideshow2')
     if haikus is None:
@@ -278,8 +247,6 @@ class HaikuSweepPage(webapp2.RequestHandler):
 
 class HaikuAboutPage(webapp2.RequestHandler):
   def get(self):
-    if BrowserRedirect(self): return
-
     template = JINJA_ENVIRONMENT.get_template('haiku-about.html')
     self.response.out.write(template.render({
         'words': glossary.core_words,
@@ -288,8 +255,6 @@ class HaikuAboutPage(webapp2.RequestHandler):
 
 class HaikuAnimatedPage(webapp2.RequestHandler):
   def get(self):
-    if BrowserRedirect(self): return
-
     template = JINJA_ENVIRONMENT.get_template('haiku-animated.html')
     self.response.out.write(template.render({
     }))
@@ -297,8 +262,6 @@ class HaikuAnimatedPage(webapp2.RequestHandler):
 
 class HaikuSoundPage(webapp2.RequestHandler):
   def get(self):
-    if BrowserRedirect(self): return
-
     template = JINJA_ENVIRONMENT.get_template('haiku-sound.html')
     self.response.out.write(template.render({
     }))
@@ -306,8 +269,6 @@ class HaikuSoundPage(webapp2.RequestHandler):
 
 class HaikuVotePage(webapp2.RequestHandler):
   def post(self):
-    if BrowserRedirect(self): return
-
     id = self.request.path.split('/')[2]
     if self.request.get('good'):
       vote = 1
@@ -324,8 +285,6 @@ class HaikuVotePage(webapp2.RequestHandler):
 
 class WordListPage(webapp2.RequestHandler):
   def get(self):
-    if BrowserRedirect(self): return
-
     template = JINJA_ENVIRONMENT.get_template('word-list.html')
     self.response.out.write(template.render({
         'words': glossary.core_words,
@@ -334,8 +293,6 @@ class WordListPage(webapp2.RequestHandler):
 
 class WordViewPage(webapp2.RequestHandler):
   def get(self):
-    if BrowserRedirect(self): return
-
     name = self.request.path.split('/')[2]
     entry = glossary.LookupEntryById(name)
     assert entry
@@ -347,8 +304,6 @@ class WordViewPage(webapp2.RequestHandler):
 
 class HaikuListPage(webapp2.RequestHandler):
   def get(self):
-    if BrowserRedirect(self): return
-
     order = self.request.get('order', '')
     if order != 'score':
       order = 'age'
@@ -375,8 +330,6 @@ class HaikuListPage(webapp2.RequestHandler):
 
 class HaikuEditorPage(webapp2.RequestHandler):
   def get(self):
-    if BrowserRedirect(self): return
-
     id = self.request.get('id')
     if id:
       haiku = ndb.Key(urlsafe=id).get()
@@ -399,8 +352,6 @@ class HaikuEditorPage(webapp2.RequestHandler):
 
 class HaikuSubmitPage(webapp2.RequestHandler):
   def post(self):
-    if BrowserRedirect(self): return
-
     title = self.request.get('title')
     if not title:
       title = 'Untitled'
@@ -417,16 +368,8 @@ class HaikuSubmitPage(webapp2.RequestHandler):
     self.redirect('/')
 
 
-class BrowsersPage(webapp2.RequestHandler):
-  def get(self):
-    template = JINJA_ENVIRONMENT.get_template('browsers.html')
-    self.response.out.write(template.render({}))
-
-
 class MainPage(webapp2.RequestHandler):
   def get(self):
-    if BrowserRedirect(self): return
-
     main_items = memcache.get('main_items')
     if main_items is None:
       q = Haiku.gql('ORDER BY score DESC')
