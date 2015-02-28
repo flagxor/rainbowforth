@@ -526,10 +526,14 @@ function make_fragment_shader(input_code) {
       'float gtan(float v) { return tan(mod(v, PI2)); }');
   code[code.length-1] = code[code.length-1].replace(
       ']; }; go', '); ' +
+      'gl_FragColor.r = min(max(0.0, gl_FragColor.r), 1.0); ' +
+      'gl_FragColor.g = min(max(0.0, gl_FragColor.g), 1.0); ' +
+      'gl_FragColor.b = min(max(0.0, gl_FragColor.b), 1.0); ' +
       'gl_FragColor.a = min(max(0.0, gl_FragColor.a), 1.0); ' +
       'gl_FragColor.r *= gl_FragColor.a; ' +
       'gl_FragColor.g *= gl_FragColor.a; ' + 
-      'gl_FragColor.b *= gl_FragColor.a; }');
+      'gl_FragColor.b *= gl_FragColor.a; ' +
+      '}');
   code[code.length-1] = code[code.length-1].replace(
       'return [', 'gl_FragColor = vec4(');
   code = code.join('\n');
