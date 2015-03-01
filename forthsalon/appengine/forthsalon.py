@@ -392,7 +392,6 @@ class MainPage(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
-    ('/browsers', BrowsersPage),
     ('/haiku-editor', HaikuEditorPage),
     ('/haiku-submit', HaikuSubmitPage),
     ('/haiku-list', HaikuListPage),
