@@ -358,11 +358,15 @@ class HaikuSubmitPage(webapp2.RequestHandler):
     author = self.request.get('author')
     if not author:
       author = 'Anonymous'
+    code = self.request.get('code', '')
+    if 'href=' in code or code == '':
+      self.redirect('/')
+      return
 
     haiku = Haiku()
     haiku.title = title
     haiku.author = author
-    haiku.code = self.request.get('code', '')
+    haiku.code = code
     haiku.score = 0
     haiku.put()
     self.redirect('/')
