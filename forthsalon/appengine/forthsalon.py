@@ -2,6 +2,7 @@ import datetime
 import json
 import os
 import random
+import re
 
 import glossary
 
@@ -14,6 +15,7 @@ from google.appengine.ext import ndb
 from google.appengine.api import users
 
 CACHE_TIMEOUT = 120
+SPAM_RE = re.compile('[A-Za-z0-9]{30}')
 
 
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -359,7 +361,7 @@ class HaikuSubmitPage(webapp2.RequestHandler):
     if not author:
       author = 'Anonymous'
     code = self.request.get('code', '')
-    if 'href=' in code or code == '':
+    if 'href=' in code or code == '' or SPAM_RE.search(code):
       self.redirect('/')
       return
 
