@@ -104,6 +104,18 @@ core_words = [
     ],
   },
   {
+    'names': ['r@'],
+    'summary': 'Copy the top value from the return stack to the data stack.',
+    'description': [
+        return_stack_text
+        ,
+        floating_point_text
+    ],
+    'examples': [
+        ['1 2 3 _push _* _r@ _+ _pop _+', '8'],
+    ],
+  },
+  {
     'names': ['dup'],
     'stack' : '( n -- n n )',
     'summary': 'Duplicate the element on top of the stack.',

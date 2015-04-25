@@ -33,6 +33,9 @@ function core_words() {
   dict['pop'] = ['dstack.push(rstack.pop());'];
   dict['>r'] = dict['push'];
   dict['r>'] = dict['pop'];
+  dict['r@'] = ['work1 = rstack.pop();',
+                'rstack.push(work1);',
+                'dstack.push(work1);'];
 
   dict['dup'] = ['work1 = dstack.pop();',
                  'dstack.push(work1);',
