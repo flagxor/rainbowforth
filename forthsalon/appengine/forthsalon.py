@@ -361,7 +361,11 @@ class HaikuSubmitPage(webapp2.RequestHandler):
     if not author:
       author = 'Anonymous'
     code = self.request.get('code', '')
-    if 'href=' in code or code == '' or SPAM_RE.search(code):
+    if ('href=' in code or
+        'http://' in code or
+        'https://' in code or
+        code == '' or
+        SPAM_RE.search(code)):
       self.redirect('/')
       return
 
