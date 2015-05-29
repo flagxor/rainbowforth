@@ -752,3 +752,7 @@ for entry in core_words:
 
 def LookupEntryById(id):
   return entry_map.get(id)
+
+
+def IsHaikuWord(name):
+  return name.lower() in word_ids

@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 import os
 import random
 import re
@@ -16,6 +17,7 @@ from google.appengine.api import users
 
 CACHE_TIMEOUT = 120
 SPAM_RE = re.compile('[A-Za-z0-9]{30}')
+NUMBER_RE = re.compile('^[0-9eE.+-]+$')
 
 
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -32,6 +34,14 @@ def FromDatetime(dt):
   # To get a JS data do: new Date(s).
   epoch = datetime.datetime.utcfromtimestamp(0)
   return str((dt - epoch).total_seconds() * 1000.0)
+
+
+def HaikuWordCount(text):
+  text = text.replace('\n', ' ')
+  text = text.replace('\r', ' ')
+  text = text.replace('\t', ' ')
+  return len([i for i in text.split(' ')
+              if glossary.IsHaikuWord(i) or NUMBER_RE.match(i)])
 
 
 class Haiku(ndb.Model):
@@ -365,8 +375,13 @@ class HaikuSubmitPage(webapp2.RequestHandler):
         'http://' in code or
         'https://' in code or
         code == '' or
-        SPAM_RE.search(code)):
+        SPAM_RE.search(code) or
+        SPAM_RE.search(title) or
+        SPAM_RE.search(author) or
+        HaikuWordCount(code) < 3):
       self.redirect('/')
+      logging.info(
+          'Rejected [%s] by [%s] as spam. Code: %s' % (title, author, code))
       return
 
     haiku = Haiku()
