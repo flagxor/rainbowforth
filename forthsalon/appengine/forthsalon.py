@@ -143,10 +143,10 @@ class HaikuSlideshow3Page(webapp2.RequestHandler):
     limit = int(self.request.get('limit', 40))
 
     order = self.request.get('order', '')
-    if order != 'score':
+    if order != 'rank':
       order = 'age'
     cursorv = self.request.get('cursor', '')
-    if order == 'score':
+    if order == 'rank':
       qorder = 'ORDER BY rank DESC'
       norder = 'rank'
     else:
@@ -339,10 +339,10 @@ class WordViewPage(webapp2.RequestHandler):
 class HaikuListPage(webapp2.RequestHandler):
   def get(self):
     order = self.request.get('order', '')
-    if order != 'score':
+    if order != 'rank':
       order = 'age'
     cursorv = self.request.get('cursor', '')
-    if order == 'score':
+    if order == 'rank':
       qorder = 'ORDER BY rank DESC'
       norder = 'rank'
     else:
@@ -423,7 +423,7 @@ class MainPage(webapp2.RequestHandler):
   def get(self):
     main_items = memcache.get('main_items')
     if main_items is None:
-      q = Haiku.gql('ORDER BY score DESC')
+      q = Haiku.gql('ORDER BY rank DESC')
       top_haikus = q.fetch(8)
       top_haikus = [h.ToDict() for h in top_haikus]
       q = Haiku.gql('ORDER BY when DESC')
