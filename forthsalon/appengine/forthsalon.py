@@ -211,7 +211,7 @@ class HaikuPrintPage(webapp2.RequestHandler):
 
 class HaikuSlideshowPage(webapp2.RequestHandler):
   def get(self):
-    q = Haiku.gql('ORDER BY score DESC')
+    q = Haiku.gql('ORDER BY rank DESC')
     haikus = q.fetch(int(self.request.get('limit', 200)))
     haiku = haikus[random.randrange(len(haikus))]
     template = JINJA_ENVIRONMENT.get_template('haiku-slideshow.html')
@@ -228,7 +228,7 @@ class HaikuSlideshowPage(webapp2.RequestHandler):
 
 class HaikuSlideshow2Page(webapp2.RequestHandler):
   def get(self):
-    q = Haiku.gql('ORDER BY score DESC')
+    q = Haiku.gql('ORDER BY rank DESC')
     haikus = memcache.get('slideshow2')
     if haikus is None:
       haikus = q.fetch(int(self.request.get('limit', 200)))
@@ -260,23 +260,6 @@ class HaikuDumpPage(webapp2.RequestHandler):
       'cursor': next_cursor.urlsafe(),
       'more': more,
       }, sort_keys=True, indent=2, separators=(',', ':')))
-
-
-class HaikuFetchPage(webapp2.RequestHandler):
-  def get(self):
-    self.response.headers['Content-type'] = 'text/plain'
-    item_id = self.request.get('id')
-    if item_id:
-      haikus = [ndb.Key(urlsafe=item_id).get().ToDict()]
-    else:
-      start = ToDatetime(self.request.get('start', '0'))
-      q = Haiku.gql('where last_modified > :1 ORDER BY last_modified',
-                    start)
-      haikus = q.fetch(int(self.request.get('limit', 40)))
-    content = []
-    for haiku in haikus:
-      content.append(haiku.ToJSDict())
-    self.response.out.write(json.dumps(content))
 
 
 class HaikuAboutPage(webapp2.RequestHandler):
@@ -475,7 +458,6 @@ app = webapp2.WSGIApplication([
     ('/haiku-slideshow2', HaikuSlideshow2Page),
     ('/haiku-slideshow3', HaikuSlideshow3Page),
     ('/haiku-dump', HaikuDumpPage),
-    ('/haiku-fetch', HaikuFetchPage),
     ('/word-list', WordListPage),
     ('/word-view/.*', WordViewPage),
 ], debug=False)
