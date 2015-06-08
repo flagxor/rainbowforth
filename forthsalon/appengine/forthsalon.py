@@ -44,13 +44,38 @@ def HaikuWordCount(text):
               if glossary.IsHaikuWord(i) or NUMBER_RE.match(i)])
 
 
+class Password(ndb.Model):
+  secret = ndb.StringProperty()
+
+
+def CheckPassword(secret):
+  passwd = memcache.get('passwd')
+  if passwd:
+    return secret == passwd
+  q = Password.query()
+  items = q.fetch(limit=1)
+  if len(items) == 0:
+    p = Password()
+    p.secret = ''
+    p.put()
+    return False
+  if len(items) != 1:
+    return False
+  if items[0].secret == '':
+    return False
+  memcache.add('passwd', items[0].secret)
+  return secret == items[0].secret
+
+
 class Haiku(ndb.Model):
   when = ndb.DateTimeProperty(auto_now_add=True)
   title = ndb.StringProperty()
   author = ndb.StringProperty()
   code = ndb.TextProperty()
   score = ndb.IntegerProperty()
+  rank = ndb.FloatProperty(default=0.0)
   last_modified = ndb.DateTimeProperty(auto_now=True)
+  parent = ndb.StringProperty(default='')
 
   def GetId(self):
     return self.key.urlsafe() 
@@ -63,8 +88,10 @@ class Haiku(ndb.Model):
         'author': self.author,
         'code': self.code,
         'score': self.score,
+        'rank': self.rank,
         'code_formatted': glossary.FormatHtml(self.code),
         'code_formatted_print': glossary.FormatHtmlPrint(self.code),
+        'parent': self.parent,
     }
 
   def ToJSDict(self):
@@ -76,6 +103,8 @@ class Haiku(ndb.Model):
         'author': self.author,
         'code': self.code,
         'score': self.score,
+        'rank': self.score,
+        'parent': self.parent,
     }
 
 
@@ -209,20 +238,16 @@ class HaikuSlideshow2Page(webapp2.RequestHandler):
 class HaikuDumpPage(webapp2.RequestHandler):
   def get(self):
     self.response.headers['Content-type'] = 'text/plain'
-    start = ToDatetime(self.request.get('start', '0'))
-    q = Haiku.gql('WHERE when >= :1 ORDER BY when', start)
-    haikus = q.fetch(int(self.request.get('limit', 100)))
-    content = []
-    for haiku in haikus:
-      content.append('------------------------------------\n')
-      content.append('ID: ' + haiku.GetId() + '\n')
-      content.append('Title: ' + haiku.title + '\n')
-      content.append('Author: ' + haiku.author + '\n')
-      content.append('Score: ' + str(haiku.score) + '\n')
-      content.append('When: ' + str(haiku.when) + '\n')
-      content.append('Code:\n' + haiku.code + '\n\n\n')
-    content = ''.join(content)
-    self.response.out.write(content)
+    cursorv = self.request.get('cursor', '')
+    cursor = Cursor(urlsafe=cursorv)
+    q = Haiku.query()
+    haikus, next_cursor, more = q.fetch_page(40, start_cursor=cursor)
+    haikus = [h.ToJSDict() for h in haikus]
+    self.response.out.write(json.dumps({
+      'items': haikus,
+      'cursor': next_cursor.urlsafe(),
+      'more': more,
+      }, sort_keys=True, indent=2, separators=(',', ':')))
 
 
 class HaikuFetchPage(webapp2.RequestHandler):
@@ -240,21 +265,6 @@ class HaikuFetchPage(webapp2.RequestHandler):
     for haiku in haikus:
       content.append(haiku.ToJSDict())
     self.response.out.write(json.dumps(content))
-
-
-class HaikuSweepPage(webapp2.RequestHandler):
-  def get(self):
-    self.response.headers['Content-type'] = 'text/plain'
-    q = Haiku.gql('ORDER BY last_modified')
-    haikus = q.fetch(50)
-    count = 0
-    for haiku in haikus:
-      if haiku.last_modified is None:
-        count += 1
-        if count > 50:
-          break
-        haiku.put()
-    self.response.out.write(str(count))
 
 
 class HaikuAboutPage(webapp2.RequestHandler):
@@ -293,6 +303,22 @@ class HaikuVotePage(webapp2.RequestHandler):
       haiku.score += vote
       haiku.put()
     self.redirect('/')
+
+
+class HaikuAdjustPage(webapp2.RequestHandler):
+  def post(self):
+    passwd = self.request.get('passwd')
+    if not CheckPassword(passwd):
+      return
+    id = self.request.get('id')
+    haiku = ndb.Key(urlsafe=id).get()
+    rank = self.request.get('rank')
+    if rank is not None:
+      haiku.rank = float(rank)
+    parent = self.request.get('parent')
+    if parent is not None:
+      haiku.parent = parent
+    haiku.put()
 
 
 class WordListPage(webapp2.RequestHandler):
@@ -424,6 +450,7 @@ app = webapp2.WSGIApplication([
     ('/haiku-bare/.*', HaikuBarePage),
     ('/haiku-print/.*', HaikuPrintPage),
     ('/haiku-vote/.*', HaikuVotePage),
+    ('/haiku-adjust', HaikuAdjustPage),
     ('/haiku-about', HaikuAboutPage),
     ('/haiku-animated', HaikuAnimatedPage),
     ('/haiku-sound', HaikuSoundPage),
@@ -432,7 +459,6 @@ app = webapp2.WSGIApplication([
     ('/haiku-slideshow3', HaikuSlideshow3Page),
     ('/haiku-dump', HaikuDumpPage),
     ('/haiku-fetch', HaikuFetchPage),
-#    ('/haiku-sweep', HaikuSweepPage),
     ('/word-list', WordListPage),
     ('/word-view/.*', WordViewPage),
 ], debug=False)
