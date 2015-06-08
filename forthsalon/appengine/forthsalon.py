@@ -103,7 +103,7 @@ class Haiku(ndb.Model):
         'author': self.author,
         'code': self.code,
         'score': self.score,
-        'rank': self.score,
+        'rank': self.rank,
         'parent': self.parent,
     }
 
@@ -115,12 +115,24 @@ class HaikuViewPage(webapp2.RequestHandler):
     if haiku is None:
       haiku = ndb.Key(urlsafe=id).get().ToDict()
       memcache.add('haiku_' + id, haiku)
+
+    parent_id = haiku.get('parent')
+    parent = None
+    if parent_id:
+      parent = memcache.get('haiku_' + parent_id)
+      if parent is None:
+        parent = ndb.Key(urlsafe=parent_id).get().ToDict()
+        memcache.add('haiku_' + parent_id, parent)
+    has_parent = parent is not None
+
     template = JINJA_ENVIRONMENT.get_template('haiku-view.html')
     haiku_size = self.request.get('size', 256)
     haiku_width = self.request.get('width', haiku_size)
     haiku_height = self.request.get('height', haiku_size)
     self.response.out.write(template.render({
         'haiku': haiku,
+        'parent': parent,
+        'has_parent': has_parent,
         'haiku_width': haiku_width,
         'haiku_height': haiku_height,
     }))
@@ -135,8 +147,8 @@ class HaikuSlideshow3Page(webapp2.RequestHandler):
       order = 'age'
     cursorv = self.request.get('cursor', '')
     if order == 'score':
-      qorder = 'ORDER BY score DESC'
-      norder = 'score'
+      qorder = 'ORDER BY rank DESC'
+      norder = 'rank'
     else:
       qorder = 'ORDER BY when DESC'
       norder = 'when'
@@ -301,6 +313,7 @@ class HaikuVotePage(webapp2.RequestHandler):
     if vote in [1, -1]:
       haiku = ndb.Key(urlsafe=id).get()
       haiku.score += vote
+      haiku.rank += vote
       haiku.put()
     self.redirect('/')
 
@@ -312,10 +325,10 @@ class HaikuAdjustPage(webapp2.RequestHandler):
       return
     id = self.request.get('id')
     haiku = ndb.Key(urlsafe=id).get()
-    rank = self.request.get('rank')
+    rank = self.request.get('rank', default_value=None)
     if rank is not None:
       haiku.rank = float(rank)
-    parent = self.request.get('parent')
+    parent = self.request.get('parent', default_value=None)
     if parent is not None:
       haiku.parent = parent
     haiku.put()
@@ -347,8 +360,8 @@ class HaikuListPage(webapp2.RequestHandler):
       order = 'age'
     cursorv = self.request.get('cursor', '')
     if order == 'score':
-      qorder = 'ORDER BY score DESC'
-      norder = 'score'
+      qorder = 'ORDER BY rank DESC'
+      norder = 'rank'
     else:
       qorder = 'ORDER BY when DESC'
       norder = 'when'
@@ -385,6 +398,7 @@ class HaikuEditorPage(webapp2.RequestHandler):
         'title': title,
         'haiku_width': haiku_width,
         'haiku_height': haiku_height,
+        'parent': id,
     }))
 
 
@@ -396,6 +410,7 @@ class HaikuSubmitPage(webapp2.RequestHandler):
     author = self.request.get('author')
     if not author:
       author = 'Anonymous'
+    parent = self.request.get('parent', '')
     code = self.request.get('code', '')
     if ('href=' in code or
         'http://' in code or
@@ -415,6 +430,8 @@ class HaikuSubmitPage(webapp2.RequestHandler):
     haiku.author = author
     haiku.code = code
     haiku.score = 0
+    haiku.rank = 0.0
+    haiku.parent = parent
     haiku.put()
     self.redirect('/')
 
