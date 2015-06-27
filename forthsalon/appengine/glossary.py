@@ -68,6 +68,22 @@ core_words = [
     ],
   },
   {
+    'names': ['('],
+    'stack': '( -- )',
+    'summary': 'A comment until the next ")".',
+    'description': [
+        'Ignore everything until the next ")".',
+    ],
+  },
+  {
+    'names': ['\\'],
+    'stack': '( -- )',
+    'summary': 'A comment until the end of the line.',
+    'description': [
+        'Ignore everything until the end of the line.',
+    ],
+  },
+  {
     'names': ['push', '>r'],
     'summary': 'Move one value from the data stack to the return stack.',
     'description': [

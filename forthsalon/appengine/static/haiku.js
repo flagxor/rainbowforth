@@ -25,9 +25,9 @@ function start_fetch() {
 
 function core_words() {
   var dict = new Object();
-  dict['x'] = ['dstack.push(xpos);']; 
-  dict['y'] = ['dstack.push(ypos);']; 
-  dict['t'] = ['dstack.push(time_val);']; 
+  dict['x'] = ['dstack.push(xpos);'];
+  dict['y'] = ['dstack.push(ypos);'];
+  dict['t'] = ['dstack.push(time_val);'];
 
   dict['push'] = ['rstack.push(dstack.pop());'];
   dict['pop'] = ['dstack.push(rstack.pop());'];
@@ -177,7 +177,7 @@ function code_tags(src) {
 
 if (typeof String.prototype.trim != 'function') {
   String.prototype.trim = function() {
-    return this.replace(/^\s+|\s+$/, ''); 
+    return this.replace(/^\s+|\s+$/, '');
   }
 }
 
@@ -192,7 +192,7 @@ function optimize(code, result_limit) {
 
   // Use alternate pre/post-amble to optimize away dstack/rstack.
   code = code.slice(0, code.length - 1);
-  code[0] = 'var go = function(xpos, ypos) { ' + 
+  code[0] = 'var go = function(xpos, ypos) { ' +
             'var time_val=0.0; var work1, work2, work3, work4;';
   for (var i = 0; i < result_limit; i++) {
     code.push(CAPPED_VALUE);
@@ -274,43 +274,55 @@ function optimize(code, result_limit) {
 }
 
 
-function compile(src, result_limit) {
+function compile(src_code, result_limit) {
   var code = ['var go = function(xpos, ypos) { ' +
               'var time_val=0.0; var dstack=[]; var rstack=[];'];
   var dict = core_words();
   var pending_name = 'bogus';
   var code_stack = [];
-  src = src.replace(/[ \r\n\t]+/g, ' ').trim();
-  src = src.split(' ');
-  for (var i = 0; i < src.length; i++) {
-    var word = src[i];
-    word = word.toLowerCase();
-    if (word in dict) {
-      code = code.concat(dict[word]);
-    } else if (word == '(') {
-      // Skip comments.
-      while (i < src.length && src[i] != ')') {
+  var paren_comment = false;
+  src_code = src_code.replace(/[ \r\t]+/g, ' ').trim();
+  var lines = src_code.split('\n');
+  for (var j = 0; j < lines.length; j++) {
+    var src = lines[j].split(' ');
+    for (var i = 0; i < src.length; i++) {
+      var word = src[i];
+      word = word.toLowerCase();
+      if (paren_comment) {
+        if (word == ')') {
+          paren_comment = false;
+        }
+        continue;
+      }
+      if (word == '') {
+        continue;
+      } else if (word in dict) {
+        code = code.concat(dict[word]);
+      } else if (word == '\\') {
+        break;
+      } else if (word == '(') {
+        paren_comment = true;
+        continue;
+      } else if (word == ':') {
         i++;
+        pending_name = src[i];
+        // Disallow nested words.
+        if (code_stack.length != 0) return BOGUS;
+        code_stack.push(code);
+        code = [];
+      } else if (word == ';') {
+        // Disallow ; other than to end a word.
+        if (code_stack.length != 1) return BOGUS;
+        dict[pending_name] = code;
+        code = code_stack.pop();
+        pending_name = 'bogus';
+      } else {
+        var num = '' + parseFloat(word);
+        if (num.match(/^[-]?[0-9]+$/)) {
+          num += '.0';
+        }
+        code.push('dstack.push(' + num + ');');
       }
-    } else if (word == ':') {
-      i++;
-      pending_name = src[i];
-      // Disallow nested words.
-      if (code_stack.length != 0) return BOGUS;
-      code_stack.push(code);
-      code = [];
-    } else if (word == ';') {
-      // Disallow ; other than to end a word.
-      if (code_stack.length != 1) return BOGUS;
-      dict[pending_name] = code;
-      code = code_stack.pop(); 
-      pending_name = 'bogus';
-    } else {
-      var num = '' + parseFloat(word);
-      if (num.match(/^[-]?[0-9]+$/)) {
-        num += '.0';
-      }
-      code.push('dstack.push(' + num + ');');
     }
   }
   code.push('return dstack; }; go');
@@ -413,15 +425,15 @@ function setup3d(cv, cv3, code) {
   }
   cv3.w = w;
   cv3.h = h;
-   
+
   gl = cv3.getContext('webgl') || cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
   var renderer = gl.getParameter(gl.RENDERER);
   if (!force_gpu) {
-    // Reject i9* for webgl, as its too slow. 
+    // Reject i9* for webgl, as its too slow.
     if (renderer.search(' i9') >= 0) throw 'i9* too slow';
   }
-    
+
   var fshader = gl.createShader(gl.FRAGMENT_SHADER);
   gl.shaderSource(fshader, make_fragment_shader(code));
   gl.compileShader(fshader);
@@ -486,7 +498,7 @@ function draw3d(cv, cv3) {
 
   var aspect_val_loc = gl.getUniformLocation(cv.program3d, 'aspect');
   gl.uniform2f(aspect_val_loc, cv3.w, cv3.h);
- 
+
   gl.clearColor(0.0, 0.0, 0.0, 0.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -534,15 +546,15 @@ function make_fragment_shader(input_code) {
       'gl_FragColor.b = min(max(0.0, gl_FragColor.b), 1.0); ' +
       'gl_FragColor.a = min(max(0.0, gl_FragColor.a), 1.0); ' +
       'gl_FragColor.r *= gl_FragColor.a; ' +
-      'gl_FragColor.g *= gl_FragColor.a; ' + 
+      'gl_FragColor.g *= gl_FragColor.a; ' +
       'gl_FragColor.b *= gl_FragColor.a; ' +
       '}');
   code[code.length-1] = code[code.length-1].replace(
       'return [', 'gl_FragColor = vec4(');
   code = code.join('\n');
-  
+
   console.log('----------SHADER:\n' + code + '\n\n\n');
-  
+
   return code;
 }
 
@@ -586,7 +598,7 @@ function render(cv, cv3, animated, code, next) {
   } catch (e) {
     // Fall back on software.
   }
- 
+
   try {
     var image = eval(compiled_code_flat);
     var ctx = cv.getContext('2d');
@@ -620,7 +632,7 @@ function find_tags_named(base, tag, name) {
 function find_tag_name(base, tag, name) {
   var found = find_tags_named(base, tag, name);
   if (found.length == 0) return null;
-  return found[0]; 
+  return found[0];
 }
 
 function find_tag(base, tag) {
