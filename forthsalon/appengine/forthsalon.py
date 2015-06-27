@@ -357,7 +357,8 @@ class HaikuSearchPage(webapp2.RequestHandler):
     if not phase and not more:
       q = Haiku.query(ndb.AND(Haiku.author >= search,
                       Haiku.author < (search + '\ufffd')))
-      haikus, next_cursor, more = q.fetch_page(40, start_cursor=cursor)
+      haikus, next_cursor, more = q.fetch_page(
+          40 - len(haikus_list), start_cursor=cursor)
       haikus_list += [h.ToDict() for h in haikus]
       phase = '1'
 
