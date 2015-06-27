@@ -145,7 +145,7 @@ class HaikuSlideshow3Page(webapp2.RequestHandler):
     order = self.request.get('order', '')
     if order != 'rank':
       order = 'age'
-    cursorv = self.request.get('cursor', '')
+    cursorv = self.request.get('cursor', None)
     if order == 'rank':
       qorder = 'ORDER BY rank DESC'
       norder = 'rank'
@@ -156,6 +156,8 @@ class HaikuSlideshow3Page(webapp2.RequestHandler):
     q = Haiku.gql(qorder)
     haikus, next_cursor, more = q.fetch_page(limit, start_cursor=cursor)
     haikus = [h.ToDict() for h in haikus]
+    if next_cursor:
+      next_cursor = next_cursor.urlsafe()
 
     template = JINJA_ENVIRONMENT.get_template('haiku-slideshow3.html')
     haiku_size = self.request.get('size', 600)
@@ -168,7 +170,7 @@ class HaikuSlideshow3Page(webapp2.RequestHandler):
         'haiku_height': haiku_height,
         'order': order,
         'more': more,
-        'cursor': next_cursor.urlsafe(),
+        'cursor': next_cursor,
         'limit': limit,
     }))
 
@@ -250,14 +252,16 @@ class HaikuSlideshow2Page(webapp2.RequestHandler):
 class HaikuDumpPage(webapp2.RequestHandler):
   def get(self):
     self.response.headers['Content-type'] = 'text/plain'
-    cursorv = self.request.get('cursor', '')
+    cursorv = self.request.get('cursor', None)
     cursor = Cursor(urlsafe=cursorv)
     q = Haiku.query()
     haikus, next_cursor, more = q.fetch_page(40, start_cursor=cursor)
+    if next_cursor:
+      next_cursor = next_cursor.urlsafe()
     haikus = [h.ToJSDict() for h in haikus]
     self.response.out.write(json.dumps({
       'items': haikus,
-      'cursor': next_cursor.urlsafe(),
+      'cursor': next_cursor,
       'more': more,
       }, sort_keys=True, indent=2, separators=(',', ':')))
 
@@ -336,12 +340,46 @@ class WordViewPage(webapp2.RequestHandler):
     }))
 
 
+class HaikuSearchPage(webapp2.RequestHandler):
+  def get(self):
+    search = self.request.get('s', '')
+    cursorv = self.request.get('cursor', None)
+    phase = self.request.get('phase', '')
+    cursor = Cursor(urlsafe=cursorv)
+    if phase:
+      q = Haiku.query(ndb.AND(Haiku.author >= search,
+                      Haiku.author < (search + '\ufffd')))
+    else:
+      q = Haiku.query(ndb.AND(Haiku.title >= search,
+                      Haiku.title < (search + '\ufffd')))
+    haikus, next_cursor, more = q.fetch_page(40, start_cursor=cursor)
+    haikus_list = [h.ToDict() for h in haikus]
+    if not phase and not more:
+      q = Haiku.query(ndb.AND(Haiku.author >= search,
+                      Haiku.author < (search + '\ufffd')))
+      haikus, next_cursor, more = q.fetch_page(40, start_cursor=cursor)
+      haikus_list += [h.ToDict() for h in haikus]
+      phase = '1'
+
+    if next_cursor:
+      next_cursor = next_cursor.urlsafe()
+
+    template = JINJA_ENVIRONMENT.get_template('haiku-search.html')
+    self.response.out.write(template.render({
+        'search': search,
+        'haikus': haikus_list,
+        'more': more,
+        'phase': phase,
+        'cursor': next_cursor,
+    }))
+
+
 class HaikuListPage(webapp2.RequestHandler):
   def get(self):
     order = self.request.get('order', '')
     if order != 'rank':
       order = 'age'
-    cursorv = self.request.get('cursor', '')
+    cursorv = self.request.get('cursor', None)
     if order == 'rank':
       qorder = 'ORDER BY rank DESC'
       norder = 'rank'
@@ -453,6 +491,7 @@ app = webapp2.WSGIApplication([
     ('/haiku-adjust', HaikuAdjustPage),
     ('/haiku-about', HaikuAboutPage),
     ('/haiku-animated', HaikuAnimatedPage),
+    ('/haiku-search', HaikuSearchPage),
     ('/haiku-sound', HaikuSoundPage),
     ('/haiku-slideshow', HaikuSlideshow2Page),
     ('/haiku-slideshow2', HaikuSlideshow2Page),

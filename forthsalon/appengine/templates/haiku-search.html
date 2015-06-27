@@ -7,8 +7,13 @@
 <div id="wrapper">
 
 <div id="header">
-  {% include 'search.html' %}
-  <h1>Haiku Gallery</h1>
+  <div style="float:right">
+    <form action="/haiku-search">
+      <input type="text" size="10" name="s" value="{{ search|escape }}"/>
+      <input type="submit" value="&#128269;"/>
+    </form>
+  </div>
+  <h1>Haiku Search</h1>
 </div>
 
 <div class="section">
@@ -27,7 +32,7 @@
 {% if more and cursor %}
 <br/>
 <h3>
-<a href="/haiku-list?order={{ order|escape }}&cursor={{ cursor|escape }}">Next</a>
+  <a href="/haiku-search?s={{ search|escape }}&cursor={{ cursor|escape }}&phase={{ phase|escape }}">Next</a>
 </h3>
 {% endif %}
 
