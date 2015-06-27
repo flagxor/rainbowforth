@@ -76,6 +76,7 @@ class Haiku(ndb.Model):
   rank = ndb.FloatProperty(default=0.0)
   last_modified = ndb.DateTimeProperty(auto_now=True)
   parent = ndb.StringProperty(default='')
+  parent_recorded = ndb.BooleanProperty(default=False)
 
   def GetId(self):
     return self.key.urlsafe() 
@@ -92,6 +93,7 @@ class Haiku(ndb.Model):
         'code_formatted': glossary.FormatHtml(self.code),
         'code_formatted_print': glossary.FormatHtmlPrint(self.code),
         'parent': self.parent,
+        'parent_recorded': self.parent_recorded,
     }
 
   def ToJSDict(self):
@@ -105,6 +107,7 @@ class Haiku(ndb.Model):
         'score': self.score,
         'rank': self.rank,
         'parent': self.parent,
+        'parent_recorded': self.parent_recorded,
     }
 
 
@@ -454,6 +457,7 @@ class HaikuSubmitPage(webapp2.RequestHandler):
     haiku.score = 0
     haiku.rank = 0.0
     haiku.parent = parent
+    haiku.parent_recorded = True
     haiku.put()
     self.redirect('/')
 

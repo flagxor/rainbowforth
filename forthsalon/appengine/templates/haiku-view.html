@@ -33,7 +33,12 @@
 </div>
 {% if has_parent %}
 <h2>
-Based on: <a href ="/haiku-view/{{ parent.id|escape }}">
+  {% if haiku.parent_recorded %}
+    Based on:
+  {% else %}
+    Possibly based on:
+  {% endif %}
+  <a href ="/haiku-view/{{ parent.id|escape }}">
   <b>{{ parent.title|escape }}</b> - <i>{{ parent.author|escape }}</i></a>
 {% endif %}
 </h2>
