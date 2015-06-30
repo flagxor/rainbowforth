@@ -351,15 +351,15 @@ class HaikuSearchPage(webapp2.RequestHandler):
     cursor = Cursor(urlsafe=cursorv)
     if phase:
       q = Haiku.query(ndb.AND(Haiku.author >= search,
-                      Haiku.author < (search + '\ufffd')))
+                      Haiku.author < (search + u'\ufffd')))
     else:
       q = Haiku.query(ndb.AND(Haiku.title >= search,
-                      Haiku.title < (search + '\ufffd')))
+                      Haiku.title < (search + u'\ufffd')))
     haikus, next_cursor, more = q.fetch_page(40, start_cursor=cursor)
     haikus_list = [h.ToDict() for h in haikus]
     if not phase and not more:
       q = Haiku.query(ndb.AND(Haiku.author >= search,
-                      Haiku.author < (search + '\ufffd')))
+                      Haiku.author < (search + u'\ufffd')))
       haikus, next_cursor, more = q.fetch_page(
           40 - len(haikus_list), start_cursor=cursor)
       haikus_list += [h.ToDict() for h in haikus]
