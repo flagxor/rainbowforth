@@ -188,77 +188,58 @@ BOGUS = ['var go = function(xpos, ypos) {',
 
 function optimize(code, result_limit) {
   if (code == BOGUS) return BOGUS;
-  CAPPED_VALUE = 'dstack.pop()';
 
   // Use alternate pre/post-amble to optimize away dstack/rstack.
   code = code.slice(0, code.length - 1);
   code[0] = 'var go = function(xpos, ypos) { ' +
             'var time_val=0.0; var work1, work2, work3, work4;';
-  for (var i = 0; i < result_limit; i++) {
-    code.push(CAPPED_VALUE);
-  }
 
+  var dstack = [];
+  var rstack = [];
   var tmp_index = 1;
-  for (var i = 0; i < code.length - 1; i++) {
-    var retry = false;
+  for (var i = 0; i < code.length; i++) {
+    for (;;) {
+      if (code[i].search(/dstack\.pop\(\)/) >= 0) {
+        if (dstack.length === 0) return BOGUS;
+        var tmp = dstack.pop();
+        code[i] = code[i].replace(/dstack\.pop\(\)/, tmp);
+        continue;
+      }
+      if (code[i].search(/rstack\.pop\(\)/) >= 0) {
+        if (rstack.length === 0) return BOGUS;
+        var tmp = rstack.pop();
+        code[i] = code[i].replace(/rstack\.pop\(\)/, tmp);
+        continue;
+      }
+      break;
+    }
     var m = code[i].match(/^dstack\.push\((.*)\);$/);
     if (m) {
-      for (var j = i + 1; j < code.length; j++) {
-        if (code[j].search(/dstack\.pop\(\)/) >= 0) {
-          var tmp = 'temp' + tmp_index;
-          tmp_index++;
-          var x = code[j].replace(/dstack\.pop\(\)/, tmp);
-          code = code.slice(0, i).concat(
-              'var ' + tmp + ' = ' + m[1] + ';').concat(code.slice(
-              i + 1, j)).concat([x]).concat(code.slice(j + 1));
-          i = -1;
-          retry = true;
-          break;
-        }
-        if (code[j].match(/^dstack\.push\((.*)\);$/)) break;
-        if (code[j].match(/[{}]/)) break;
-      }
-      if (retry) continue;
+      var tmp = 'temp' + tmp_index;
+      tmp_index++;
+      code[i] = 'var ' + tmp + ' = ' + m[1] + ';';
+      dstack.push(tmp);
     }
-
     var m = code[i].match(/^rstack\.push\((.*)\);$/);
     if (m) {
-      for (var j = i + 1; j < code.length; j++) {
-        if (code[j].search(/rstack\.pop\(\)/) >= 0) {
-          var tmp = 'temp' + tmp_index;
-          tmp_index++;
-          var x = code[j].replace(/rstack\.pop\(\)/, tmp);
-          code = code.slice(0, i).concat(
-              'var ' + tmp + ' = ' + m[1] + ';').concat(code.slice(
-              i + 1, j)).concat([x]).concat(code.slice(j + 1));
-          i = -1;
-          retry = true;
-          break;
-        }
-        if (code[j].match(/^rstack\.push\((.*)\);$/)) break;
-        if (code[j].match(/[{}]/)) break;
-      }
-      if (retry) continue;
+      var tmp = 'temp' + tmp_index;
+      tmp_index++;
+      code[i] = 'var ' + tmp + ' = ' + m[1] + ';';
+      rstack.push(tmp);
     }
   }
 
-  // Fill in missing stack items with defaults [0,0,0,1,0].
-  var count = 0;
-  while (count < result_limit && code[code.length - 1] == CAPPED_VALUE) {
-    code = code.slice(0, code.length - 1);
-    count++;
-  }
-  count = result_limit - count;
-  var ret = code.slice(code.length - count, code.length).reverse();
-  while (ret.length < result_limit) {
-    if (ret.length == 3) {
-      ret.push('1.0');
+  if (rstack.length !== 0) return BOGUS;
+  if (dstack.length > 4) return BOGUS;
+
+  while (dstack.length < 4) {
+    if (dstack.length == 3) {
+      dstack.push('1.0');
     } else {
-      ret.push('0.0');
+      dstack.push('0.0');
     }
   }
-  code = code.slice(0, code.length - count);
-  code.push('return [' + ret.join(', ') + ']; }; go');
+  code.push('return [' + dstack.join(', ') + ']; }; go');
 
   // Dump code to console.
   console.log('----------JSCRIPT:\n' + code.join('\n') + '\n\n\n');
