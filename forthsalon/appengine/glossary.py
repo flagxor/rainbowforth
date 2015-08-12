@@ -683,6 +683,24 @@ core_words = [
         [': square ( n -- n ) dup * ; 4 square', '16'],
     ],
   },
+  {
+    'names': ['if', 'else', 'then'],
+    'summary': 'Conditional statements.',
+    'description': [
+        'if <true> else <false> then'
+        ,
+        'if <true> then'
+        ,
+        'Pops a value from the stack, if non-zero execute the true case. '
+        'Otherwise execute the false case if any. '
+        'In Haiku Forth, the data-stack and return-stack depth in '
+        'both cases of the conditional must remain the same. '
+    ],
+    'examples': [
+        ['1 .5 > if 3 else 4 then', '3'],
+        ['3 1 .5 > if 1 + then', '4'],
+    ],
+  },
 ]
 
 
