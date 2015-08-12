@@ -124,6 +124,10 @@ function core_words() {
 
   dict['random'] = ['dstack.push(Math.random());'];
 
+  dict['if'] = ['if(dstack.pop() != 0.0) {'];
+  dict['else'] = ['} else {'];
+  dict['then'] = ['}'];
+
   return dict;
 }
 
@@ -189,13 +193,14 @@ BOGUS = ['var go = function(xpos, ypos) {',
 function optimize(code, result_limit) {
   if (code == BOGUS) return BOGUS;
 
-  // Use alternate pre/post-amble to optimize away dstack/rstack.
+  // Use alternate pre/post-amble and optimize away dstack/rstack.
   code = code.slice(0, code.length - 1);
   code[0] = 'var go = function(xpos, ypos) { ' +
             'var time_val=0.0; var work1, work2, work3, work4;';
 
   var dstack = [];
   var rstack = [];
+  var cstack = [];
   var tmp_index = 1;
   for (var i = 0; i < code.length; i++) {
     for (;;) {
@@ -215,17 +220,61 @@ function optimize(code, result_limit) {
     }
     var m = code[i].match(/^dstack\.push\((.*)\);$/);
     if (m) {
-      var tmp = 'temp' + tmp_index;
-      tmp_index++;
+      var tmp = 'temp' + tmp_index++;
       code[i] = 'var ' + tmp + ' = ' + m[1] + ';';
       dstack.push(tmp);
     }
     var m = code[i].match(/^rstack\.push\((.*)\);$/);
     if (m) {
-      var tmp = 'temp' + tmp_index;
-      tmp_index++;
+      var tmp = 'temp' + tmp_index++;
       code[i] = 'var ' + tmp + ' = ' + m[1] + ';';
       rstack.push(tmp);
+    }
+    var m = code[i].match(/^if\((.*)\) \{$/);
+    if (m) {
+      cstack.push([0, dstack.slice(0), rstack.slice(0), i]);
+    }
+    if (code[i] === '} else {') {
+      if (cstack.length === 0) return BOGUS;
+      var frame = cstack.pop();
+      if (frame[0] !== 0) return BOGUS;
+      cstack.push([1, dstack.slice(0), rstack.slice(0), frame[3], i]);
+      dstack = frame[1];
+      rstack = frame[2];
+    }
+    if (code[i] === '}') {
+      if (cstack.length === 0) return BOGUS;
+      var frame = cstack.pop();
+      if (dstack.length != frame[1].length ||
+          rstack.length != frame[2].length) return BOGUS;
+      var decls = '';
+      var fixup1 = '';
+      var fixup2 = '';
+      for (var j = 0; j < dstack.length; j++) {
+        if (dstack[j] !== frame[1][j]) {
+          var tmp = 'temp' + tmp_index++;
+          decls += 'var ' + tmp + ';';
+          fixup1 += tmp + ' = ' + dstack[j] + ';';
+          fixup2 += tmp + ' = ' + frame[1][j] + ';';
+          dstack[j] = tmp;
+        }
+      }
+      for (var j = 0; j < rstack.length; j++) {
+        if (rstack[j] !== frame[2][j]) {
+          var tmp = 'temp' + tmp_index++;
+          decls += 'var ' + tmp + ';';
+          fixup1 += tmp + ' = ' + rstack[j] + ';';
+          fixup2 += tmp + ' = ' + frame[2][j] + ';';
+          rstack[j] = tmp;
+        }
+      }
+      code[frame[3]] = decls + code[frame[3]];
+      if (frame[0] === 0) {
+        code[i] = fixup1 + '} else {' + fixup2 + '}';
+      } else {
+        code[i] = fixup1 + '}';
+        code[frame[4]] = fixup2 + '} else {';
+      }
     }
   }
 
@@ -503,7 +552,7 @@ function make_fragment_shader(input_code) {
   ];
   code = prefix.concat(main).concat(input_code.slice(1));
   for (var i = 0; i < code.length; i++) {
-    code[i] = code[i].replace(/var /, 'float ');
+    code[i] = code[i].replace(/var /g, 'float ');
     code[i] = code[i].replace(/xpos/g, 'tpos.x');
     code[i] = code[i].replace(/ypos/g, 'tpos.y');
     code[i] = code[i].replace(/Math\./g, '');
