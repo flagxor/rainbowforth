@@ -807,7 +807,7 @@ function synth(n, t) {
 // Setup audio pipeline.
 var audio_context;
 try {
-  audio_context = new webkitAudioContext();
+  audio_context = new AudioContext();
 } catch (e) {
 }
 var audio_off = function(t, x) { return [0, 0, 0, 1]; };
