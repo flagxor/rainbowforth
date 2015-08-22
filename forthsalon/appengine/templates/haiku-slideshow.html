@@ -1,60 +1,90 @@
 <html>
 <head>
-<title>{{ haiku.title }}</title>
+<title>Slideshow3</title>
 <meta http-equiv="X-UA-Compatible" content="chrome=1">
-<meta http-equiv="refresh" content="{{ speed }}">
-
-<style type="text/css">
+<style>
 body {
-  font-family: Verdana, Arial, Helvetica, sans-serif;
+  border: 0;
+  margin: 0;
+  padding: 0;
 }
-
-div.haiku_text {
-  font-family: "Courier New"
-               Courier
-               "Andale Mono"
-               "Fixed"
-               "Lucidatypewriter"
-               monospace;
+div {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+span {
+  color: white;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+canvas {
+  border: 0;
+  margin: 0;
+  padding: 0;
 }
 </style>
-
 <link href="/favicon.ico" rel="SHORTCUT ICON">
 <link href="http://forthsalon.appspot.com/favicon.png"
  rel="apple-touch-icon-precomposed">
-<meta name="viewport" content="width=device-width">
+<meta name="viewport" content="width=600">
 <meta name="viewport" content="initial-scale=1.0">
-<meta name="viewport" content="maximum-scale=1.0">
-<meta name="viewport" content="user-scalable=0">
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style"
  content="black-translucent"/>
 {% include 'tracking.html' %}
 </head>
 
-<body onload="init();" bgcolor="#ffffff">
-
-<center>
+<body onload="init();" bgcolor="#000000">
 
 <div class="haiku">
 <span name="haiku" width="{{ haiku_width }}" height="{{ haiku_height }}">
-<textarea style="display: none">{{ haiku.code|escape }}</textarea>
+<textarea id="code" style="display: none"></textarea>
+<a name="animated" style="display: none"></a>
 </span>
 </div>
 
-<h1>{{ haiku.title|escape }}</h1>
-<h2><i>{{ haiku.author|escape }}</i></h2>
+{% for haiku in haikus %}
+<textarea id="item{{ loop.index }}" style="display: none"
+ >{{ haiku.code|escape }}</textarea>
+{% endfor %}
 
-<div class="haiku_text">
-{{ haiku.code_formatted_print }}
-</div>
-
-</center>
+<br/>
+<h3>
+{% if more and cursor %}
+<a href="/haiku-slideshow3?order={{ order|escape }}&cursor={{ cursor|escape }}&width={{ haiku_width|escape }}&height={{ haiku_height|escape }}&limit={{ limit|escape }}">Next</a>
+{% endif %}
+<span id="status"></span>
+</h3>
 
 <script type="text/javascript" src="/static/haiku.js"></script>
 <script type="text/javascript">
+
+var haiku_count = {{ haiku_count }};
+var current_slide = 0;
+
 function init() {
   animate_haikus(function() {});
+
+  window.onkeydown = function(e) {
+    if (e.which == 37) {
+      current_slide = (current_slide + haiku_count - 1) % haiku_count;
+      pick_slide(current_slide);
+    } else if (e.which == 39) {
+      current_slide = (current_slide + 1) % haiku_count;
+      pick_slide(current_slide);
+    }
+  };
+  pick_slide(current_slide);
+}
+
+function pick_slide(index) {
+  var code = document.getElementById('code');
+  var tag = document.getElementById('item' + (index + 1));
+  code.value = tag.value;
+  var label = document.getElementById('status');
+  label.innerText = '' + (index + 1) + ' of ' + haiku_count;
 }
 </script>
 

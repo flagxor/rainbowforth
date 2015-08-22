@@ -141,7 +141,7 @@ class HaikuViewPage(webapp2.RequestHandler):
     }))
 
 
-class HaikuSlideshow3Page(webapp2.RequestHandler):
+class HaikuSlideshowPage(webapp2.RequestHandler):
   def get(self):
     limit = int(self.request.get('limit', 40))
 
@@ -162,7 +162,7 @@ class HaikuSlideshow3Page(webapp2.RequestHandler):
     if next_cursor:
       next_cursor = next_cursor.urlsafe()
 
-    template = JINJA_ENVIRONMENT.get_template('haiku-slideshow3.html')
+    template = JINJA_ENVIRONMENT.get_template('haiku-slideshow.html')
     haiku_size = self.request.get('size', 600)
     haiku_width = self.request.get('width', haiku_size)
     haiku_height = self.request.get('height', haiku_size)
@@ -211,44 +211,6 @@ class HaikuPrintPage(webapp2.RequestHandler):
         'haiku': haiku,
         'haiku_width': haiku_width,
         'haiku_height': haiku_height,
-    }))
-
-
-class HaikuSlideshowPage(webapp2.RequestHandler):
-  def get(self):
-    q = Haiku.gql('ORDER BY rank DESC')
-    haikus = q.fetch(int(self.request.get('limit', 200)))
-    haiku = haikus[random.randrange(len(haikus))]
-    template = JINJA_ENVIRONMENT.get_template('haiku-slideshow.html')
-    haiku_size = self.request.get('size', 400)
-    haiku_width = self.request.get('width', haiku_size)
-    haiku_height = self.request.get('height', haiku_size)
-    self.response.out.write(template.render({
-        'haiku': haiku.ToDict(),
-        'haiku_width': haiku_width,
-        'haiku_height': haiku_height,
-        'speed': self.request.get('speed', 15),
-    }))
-
-
-class HaikuSlideshow2Page(webapp2.RequestHandler):
-  def get(self):
-    q = Haiku.gql('ORDER BY rank DESC')
-    haikus = memcache.get('slideshow2')
-    if haikus is None:
-      haikus = q.fetch(int(self.request.get('limit', 200)))
-      haikus = [h.ToDict() for h in haikus]
-      memcache.add('slideshow2', haikus, CACHE_TIMEOUT)
-    template = JINJA_ENVIRONMENT.get_template('haiku-slideshow2.html')
-    haiku_size = self.request.get('size', 400)
-    haiku_width = self.request.get('width', haiku_size)
-    haiku_height = self.request.get('height', haiku_size)
-    self.response.out.write(template.render({
-        'haikus': haikus,
-        'haiku_count': len(haikus),
-        'haiku_width': haiku_width,
-        'haiku_height': haiku_height,
-        'speed': self.request.get('speed', 10),
     }))
 
 
@@ -498,9 +460,7 @@ app = webapp2.WSGIApplication([
     ('/haiku-animated', HaikuAnimatedPage),
     ('/haiku-search', HaikuSearchPage),
     ('/haiku-sound', HaikuSoundPage),
-    ('/haiku-slideshow', HaikuSlideshow2Page),
-    ('/haiku-slideshow2', HaikuSlideshow2Page),
-    ('/haiku-slideshow3', HaikuSlideshow3Page),
+    ('/haiku-slideshow', HaikuSlideshowPage),
     ('/haiku-dump', HaikuDumpPage),
     ('/word-list', WordListPage),
     ('/word-view/.*', WordViewPage),
