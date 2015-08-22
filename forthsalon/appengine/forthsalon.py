@@ -405,7 +405,9 @@ class HaikuSubmitPage(webapp2.RequestHandler):
         code == '' or
         SPAM_RE.search(code) or
         SPAM_RE.search(title) or
+        len(title) > 40 or
         SPAM_RE.search(author) or
+        len(author) > 30 or
         HaikuWordCount(code) < 3):
       self.redirect('/')
       logging.info(
