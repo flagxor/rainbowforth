@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Slideshow3</title>
+<title>Slideshow</title>
 <meta http-equiv="X-UA-Compatible" content="chrome=1">
 <style>
 body {
@@ -38,16 +38,36 @@ canvas {
 
 <body onload="init();" bgcolor="#000000">
 
+<center>
+<div style="color:#ffffff; font-size:20px;">
+  <b id="showntitle" style="color:#ffffff; font-size:20px;"></b>
+  <span> - </span>
+  <i id="shownauthor" style="color:#ffffff; font-size:20px;"></i>
+</div>
+</center>
+<center>
 <div class="haiku">
 <span name="haiku" width="{{ haiku_width }}" height="{{ haiku_height }}">
-<textarea id="code" style="display: none"></textarea>
+<textarea id="showncode" style="display: none"></textarea>
 <a name="animated" style="display: none"></a>
 </span>
 </div>
+</center>
+<br/>
+<br/>
+<table style="margin:auto;"><tr><td style="margin:auto;">
+<pre id="source"
+ style="color:#ffffff; font-size:20px; white-space: pre-wrap;">
+</pre>
+</td></tr></table>
 
 {% for haiku in haikus %}
-<textarea id="item{{ loop.index }}" style="display: none"
+<textarea id="code{{ loop.index }}" style="display: none"
  >{{ haiku.code|escape }}</textarea>
+<textarea id="title{{ loop.index }}" style="display: none"
+ >{{ haiku.title|escape }}</textarea>
+<textarea id="author{{ loop.index }}" style="display: none"
+ >{{ haiku.author|escape }}</textarea>
 {% endfor %}
 
 <br/>
@@ -80,11 +100,17 @@ function init() {
 }
 
 function pick_slide(index) {
-  var code = document.getElementById('code');
-  var tag = document.getElementById('item' + (index + 1));
-  code.value = tag.value;
+  var showncode = document.getElementById('showncode');
+  var code = document.getElementById('code' + (index + 1));
+  var title = document.getElementById('title' + (index + 1));
+  var author = document.getElementById('author' + (index + 1));
+  showncode.value = code.value;
+  showntitle.innerText = title.value;
+  shownauthor.innerText = author.value;
   var label = document.getElementById('status');
   label.innerText = '' + (index + 1) + ' of ' + haiku_count;
+  var source = document.getElementById('source');
+  source.innerText = code.value; 
 }
 </script>
 
