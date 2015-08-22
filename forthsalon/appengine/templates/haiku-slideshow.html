@@ -24,6 +24,18 @@ canvas {
   margin: 0;
   padding: 0;
 }
+a:link {
+  color: #777;
+  text-decoration: underline;
+}
+a:visited {
+  color: #777;
+  text-decoration: underline;
+}
+a:hover {
+  color: #777;
+  text-decoration: underline;
+}
 </style>
 <link href="/favicon.ico" rel="SHORTCUT ICON">
 <link href="http://forthsalon.appspot.com/favicon.png"
@@ -72,10 +84,11 @@ canvas {
 
 <br/>
 <h3>
-{% if more and cursor %}
-<a href="/haiku-slideshow?order={{ order|escape }}&cursor={{ cursor|escape }}&width={{ haiku_width|escape }}&height={{ haiku_height|escape }}&limit={{ limit|escape }}">Next</a>
-{% endif %}
 <span id="status"></span>
+{% if more and cursor %}
+<a href="/haiku-slideshow?order={{ order|escape }}&cursor={{ cursor|escape
+  }}&width={{ haiku_width|escape }}&height={{ haiku_height|escape }}&limit={{ limit|escape }}">more</a>
+{% endif %}
 </h3>
 
 <script type="text/javascript" src="/static/haiku.js"></script>
@@ -83,18 +96,30 @@ canvas {
 
 var haiku_count = {{ haiku_count }};
 var current_slide = 0;
+var shadow = false;
 
 function init() {
   animate_haikus(function() {});
 
   window.onkeydown = function(e) {
-    if (e.which == 37) {
+    if (e.which === 37 || e.which === 33) {
       current_slide = (current_slide + haiku_count - 1) % haiku_count;
       pick_slide(current_slide);
-    } else if (e.which == 39) {
+      return false;
+    } else if (e.which === 39 || e.which === 34) {
       current_slide = (current_slide + 1) % haiku_count;
       pick_slide(current_slide);
+      return false;
+    } else if (e.which === 66) {
+      shadow = !shadow;
+      if (shadow) {
+        window.scroll(0, 600);
+      } else {
+        window.scroll(0, 0);
+      }
+      return false;
     }
+    return true;
   };
   pick_slide(current_slide);
 }
