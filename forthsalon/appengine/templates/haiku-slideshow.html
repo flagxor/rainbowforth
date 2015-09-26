@@ -111,7 +111,7 @@ function init() {
       current_slide = (current_slide + 1) % haiku_count;
       pick_slide(current_slide);
       return false;
-    } else if (e.which === 66) {
+    } else if (e.which === 66 || e.which == 190) {
       shadow = !shadow;
       if (shadow) {
         window.scroll(0, 600);
