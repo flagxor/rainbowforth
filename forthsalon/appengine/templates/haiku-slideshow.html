@@ -97,6 +97,7 @@ a:hover {
 var haiku_count = {{ haiku_count }};
 var current_slide = 0;
 var shadow = false;
+var last_slide = 0;
 
 function init() {
   animate_haikus(function() {});
@@ -117,6 +118,14 @@ function init() {
       } else {
         window.scroll(0, 0);
       }
+      var tm = new Date().getTime();
+      if (tm - last_slide < 200) {
+        audio_toggle_play();
+      }
+      last_slide = tm;
+      return false;
+    } else if (e.which == 65) {
+      audio_toggle_play();
       return false;
     }
     return true;
