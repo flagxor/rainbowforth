@@ -100,31 +100,43 @@ var current_slide = 0;
 var shadow = false;
 var last_slide = 0;
 
+function slide_prev() {
+  current_slide = (current_slide + haiku_count - 1) % haiku_count;
+  pick_slide(current_slide);
+  return false;
+}
+
+function slide_next() {
+  current_slide = (current_slide + 1) % haiku_count;
+  pick_slide(current_slide);
+  return false;
+}
+
+function slide_scroll() {
+  shadow = !shadow;
+  if (shadow) {
+    window.scroll(0, 600);
+  } else {
+    window.scroll(0, 0);
+  }
+  var tm = new Date().getTime();
+  if (tm - last_slide < 400) {
+    audio_toggle_play();
+  }
+  last_slide = tm;
+  return false;
+}
+
 function init() {
   animate_haikus(function() {});
 
   window.onstroke = function(s) {
     if (s === 'F') {
-      current_slide = (current_slide + haiku_count - 1) % haiku_count;
-      pick_slide(current_slide);
-      return false;
+      return slide_prev();
     } else if (s === 'T') {
-      current_slide = (current_slide + 1) % haiku_count;
-      pick_slide(current_slide);
-      return false;
+      return slide_next();
     } else if (s === 'B') {
-      shadow = !shadow;
-      if (shadow) {
-        window.scroll(0, 600);
-      } else {
-        window.scroll(0, 0);
-      }
-      var tm = new Date().getTime();
-      if (tm - last_slide < 400) {
-        audio_toggle_play();
-      }
-      last_slide = tm;
-      return false;
+      return slide_scroll();
     } else if (s === 'AWD' || s === 'AUD') {
       audio_toggle_play();
       return false;
@@ -133,26 +145,11 @@ function init() {
   };
   window.onkeydown = function(e) {
     if (e.which === 37 || e.which === 33) {
-      current_slide = (current_slide + haiku_count - 1) % haiku_count;
-      pick_slide(current_slide);
-      return false;
+      return slide_prev();
     } else if (e.which === 39 || e.which === 34) {
-      current_slide = (current_slide + 1) % haiku_count;
-      pick_slide(current_slide);
-      return false;
+      return slide_next();
     } else if (e.which === 66 || e.which == 190) {
-      shadow = !shadow;
-      if (shadow) {
-        window.scroll(0, 600);
-      } else {
-        window.scroll(0, 0);
-      }
-      var tm = new Date().getTime();
-      if (tm - last_slide < 400) {
-        audio_toggle_play();
-      }
-      last_slide = tm;
-      return false;
+      return slide_scroll();
     } else if (e.which == 65) {
       audio_toggle_play();
       return false;
