@@ -912,7 +912,7 @@ function connect_touch() {
   try {
     haiku_touch_port = chrome.runtime.connect(
         'gjpkfjbomndhibbiiakfjpgjcaeggbic');
-    port.onMessage.addListener(function(m) {
+    haiku_touch_port.onMessage.addListener(function(m) {
       buffer += m.data;
       var parts = buffer.split('\n');
       if (parts.length > 1) {
