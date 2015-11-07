@@ -904,3 +904,41 @@ function audio_toggle_play() {
     mute_button.innerText = 'Play Audio';
   }
 }
+
+var haiku_touch_port = null;
+
+function connect_touch() {
+  var buffer = '';
+  try {
+    haiku_touch_port = chrome.runtime.connect(
+        'gjpkfjbomndhibbiiakfjpgjcaeggbic');
+    port.onMessage.addListener(function(m) {
+      buffer += m.data;
+      var parts = buffer.split('\n');
+      if (parts.length > 1) {
+        for (var i = 0; i < parts.length - 1; i++) {
+          if (window.onstroke !== undefined) {
+            window.onstroke(parts[i]);
+          }
+        }
+        buffer = parts[parts.length - 1];
+      }
+    });
+  } catch(e) {
+    haiku_touch_port = null;
+    return;
+  }
+}
+
+function send_to_touch(s) {
+  if (haiku_touch_port === null) {
+    return;
+  }
+  try {
+    haiku_touch_port.postMessage({'data': s});
+  } catch(e) {
+    return;
+  }
+}
+
+connect_touch();

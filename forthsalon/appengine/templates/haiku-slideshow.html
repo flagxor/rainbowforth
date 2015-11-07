@@ -103,6 +103,34 @@ var last_slide = 0;
 function init() {
   animate_haikus(function() {});
 
+  window.onstroke = function(s) {
+    if (s === 'F') {
+      current_slide = (current_slide + haiku_count - 1) % haiku_count;
+      pick_slide(current_slide);
+      return false;
+    } else if (s === 'T') {
+      current_slide = (current_slide + 1) % haiku_count;
+      pick_slide(current_slide);
+      return false;
+    } else if (s === 'B') {
+      shadow = !shadow;
+      if (shadow) {
+        window.scroll(0, 600);
+      } else {
+        window.scroll(0, 0);
+      }
+      var tm = new Date().getTime();
+      if (tm - last_slide < 400) {
+        audio_toggle_play();
+      }
+      last_slide = tm;
+      return false;
+    } else if (s === 'AWD' || s === 'AUD') {
+      audio_toggle_play();
+      return false;
+    }
+    return true;
+  };
   window.onkeydown = function(e) {
     if (e.which === 37 || e.which === 33) {
       current_slide = (current_slide + haiku_count - 1) % haiku_count;
