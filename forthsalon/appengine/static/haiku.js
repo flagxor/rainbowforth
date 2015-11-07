@@ -906,27 +906,30 @@ function audio_toggle_play() {
 }
 
 var haiku_touch_port = null;
+var haiku_touch_buffer = '';
 
 function connect_touch() {
-  var buffer = '';
   try {
     haiku_touch_port = chrome.runtime.connect(
         'gjpkfjbomndhibbiiakfjpgjcaeggbic');
     haiku_touch_port.onMessage.addListener(function(m) {
-      buffer += m.data;
-      var parts = buffer.split('\n');
+      haiku_touch_buffer += m.data.replace(/[\r]/g, '');
+      var parts = haiku_touch_buffer.split('\n');
       if (parts.length > 1) {
         for (var i = 0; i < parts.length - 1; i++) {
-          if (window.onstroke !== undefined) {
-            window.onstroke(parts[i]);
+          if (window.onstroke !== undefined &&
+              parts[i].length !== 0) {
+            console.log('stroke: ' + parts[i]);
+            try {
+              window.onstroke(parts[i]);
+            } catch(e) {
+            }
           }
         }
-        buffer = parts[parts.length - 1];
+        haiku_touch_buffer = parts[parts.length - 1];
       }
     });
   } catch(e) {
-    haiku_touch_port = null;
-    return;
   }
 }
 
@@ -937,8 +940,7 @@ function send_to_touch(s) {
   try {
     haiku_touch_port.postMessage({'data': s});
   } catch(e) {
-    return;
   }
 }
 
-connect_touch();
+window.addEventListener('load', connect_touch);
