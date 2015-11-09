@@ -1,13 +1,13 @@
+'use strict';
+
 var NOTES = 10;
 var NOTE_BASE = 10;
 var STEP = 2048;
 
 var all_haikus = {};
 
-var fetcher;
-
 function start_fetch() {
-  fetcher = new Worker('fetch.js');
+  var fetcher = new Worker('fetch.js');
   fetcher.addEventListener('message', function(e) {
     for (var i = 0; i < e.data.length; i++) {
       all_haikus[e.data[i].id] = e.data[i];
@@ -28,6 +28,9 @@ function core_words() {
   dict['x'] = ['dstack.push(xpos);'];
   dict['y'] = ['dstack.push(ypos);'];
   dict['t'] = ['dstack.push(time_val);'];
+  dict['dt'] = ['dstack.push(time_delta_val);'];
+  dict['button'] = ['work1 = dstack.pop();',
+                    'dstack.push(button(work1));'];
 
   dict['push'] = ['rstack.push(dstack.pop());'];
   dict['pop'] = ['dstack.push(rstack.pop());'];
@@ -167,7 +170,8 @@ function code_tags(src) {
   }
   // Detect animation.
   for (var i = 0; i < words.length; i++) {
-    if (words[i].toLowerCase() == 't') {
+    var wl = words[i].toLowerCase();
+    if (wl === 't' || wl === 'dt' || wl === 'button') {
       tags.push('animated');
       break;
     }
@@ -186,8 +190,8 @@ if (typeof String.prototype.trim != 'function') {
 }
 
 
-BOGUS = ['var go = function(xpos, ypos) {',
-         'return [1.0, 0.0, 0.7, 1.0, 0.0]; }; go'];
+var BOGUS = ['var go = function(xpos, ypos) {',
+             'return [1.0, 0.0, 0.7, 1.0, 0.0]; }; go'];
 
 
 function optimize(code, result_limit) {
@@ -196,7 +200,9 @@ function optimize(code, result_limit) {
   // Use alternate pre/post-amble and optimize away dstack/rstack.
   code = code.slice(0, code.length - 1);
   code[0] = 'var go = function(xpos, ypos) { ' +
-            'var time_val=0.0; var work1, work2, work3, work4;';
+            'var time_val=0.0; var time_delta_val=0.0; ' +
+            'function button(x) { return 0; } ' +
+            'var work1, work2, work3, work4;';
 
   var dstack = [];
   var rstack = [];
@@ -306,7 +312,9 @@ function optimize(code, result_limit) {
 
 function compile(src_code, result_limit) {
   var code = ['var go = function(xpos, ypos) { ' +
-              'var time_val=0.0; var dstack=[]; var rstack=[];'];
+              'var time_val=0.0; var time_delta_val=0.0; ' +
+              'function button(x) { return 0; } ' +
+              'var dstack=[]; var rstack=[];'];
   var dict = core_words();
   var pending_name = 'bogus';
   var code_stack = [];
@@ -367,7 +375,7 @@ function compile(src_code, result_limit) {
 }
 
 function render_rows(image, ctx, img, y, w, h, next) {
-  start = new Date().getTime();
+  var start = new Date().getTime();
   try {
     // Decide if we're on android or a normal browser.
     if (navigator.userAgent.toLowerCase().search('android') < 0) {
@@ -456,7 +464,7 @@ function setup3d(cv, cv3, code) {
   cv3.w = w;
   cv3.h = h;
 
-  gl = cv3.getContext('webgl') || cv3.getContext('experimental-webgl');
+  var gl = cv3.getContext('webgl') || cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
   var renderer = gl.getParameter(gl.RENDERER);
   if (!force_gpu) {
@@ -523,8 +531,17 @@ function draw3d(cv, cv3) {
 
   gl.useProgram(cv.program3d);
 
+  cv.last_time = cv.time;
+  cv.time = GetTime();
   var time_val_loc = gl.getUniformLocation(cv.program3d, 'time_val');
-  gl.uniform1f(time_val_loc, GetTime());
+  gl.uniform1f(time_val_loc, cv.time);
+  var time_delta_val_loc = gl.getUniformLocation(
+      cv.program3d, 'time_delta_val');
+  gl.uniform1f(time_delta_val_loc, cv.time - cv.last_time);
+
+  var button_loc = gl.getUniformLocation(
+      cv.program3d, 'button_val');
+  gl.uniform1fv(button_loc, new Float32Array(window.stroke_buttons));
 
   var aspect_val_loc = gl.getUniformLocation(cv.program3d, 'aspect');
   gl.uniform2f(aspect_val_loc, cv3.w, cv3.h);
@@ -543,6 +560,8 @@ function make_fragment_shader(input_code) {
       'precision highp float;',
       'varying vec2 tpos;',
       'uniform float time_val;',
+      'uniform float time_delta_val;',
+      'uniform float button_val[23];',
       'float PI = 3.1415926535897931;',
       'float PI2 = PI * 2.0;',
   ];
@@ -550,7 +569,7 @@ function make_fragment_shader(input_code) {
       'void main(void) {',
       'float work1, work2, work3, work4, seed;',
   ];
-  code = prefix.concat(main).concat(input_code.slice(1));
+  var code = prefix.concat(main).concat(input_code.slice(1));
   for (var i = 0; i < code.length; i++) {
     code[i] = code[i].replace(/var /g, 'float ');
     code[i] = code[i].replace(/xpos/g, 'tpos.x');
@@ -568,7 +587,8 @@ function make_fragment_shader(input_code) {
   code.splice(prefix.length, 0,
       'float gsin(float v) { return sin(mod(v, PI2)); }',
       'float gcos(float v) { return cos(mod(v, PI2)); }',
-      'float gtan(float v) { return tan(mod(v, PI2)); }');
+      'float gtan(float v) { return tan(mod(v, PI2)); }',
+      'float button(float v) { return button_val[int(mod(floor(v), 23))]; }');
   code[code.length-1] = code[code.length-1].replace(
       ']; }; go', '); ' +
       'gl_FragColor.r = min(max(0.0, gl_FragColor.r), 1.0); ' +
@@ -598,12 +618,12 @@ function code_animated(code) {
 
 function render(cv, cv3, animated, code, next) {
   if (cv.code == code) {
-    if (cv.program3d != undefined) draw3d(cv, cv3);
+    if (cv.program3d !== null) draw3d(cv, cv3);
     next();
     return;
   }
   cv.code = code;
-  cv.program3d = undefined;
+  cv.program3d = null;
 
   var compiled_code = compile(code, 4);
   var compiled_code_flat = compiled_code.join(' ');
@@ -617,6 +637,8 @@ function render(cv, cv3, animated, code, next) {
 
   try {
     if (compiled_code_flat.search('time_val') < 0 &&
+        compiled_code_flat.search('time_delta_val') < 0 &&
+        compiled_code_flat.search('button') < 0 &&
         compiled_code_flat.search('random') < 0 &&
         cv3.width <= 128) {
       throw 'only use for time_val and large';
@@ -648,7 +670,7 @@ function render(cv, cv3, animated, code, next) {
 
 function find_tags_named(base, tag, name) {
   tag = tag.toUpperCase();
-  found = [];
+  var found = [];
   for (var i = 0; i < base.childNodes.length; i++) {
     var child = base.childNodes[i];
     if (child.tagName == tag &&
@@ -731,7 +753,7 @@ function update_haikus(next) {
     var code = code_tag.value;
     // Create 2d canvas.
     var canvas2d = find_tag_name(haiku, 'canvas', 'canvas2d');
-    if (canvas2d == null) {
+    if (canvas2d === null) {
       canvas2d = document.createElement('canvas');
       canvas2d.name = 'canvas2d';
       canvas2d.style.display = 'block';
@@ -739,6 +761,10 @@ function update_haikus(next) {
       haiku.appendChild(canvas2d);
       canvas2d.setAttribute('width', haiku.getAttribute('width'));
       canvas2d.setAttribute('height', haiku.getAttribute('height'));
+      canvas2d.time = 0;
+      canvas2d.last_time = 0;
+      canvas2d.program3d = null;
+      canvas2d.code = null;
     }
     // Create 3d canvas.
     var canvas3d = find_tag_name(haiku, 'canvas', 'canvas3d');
@@ -883,10 +909,15 @@ function audio_haiku(code) {
     }
     audio_last_code[0] = code;
     var compiled_code = compile(code, 4);
-    compiled_code[0] = 'var go = function(time_val, xpos) { ' +
-                       'var ypos = 0.5; ' +
-                       'var dstack=[]; var rstack=[];';
-    var compiled_code_flat = compiled_code.join(' ');
+    compiled_code[0] =
+      'var go = function(time_val, xpos) { ' +
+        'var ypos = 0.5; ' +
+          'function button(v) { '
+          '  return window.stroke_button[Math.mod(Math.floor(v), 23)]; '
+          '} ' +
+          'var ypos = 0.5; ' +
+          'var dstack=[]; var rstack=[];';
+        var compiled_code_flat = compiled_code.join(' ');
     var func = eval(compiled_code_flat);
     audio_last_compile[0] = func;
     audio_function[0] = func;
@@ -907,6 +938,10 @@ function audio_toggle_play() {
 
 var haiku_touch_port = null;
 var haiku_touch_buffer = '';
+window.stroke_buttons = [];
+for (var i = 0; i < 23; i++) {
+  window.stroke_buttons.push(0);
+}
 
 function connect_touch() {
   try {
@@ -919,8 +954,14 @@ function connect_touch() {
         for (var i = 0; i < parts.length - 1; i++) {
           if (window.onstroke !== undefined &&
               parts[i].length !== 0) {
-            console.log('stroke: ' + parts[i]);
             try {
+              if (parts[i].substr(0, 1) === '~') {
+                window.stroke_buttons[parseInt(parts[i].substr(1))] = 1;
+              } else if (parts[i].substr(0, 1) === '^') {
+                window.stroke_buttons[parseInt(parts[i].substr(1))] = 0;
+              } else {
+                console.log('stroke: ' + parts[i]);
+              }
               window.onstroke(parts[i]);
             } catch(e) {
             }

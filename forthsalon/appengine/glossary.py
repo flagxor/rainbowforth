@@ -1,7 +1,6 @@
 import base64
 
 
-
 return_stack_text = (
     'Forth uses two stacks, the data stack and the return stack. '
     'Most operations occur on the data stack. The return stack '
@@ -62,7 +61,32 @@ core_words = [
     'summary': 'Put the current time in seconds since midnight on the stack.',
     'description': [
         'Unique to Haiku Forth. Returns a floating point number. '
+        'Intended to avoid run speed dependencies in stateful programs. '
+        ,
+        floating_point_text
+    ],
+  },
+  {
+    'names': ['dt'],
+    'stack': '( -- dt )',
+    'summary': 'Put the change in time since the last frame in seconds '
+               'on the stack.',
+    'description': [
+        'Unique to Haiku Forth. Returns a floating point number. '
         'Midnight based to allow local time clocks. '
+        ,
+        floating_point_text
+    ],
+  },
+  {
+    'names': ['button'],
+    'stack': '( n -- f )',
+    'summary': 'Put the state of a button on the stack.',
+    'description': [
+        'Unique to Haiku Forth. Returns a floating point number. '
+        'There are an unspecified number of buttons at each integer '
+        'input value. These buttons wrap. '
+        'One current implementation provides 23 buttons. '
         ,
         floating_point_text
     ],
@@ -773,7 +797,8 @@ for entry in core_words:
   entry['id'] = ids[0]
   entry['name'] = ' '.join(entry['names'])
 for entry in core_words:
-  entry['description'] = [FormatHtml(d, is_haiku=False) for d in entry['description']]
+  entry['description'] = [FormatHtml(d, is_haiku=False)
+      for d in entry['description']]
   if 'examples' in entry:
     nexamples = []
     for example in entry['examples']:
