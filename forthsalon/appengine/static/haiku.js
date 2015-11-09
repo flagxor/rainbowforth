@@ -539,8 +539,7 @@ function draw3d(cv, cv3) {
       cv.program3d, 'time_delta_val');
   gl.uniform1f(time_delta_val_loc, cv.time - cv.last_time);
 
-  var button_loc = gl.getUniformLocation(
-      cv.program3d, 'button_val');
+  var button_loc = gl.getUniformLocation(cv.program3d, 'button_val');
   gl.uniform1fv(button_loc, new Float32Array(window.stroke_buttons));
 
   var aspect_val_loc = gl.getUniformLocation(cv.program3d, 'aspect');
@@ -588,7 +587,12 @@ function make_fragment_shader(input_code) {
       'float gsin(float v) { return sin(mod(v, PI2)); }',
       'float gcos(float v) { return cos(mod(v, PI2)); }',
       'float gtan(float v) { return tan(mod(v, PI2)); }',
-      'float button(float v) { return button_val[int(mod(floor(v), 23.0))]; }');
+      'float button(float v) { ' +
+      '  for (int i = 0; i < 23; ++i) { ' +
+      '    if (i == int(mod(floor(v), 23.0))) return button_val[i]; ' +
+      '  } ' +
+      '  return 0.0; ' +
+      '}');
   code[code.length-1] = code[code.length-1].replace(
       ']; }; go', '); ' +
       'gl_FragColor.r = min(max(0.0, gl_FragColor.r), 1.0); ' +
@@ -638,7 +642,7 @@ function render(cv, cv3, animated, code, next) {
   try {
     if (compiled_code_flat.search('time_val') < 0 &&
         compiled_code_flat.search('time_delta_val') < 0 &&
-        compiled_code_flat.search('button') < 0 &&
+        compiled_code_flat.search('button(work1)') < 0 &&
         compiled_code_flat.search('random') < 0 &&
         cv3.width <= 128) {
       throw 'only use for time_val and large';
@@ -952,16 +956,16 @@ function connect_touch() {
       var parts = haiku_touch_buffer.split('\n');
       if (parts.length > 1) {
         for (var i = 0; i < parts.length - 1; i++) {
-          if (window.onstroke !== undefined &&
-              parts[i].length !== 0) {
+          if (parts[i].length === 0) continue;
+          if (parts[i].substr(0, 1) === '~') {
+            window.stroke_buttons[parseInt(parts[i].substr(1))] = 1.0;
+          } else if (parts[i].substr(0, 1) === '^') {
+            window.stroke_buttons[parseInt(parts[i].substr(1))] = 0.0;
+          } else {
+            console.log('stroke: ' + parts[i]);
+          }
+          if (window.onstroke !== 'undefined') {
             try {
-              if (parts[i].substr(0, 1) === '~') {
-                window.stroke_buttons[parseInt(parts[i].substr(1))] = 1;
-              } else if (parts[i].substr(0, 1) === '^') {
-                window.stroke_buttons[parseInt(parts[i].substr(1))] = 0;
-              } else {
-                console.log('stroke: ' + parts[i]);
-              }
               window.onstroke(parts[i]);
             } catch(e) {
             }
