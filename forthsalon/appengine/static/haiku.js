@@ -1023,7 +1023,7 @@ function connect_touch() {
   }
 }
 
-function send_to_touch(s) {
+window.stroke_print = function(s) {
   if (haiku_touch_port === null) {
     return;
   }
@@ -1033,4 +1033,47 @@ function send_to_touch(s) {
   }
 }
 
+function decodeKey(code) {
+  switch (code) {
+    case 81: return 0;  // q [#]
+    case 65: return 1;  // a [S]
+    case 87: return 2;  // w [T]
+    case 83: return 3;  // s [K]
+    case 69: return 4;  // e [P]
+    case 68: return 5;  // d [W]
+    case 82: return 6;  // r [H]
+    case 70: return 7;  // f [R]
+    case 67: return 8;  // c [A]
+    case 86: return 9;  // v [O]
+    case 72: return 10;  // h [*]
+    case 78: return 11;  // n [E]
+    case 77: return 12;  // m [U]
+    case 85: return 13;  // u [F]
+    case 74: return 14;  // j [R]
+    case 73: return 15;  // i [P]
+    case 75: return 16;  // k [B]
+    case 79: return 17;  // o [L]
+    case 76: return 18;  // l [G]
+    case 80: return 19;  // p [T]
+    case 186: return 20;  // ; [S]
+    case 219: return 21;  // [ [D]
+    case 222: return 22;  // ' [Z]
+  }
+  return null;
+}
+
 window.addEventListener('load', connect_touch);
+
+window.addEventListener('keydown', function(e) {
+  var k = decodeKey(e.keyCode);
+  if (k !== null) {
+    window.stroke_buttons |= (1<<k);
+  }
+});
+
+window.addEventListener('keyup', function(e) {
+  var k = decodeKey(e.keyCode);
+  if (k !== null) {
+    window.stroke_buttons &= ~(1<<k);
+  }
+});

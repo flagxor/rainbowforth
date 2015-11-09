@@ -31,6 +31,34 @@ memory_text = (
 )
 
 
+keyboard_text = (
+    'Keyboard is also attached at: '
+    'Q -> 0 '
+    'A -> 1 '
+    'W -> 2 '
+    'S -> 3 '
+    'E -> 4 '
+    'D -> 5 '
+    'R -> 6 '
+    'F -> 7 '
+    'C -> 8 '
+    'V -> 9 '
+    'H -> 10 '
+    'N -> 11 '
+    'M -> 12 '
+    'U -> 13 '
+    'J -> 14 '
+    'I -> 15'
+    'K -> 16 '
+    'O -> 17 '
+    'L -> 18 '
+    'P -> 19 '
+    '; -> 20 '
+    '[ -> 21 '
+    '\' -> 22 '
+)
+
+
 boolean_text = (
     'Boolean values in Haiku Forth are returned as 1 (true) or 0 (false). '
     'This is in contrast to traditional Forth in which -1 is used for true. '
@@ -98,6 +126,8 @@ core_words = [
         'There are an unspecified number of buttons. '
         'One current implementation provides 23 buttons. '
         ,
+        keyboard_text
+        ,
         floating_point_text
     ],
   },
@@ -110,6 +140,8 @@ core_words = [
         'Each button is represented by 1 bit position in the integer. '
         'There are an unspecified number of buttons. '
         'One current implementation provides 23 buttons. '
+        ,
+        keyboard_text
         ,
         floating_point_text
     ],

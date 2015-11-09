@@ -170,7 +170,8 @@ function pick_slide(index) {
   var label = document.getElementById('status');
   label.innerText = '' + (index + 1) + ' of ' + haiku_count;
   var source = document.getElementById('source');
-  source.innerText = code.value; 
+  source.innerText = code.value;
+  window.stroke_print(title.value + '\n');
 }
 </script>
 
