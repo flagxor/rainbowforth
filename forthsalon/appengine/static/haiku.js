@@ -30,7 +30,8 @@ function core_words() {
   dict['t'] = ['dstack.push(time_val);'];
   dict['dt'] = ['dstack.push(time_delta_val);'];
   dict['button'] = ['work1 = dstack.pop();',
-                    'dstack.push(button(work1));'];
+                    'dstack.push(hasbit(button_val, work1));'];
+  dict['buttons'] = ['dstack.push(button_val);'];
 
   dict['push'] = ['rstack.push(dstack.pop());'];
   dict['pop'] = ['dstack.push(rstack.pop());'];
@@ -39,6 +40,12 @@ function core_words() {
   dict['r@'] = ['work1 = rstack.pop();',
                 'rstack.push(work1);',
                 'dstack.push(work1);'];
+
+  dict['@'] = ['work1 = dstack.pop();',
+               'dstack.push(load(work1));'];
+  dict['!'] = ['work1 = dstack.pop();',
+               'work2 = dstack.pop();',
+               'store(work2, work1);'];
 
   dict['dup'] = ['work1 = dstack.pop();',
                  'dstack.push(work1);',
@@ -138,6 +145,11 @@ function mod(v1, v2) {
   return v1 - v2 * Math.floor(v1 / v2);
 }
 
+function hasbit(val, b) {
+  b = Math.floor(b);
+  return mod(val, Math.pow(2.0, b + 1)) >= Math.pow(2.0, b);
+}
+
 function code_tags(src) {
   var tags = [];
   var char_count = src.length;
@@ -171,7 +183,7 @@ function code_tags(src) {
   // Detect animation.
   for (var i = 0; i < words.length; i++) {
     var wl = words[i].toLowerCase();
-    if (wl === 't' || wl === 'dt' || wl === 'button') {
+    if (wl === 't' || wl === 'dt' || wl === 'button' || wl === 'buttons') {
       tags.push('animated');
       break;
     }
@@ -190,7 +202,7 @@ if (typeof String.prototype.trim != 'function') {
 }
 
 
-var BOGUS = ['var go = function(xpos, ypos) {',
+var BOGUS = ['var go = function(t, dt, xpos, ypos, memory) {',
              'return [1.0, 0.0, 0.7, 1.0, 0.0]; }; go'];
 
 
@@ -199,9 +211,13 @@ function optimize(code, result_limit) {
 
   // Use alternate pre/post-amble and optimize away dstack/rstack.
   code = code.slice(0, code.length - 1);
-  code[0] = 'var go = function(xpos, ypos) { ' +
-            'var time_val=0.0; var time_delta_val=0.0; ' +
-            'function button(x) { return 0; } ' +
+  code[0] = 'var go = function( ' +
+            '  time_val, time_delta_val, xpos, ypos, memory) { ' +
+            'var button_val = window.stroke_buttons; ' +
+            'function store(v, addr) { ' +
+            '  memory[mod(Math.floor(addr), 16)] = v; } ' +
+            'function load(addr) { ' +
+            '  return memory[mod(Math.floor(addr), 16)]; } ' +
             'var work1, work2, work3, work4;';
 
   var dstack = [];
@@ -311,9 +327,13 @@ function optimize(code, result_limit) {
 
 
 function compile(src_code, result_limit) {
-  var code = ['var go = function(xpos, ypos) { ' +
-              'var time_val=0.0; var time_delta_val=0.0; ' +
-              'function button(x) { return 0; } ' +
+  var code = ['var go = function( ' +
+              '  time_val, time_delta_val, xpos, ypos, memory) { ' +
+              'var button_val = window.stroke_buttons; ' +
+              'function store(v, addr) { ' +
+              '  memory[mod(Math.floor(addr), 16)] = v; } ' +
+              'function load(addr) { ' +
+              '  return memory[mod(Math.floor(addr), 16)]; } ' +
               'var dstack=[]; var rstack=[];'];
   var dict = core_words();
   var pending_name = 'bogus';
@@ -382,7 +402,7 @@ function render_rows(image, ctx, img, y, w, h, next) {
       while (y < h) {
         var pos = w * (h - 1 - y) * 4;
         for (var x = 0.5; x < w; x++) {
-          var col = image(x / w, (y + 0.5) / h);
+          var col = image(0.0, 0.0, x / w, (y + 0.5) / h);
           img.data[pos++] = Math.floor(col[0] * 255);
           img.data[pos++] = Math.floor(col[1] * 255);
           img.data[pos++] = Math.floor(col[2] * 255);
@@ -396,7 +416,7 @@ function render_rows(image, ctx, img, y, w, h, next) {
       while (y < h) {
         var pos = w * (h - 1 - y) * 4;
         for (var x = 0.5; x < w; x++) {
-          var col = image(x / w, (y + 0.5) / h);
+          var col = image(0.0, 0.0, x / w, (y + 0.5) / h);
           if (col[3] == null) col[3] = 1;
           if (isNaN(col[3])) col[3] = 0;
           var alpha = Math.min(Math.max(0.0, col[3]), 1.0);
@@ -540,7 +560,10 @@ function draw3d(cv, cv3) {
   gl.uniform1f(time_delta_val_loc, cv.time - cv.last_time);
 
   var button_loc = gl.getUniformLocation(cv.program3d, 'button_val');
-  gl.uniform1fv(button_loc, new Float32Array(window.stroke_buttons));
+  gl.uniform1f(button_loc, window.stroke_buttons);
+
+  var memory_loc = gl.getUniformLocation(cv.program3d, 'memory_val');
+  gl.uniform1fv(memory_loc, cv.memory);
 
   var aspect_val_loc = gl.getUniformLocation(cv.program3d, 'aspect');
   gl.uniform2f(aspect_val_loc, cv3.w, cv3.h);
@@ -552,6 +575,8 @@ function draw3d(cv, cv3) {
   var ctx = cv.getContext('2d');
   ctx.clearRect(0, 0, cv.width, cv.height);
   ctx.drawImage(cv3, 0, 0);
+
+  cv.image(cv.time, cv.time - cv.last_time, 0.0, 0.0, cv.memory);
 }
 
 function make_fragment_shader(input_code) {
@@ -560,13 +585,16 @@ function make_fragment_shader(input_code) {
       'varying vec2 tpos;',
       'uniform float time_val;',
       'uniform float time_delta_val;',
-      'uniform float button_val[23];',
+      'uniform float button_val;',
+      'uniform float memory_val[16];',
+      'float memory[16];',
       'float PI = 3.1415926535897931;',
       'float PI2 = PI * 2.0;',
   ];
   var main = [
       'void main(void) {',
       'float work1, work2, work3, work4, seed;',
+      'for (int i = 0; i < 16; ++i) { memory[i] = memory_val[i]; }',
   ];
   var code = prefix.concat(main).concat(input_code.slice(1));
   for (var i = 0; i < code.length; i++) {
@@ -587,11 +615,19 @@ function make_fragment_shader(input_code) {
       'float gsin(float v) { return sin(mod(v, PI2)); }',
       'float gcos(float v) { return cos(mod(v, PI2)); }',
       'float gtan(float v) { return tan(mod(v, PI2)); }',
-      'float button(float v) { ' +
-      '  for (int i = 0; i < 23; ++i) { ' +
-      '    if (i == int(mod(floor(v), 23.0))) return button_val[i]; ' +
+      'float hasbit(float v, float b) { ' +
+      '  b = floor(b); ' +
+      '  return mod(v, pow(2.0, b + 1.0)) >= pow(2.0, b) ? 1.0 : 0.0; } ',
+      'float load(float a) { ' +
+      '  for (int i = 0; i < 16; ++i) { ' +
+      '    if (i == int(mod(floor(a), 16.0))) return memory[i]; ' +
       '  } ' +
       '  return 0.0; ' +
+      '}',
+      'void store(float v, float a) { ' +
+      '  for (int i = 0; i < 16; ++i) { ' +
+      '    if (i == int(mod(floor(a), 16.0))) memory[i] = v; ' +
+      '  } ' +
       '}');
   code[code.length-1] = code[code.length-1].replace(
       ']; }; go', '); ' +
@@ -621,13 +657,14 @@ function code_animated(code) {
 }
 
 function render(cv, cv3, animated, code, next) {
-  if (cv.code == code) {
+  if (cv.code === code) {
     if (cv.program3d !== null) draw3d(cv, cv3);
     next();
     return;
   }
   cv.code = code;
   cv.program3d = null;
+  cv.memory = new Float32Array(16);
 
   var compiled_code = compile(code, 4);
   var compiled_code_flat = compiled_code.join(' ');
@@ -642,17 +679,19 @@ function render(cv, cv3, animated, code, next) {
   try {
     if (compiled_code_flat.search('time_val') < 0 &&
         compiled_code_flat.search('time_delta_val') < 0 &&
-        compiled_code_flat.search('button(work1)') < 0 &&
+        compiled_code_flat.search('button_val') < 0 &&
         compiled_code_flat.search('random') < 0 &&
         cv3.width <= 128) {
       throw 'only use for time_val and large';
     }
+    cv.image = eval(compiled_code_flat);
     setup3d(cv, cv3, compiled_code);
     draw3d(cv, cv3);
     setTimeout(next, 0);
     return;
   } catch (e) {
     // Fall back on software.
+    console.log(e);
   }
 
   try {
@@ -747,13 +786,11 @@ var shared_canvas3d = [];
 function update_haikus(next) {
   update_haiku_lists();
   var haikus = document.getElementsByName('haiku');
-  var first_code;
+  var first_haiku = null;
   var work = [];
   for (var i = 0; i < haikus.length; i++) {
     var haiku = haikus[i];
     var code_tag = find_tag(haiku, 'textarea');
-    // Keep first one for audio.
-    if (i == 0 ) { first_code = code_tag.value; }
     var code = code_tag.value;
     // Create 2d canvas.
     var canvas2d = find_tag_name(haiku, 'canvas', 'canvas2d');
@@ -769,7 +806,10 @@ function update_haikus(next) {
       canvas2d.last_time = 0;
       canvas2d.program3d = null;
       canvas2d.code = null;
+      canvas2d.memory = new Float32Array(16);
     }
+    // Keep first one for audio.
+    if (i === 0 ) { first_haiku = canvas2d; }
     // Create 3d canvas.
     var canvas3d = find_tag_name(haiku, 'canvas', 'canvas3d');
     if (canvas3d == null && shared_canvas3d.length >= 4) {
@@ -804,8 +844,8 @@ function update_haikus(next) {
     work.push([canvas2d, canvas3d, animated, code]);
   }
   // Do audio if there's only one.
-  if (work.length == 1) {
-    audio_haiku(first_code);
+  if (work.length === 1 && first_haiku !== null) {
+    audio_haiku(first_haiku);
   }
   update_haikus_one(work, next);
 }
@@ -840,10 +880,12 @@ try {
   audio_context = new AudioContext();
 } catch (e) {
 }
-var audio_off = function(t, x) { return [0, 0, 0, 1]; };
-var audio_function = [audio_off];
-var audio_last_compile = [audio_off];
-var audio_last_code = [''];
+var audio_off = function(t, x, memory) { return [0, 0, 0, 1]; };
+var audio_function = audio_off;
+var audio_memory = new Float32Array(16);
+var audio_canvas = null;
+var audio_last_compile = audio_off;
+var audio_last_code = '';
 var audio_last_sync = new Date().getTime();
 var audio_time_offset = 0;
 var audio_time_base = GetTime();
@@ -853,7 +895,7 @@ if (audio_context) {
   audio_src.onaudioprocess = function(e) {
     try {
       var data = e.outputBuffer.getChannelData(0);
-      var func = audio_function[0];
+      var func = audio_function;
       // Periodically go back in sync with the main clock.
       // This should be done gradually, but currently isn't.
       // This will produce periodic glitches.
@@ -863,6 +905,7 @@ if (audio_context) {
         audio_time_base = GetTime();
         audio_time_offset = 0;
       }
+      var memory = audio_memory.slice(0);
       // Decide the clock offset.
       var offset = audio_time_offset / audio_context.sampleRate +
                    audio_time_base;
@@ -872,7 +915,7 @@ if (audio_context) {
         var t0 = (j / audio_context.sampleRate + offset) % (60*60*24);
         var t1 = ((j + STEP) / audio_context.sampleRate + offset) % (60*60*24);
         function func1(t, x) {
-          var val = func(t, x)[0];
+          var val = func(t, x, memory)[0];
           return Math.min(Math.max(val, 0.0), 1.0);
         }
         var amp0 = func1(t0, 1.0);
@@ -900,33 +943,38 @@ if (audio_context) {
   audio_src.connect(audio_context.destination);
 }
 
-function audio_haiku(code) {
+function audio_haiku(cv) {
+  var code = cv.code;
   if (!audio_context) return;
   try {
     if (!audio_play) {
-      audio_function[0] = audio_off;
+      audio_function = audio_off;
       return;
     }
-    if (audio_last_code[0] == code) {
-      audio_function[0] = audio_last_compile[0];
+    if (audio_last_code === code) {
+      audio_function = audio_last_compile;
       return;
     }
-    audio_last_code[0] = code;
+    audio_last_code = code;
     var compiled_code = compile(code, 4);
     compiled_code[0] =
-        'var go = function(time_val, xpos) { ' +
+        'var go = function(time_val, xpos, memory) { ' +
+        'var button_val = window.stroke_buttons; ' +
         'var time_delta_val = 0.0; ' +
         'var ypos = 0.5; ' +
-        'function button(v) { ' +
-        '  return window.stroke_buttons[mod(Math.floor(v), 23)]; ' +
-        '}';
+        'function store(v, addr) { ' +
+        '  memory[mod(Math.floor(addr), 16)] = v; } ' +
+        'function load(addr) { ' +
+        '  return memory[mod(Math.floor(addr), 16)]; } ' +
+        'var work1, work2, work3, work4;';
     var compiled_code_flat = compiled_code.join(' ');
-    console.log(compiled_code_flat);
     var func = eval(compiled_code_flat);
-    audio_last_compile[0] = func;
-    audio_function[0] = func;
+    audio_last_compile = func;
+    audio_function = func;
+    audio_memory = cv.memory;
+    audio_canvas = cv;
   } catch (e) {
-    audio_function[0] = audio_off;
+    audio_function = audio_off;
   }
 }
 
@@ -942,10 +990,7 @@ function audio_toggle_play() {
 
 var haiku_touch_port = null;
 var haiku_touch_buffer = '';
-window.stroke_buttons = [];
-for (var i = 0; i < 23; i++) {
-  window.stroke_buttons.push(0);
-}
+window.stroke_buttons = 0;
 
 function connect_touch() {
   try {
@@ -958,9 +1003,9 @@ function connect_touch() {
         for (var i = 0; i < parts.length - 1; i++) {
           if (parts[i].length === 0) continue;
           if (parts[i].substr(0, 1) === '~') {
-            window.stroke_buttons[parseInt(parts[i].substr(1))] = 1.0;
+            window.stroke_buttons |= 1 << (parseInt(parts[i].substr(1)));
           } else if (parts[i].substr(0, 1) === '^') {
-            window.stroke_buttons[parseInt(parts[i].substr(1))] = 0.0;
+            window.stroke_buttons &= ~(1 << (parseInt(parts[i].substr(1))));
           } else {
             console.log('stroke: ' + parts[i]);
           }

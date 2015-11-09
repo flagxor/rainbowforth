@@ -16,7 +16,18 @@ return_stack_text = (
 
 floating_point_text = (
     'NOTE: In Haiku Forth (unlike Traditional Forth), all stack cells and '
-    'variables are floating point numbers. '
+    'memory locations are floating point numbers. '
+)
+
+
+memory_text = (
+    'In Haiku Forth, only 16 memory locations 0-15 are provided. '
+    'Fractional addresses, are floored. '
+    'Out of bounds addresses are wrapped. '
+    'While accessible from each pixel location, '
+    'only values stored when x=0,y=0 are persisted to the next frame. '
+    'NOTE: The memory layout of Haiku Forth may change in the future. '
+    'Do not rely on wrap around. '
 )
 
 
@@ -80,13 +91,45 @@ core_words = [
   },
   {
     'names': ['button'],
-    'stack': '( n -- f )',
-    'summary': 'Put the state of a button on the stack.',
+    'stack': '( n -- n )',
+    'summary': 'Put the state of a given button on the stack.',
     'description': [
-        'Unique to Haiku Forth. Returns a floating point number. '
-        'There are an unspecified number of buttons at each integer '
-        'input value. These buttons wrap. '
+        'Unique to Haiku Forth. Returns an integer number. '
+        'There are an unspecified number of buttons. '
         'One current implementation provides 23 buttons. '
+        ,
+        floating_point_text
+    ],
+  },
+  {
+    'names': ['buttons'],
+    'stack': '( -- n )',
+    'summary': 'Put the state of several buttons on the stack.',
+    'description': [
+        'Unique to Haiku Forth. Returns an integer number. '
+        'Each button is represented by 1 bit position in the integer. '
+        'There are an unspecified number of buttons. '
+        'One current implementation provides 23 buttons. '
+        ,
+        floating_point_text
+    ],
+  },
+  {
+    'names': ['@'],
+    'stack': '( a -- n )',
+    'summary': 'Read the value at a memory address.',
+    'description': [
+        memory_text
+        ,
+        floating_point_text
+    ],
+  },
+  {
+    'names': ['!'],
+    'stack': '( n a -- )',
+    'summary': 'Store a value to a memory address.',
+    'description': [
+        memory_text
         ,
         floating_point_text
     ],
