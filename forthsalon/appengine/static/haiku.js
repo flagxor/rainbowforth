@@ -914,10 +914,10 @@ if (audio_context) {
       for (var j = 0; j < data.length; j+=STEP) {
         var t0 = (j / audio_context.sampleRate + offset) % (60*60*24);
         var t1 = ((j + STEP) / audio_context.sampleRate + offset) % (60*60*24);
-        function func1(t, x) {
+        var func1 = function(t, x) {
           var val = func(t, x, memory)[0];
           return Math.min(Math.max(val, 0.0), 1.0);
-        }
+        };
         var amp0 = func1(t0, 1.0);
         var amp1 = func1(t1, 1.0);
         var note0 = Math.floor(func1(t0, 0.0) * NOTES);
