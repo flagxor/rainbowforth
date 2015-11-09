@@ -131,13 +131,13 @@ function init() {
   animate_haikus(function() {});
 
   window.onstroke = function(s) {
-    if (s === 'F') {
+    if (s === 'f') {
       return slide_prev();
-    } else if (s === 'T') {
+    } else if (s === 't') {
       return slide_next();
-    } else if (s === 'B') {
+    } else if (s === 'b') {
       return slide_scroll();
-    } else if (s === 'AWD' || s === 'AUD') {
+    } else if (s === 'awd' || s === 'aud') {
       audio_toggle_play();
       return false;
     }
