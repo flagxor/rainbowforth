@@ -914,14 +914,14 @@ function audio_haiku(code) {
     audio_last_code[0] = code;
     var compiled_code = compile(code, 4);
     compiled_code[0] =
-      'var go = function(time_val, xpos) { ' +
+        'var go = function(time_val, xpos) { ' +
+        'var time_delta_val = 0.0; ' +
         'var ypos = 0.5; ' +
-          'function button(v) { '
-          '  return window.stroke_button[Math.mod(Math.floor(v), 23)]; '
-          '} ' +
-          'var ypos = 0.5; ' +
-          'var dstack=[]; var rstack=[];';
-        var compiled_code_flat = compiled_code.join(' ');
+        'function button(v) { ' +
+        '  return window.stroke_buttons[mod(Math.floor(v), 23)]; ' +
+        '}';
+    var compiled_code_flat = compiled_code.join(' ');
+    console.log(compiled_code_flat);
     var func = eval(compiled_code_flat);
     audio_last_compile[0] = func;
     audio_function[0] = func;
