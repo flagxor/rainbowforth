@@ -588,7 +588,7 @@ function make_fragment_shader(input_code) {
       'float gsin(float v) { return sin(mod(v, PI2)); }',
       'float gcos(float v) { return cos(mod(v, PI2)); }',
       'float gtan(float v) { return tan(mod(v, PI2)); }',
-      'float button(float v) { return button_val[int(mod(floor(v), 23))]; }');
+      'float button(float v) { return button_val[int(mod(floor(v), 23.0))]; }');
   code[code.length-1] = code[code.length-1].replace(
       ']; }; go', '); ' +
       'gl_FragColor.r = min(max(0.0, gl_FragColor.r), 1.0); ' +
