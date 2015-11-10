@@ -619,14 +619,16 @@ function make_fragment_shader(input_code) {
       '  b = floor(b); ' +
       '  return mod(v, pow(2.0, b + 1.0)) >= pow(2.0, b) ? 1.0 : 0.0; } ',
       'float load(float a) { ' +
+      '  int ai = int(mod(floor(a), 16.0)); ' +
       '  for (int i = 0; i < 16; ++i) { ' +
-      '    if (i == int(mod(floor(a), 16.0))) return memory[i]; ' +
+      '    if (i == ai) return memory[i]; ' +
       '  } ' +
       '  return 0.0; ' +
       '}',
       'void store(float v, float a) { ' +
+      '  int ai = int(mod(floor(a), 16.0)); ' +
       '  for (int i = 0; i < 16; ++i) { ' +
-      '    if (i == int(mod(floor(a), 16.0))) memory[i] = v; ' +
+      '    if (i == ai) memory[i] = v; ' +
       '  } ' +
       '}');
   code[code.length-1] = code[code.length-1].replace(
