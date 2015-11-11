@@ -206,8 +206,20 @@ if (typeof String.prototype.trim != 'function') {
 }
 
 
-var BOGUS = ['var go = function(t, dt, xpos, ypos, memory) {',
-             'return [1.0, 0.0, 0.7, 1.0, 0.0]; }; go'];
+var FUNC_SIGNATURE =
+    'var go = function( ' +
+    '  time_val, time_delta_val, ' +
+    '  xpos, ypos, ' +
+    '  mouse_x, mouse_y, ' +
+    '  button_val, '+
+    '  memory) { ' +
+    'function store(v, addr) { ' +
+    '  memory[mod(Math.floor(addr), 16)] = v; } ' +
+    'function load(addr) { ' +
+    '  return memory[mod(Math.floor(addr), 16)]; } ';
+
+
+var BOGUS = [FUNC_SIGNATURE + 'return [1.0, 0.0, 0.7, 1.0, 0.0]; }; go'];
 
 
 function optimize(code, result_limit) {
@@ -215,15 +227,7 @@ function optimize(code, result_limit) {
 
   // Use alternate pre/post-amble and optimize away dstack/rstack.
   code = code.slice(0, code.length - 1);
-  code[0] = 'var go = function( ' +
-            '  time_val, time_delta_val, xpos, ypos, memory) { ' +
-            'var button_val = 0; ' +
-            'var mouse_x = 0; var mouse_y = 0; ' +
-            'function store(v, addr) { ' +
-            '  memory[mod(Math.floor(addr), 16)] = v; } ' +
-            'function load(addr) { ' +
-            '  return memory[mod(Math.floor(addr), 16)]; } ' +
-            'var work1, work2, work3, work4;';
+  code[0] = FUNC_SIGNATURE + ' var work1, work2, work3, work4; ';
 
   var dstack = [];
   var rstack = [];
@@ -331,16 +335,9 @@ function optimize(code, result_limit) {
 }
 
 
-function compile(src_code, result_limit) {
-  var code = ['var go = function( ' +
-              '  time_val, time_delta_val, xpos, ypos, memory) { ' +
-              'var button_val = 0; ' +
-              'var mouse_x = 0; var mouse_y = 0; ' +
-              'function store(v, addr) { ' +
-              '  memory[mod(Math.floor(addr), 16)] = v; } ' +
-              'function load(addr) { ' +
-              '  return memory[mod(Math.floor(addr), 16)]; } ' +
-              'var dstack=[]; var rstack=[];'];
+function compile(src_code) {
+  var result_limit = 4;
+  var code = [FUNC_SIGNATURE + ' var dstack=[]; var rstack=[]; '];
   var dict = core_words();
   var pending_name = 'bogus';
   var code_stack = [];
@@ -408,7 +405,7 @@ function render_rows(image, ctx, img, y, w, h, next) {
       while (y < h) {
         var pos = w * (h - 1 - y) * 4;
         for (var x = 0.5; x < w; x++) {
-          var col = image(0.0, 0.0, x / w, (y + 0.5) / h);
+          var col = image(x / w, (y + 0.5) / h);
           img.data[pos++] = Math.floor(col[0] * 255);
           img.data[pos++] = Math.floor(col[1] * 255);
           img.data[pos++] = Math.floor(col[2] * 255);
@@ -422,7 +419,7 @@ function render_rows(image, ctx, img, y, w, h, next) {
       while (y < h) {
         var pos = w * (h - 1 - y) * 4;
         for (var x = 0.5; x < w; x++) {
-          var col = image(0.0, 0.0, x / w, (y + 0.5) / h);
+          var col = image(x / w, (y + 0.5) / h);
           if (col[3] == null) col[3] = 1;
           if (isNaN(col[3])) col[3] = 0;
           var alpha = Math.min(Math.max(0.0, col[3]), 1.0);
@@ -587,7 +584,7 @@ function draw3d(cv, cv3) {
   ctx.clearRect(0, 0, cv.width, cv.height);
   ctx.drawImage(cv3, 0, 0);
 
-  cv.image(cv.time, cv.time - cv.last_time, 0.0, 0.0, cv.memory);
+  cv.image(cv.time, cv.time - cv.last_time, cv.memory);
 }
 
 function make_fragment_shader(input_code) {
@@ -680,8 +677,9 @@ function render(cv, cv3, animated, code, next) {
   cv.program3d = null;
   cv.memory = new Float32Array(16);
 
-  var compiled_code = compile(code, 4);
-  var compiled_code_flat = compiled_code.join(' ');
+  var compiled_code = compile(code);
+  var code_joined = compiled_code.join('\n');
+  var func = eval(code_joined);
 
   // Set animated to visible or not.
   if (code_animated(code)) {
@@ -691,16 +689,20 @@ function render(cv, cv3, animated, code, next) {
   }
 
   try {
-    if (compiled_code_flat.search('time_val') < 0 &&
-        compiled_code_flat.search('time_delta_val') < 0 &&
-        compiled_code_flat.search('button_val') < 0 &&
-        compiled_code_flat.search('random') < 0 &&
-        compiled_code_flat.search('mouse_x') < 0 &&
-        compiled_code_flat.search('mouse_y') < 0 &&
+    if (code_joined.search('time_val') < 0 &&
+        code_joined.search('time_delta_val') < 0 &&
+        code_joined.search('button_val') < 0 &&
+        code_joined.search('random') < 0 &&
+        code_joined.search('mouse_x') < 0 &&
+        code_joined.search('mouse_y') < 0 &&
         cv3.width <= 128) {
       throw 'only use for time_val and large';
     }
-    cv.image = eval(compiled_code_flat);
+    cv.image = function(t, dt, x, y) {
+      return func(
+          t, dt, x, y, cv.mouse_x, cv.mouse_y,
+          window.stroke_buttons, cv.memory);
+    };
     setup3d(cv, cv3, compiled_code);
     draw3d(cv, cv3);
     setTimeout(next, 0);
@@ -711,7 +713,10 @@ function render(cv, cv3, animated, code, next) {
   }
 
   try {
-    var image = eval(compiled_code_flat);
+    var image = function(x, y) {
+      var mem = new Float32Array(16);
+      return func(0, 0, x, y, 0, 0, 0, mem);
+    };
     var ctx = cv.getContext('2d');
     var w = cv.width;
     var h = cv.height;
@@ -1044,23 +1049,15 @@ function audio_haiku(cv) {
       return;
     }
     audio_last_code = code;
-    var compiled_code = compile(code, 4);
-    compiled_code[0] =
-        'var go = function(time_val, xpos, memory) { ' +
-        'var button_val = window.stroke_buttons; ' +
-        'var mouse_x = audio_canvas.mouse_x; ' +
-        'var mouse_y = audio_canvas.mouse_y; ' +
-        'var time_delta_val = 0.0; ' +
-        'var ypos = 0.5; ' +
-        'function store(v, addr) { ' +
-        '  memory[mod(Math.floor(addr), 16)] = v; } ' +
-        'function load(addr) { ' +
-        '  return memory[mod(Math.floor(addr), 16)]; } ' +
-        'var work1, work2, work3, work4;';
-    var compiled_code_flat = compiled_code.join(' ');
-    var func = eval(compiled_code_flat);
-    audio_last_compile = func;
-    audio_function = func;
+    var compiled_code = compile(code);
+    var func = eval(compiled_code.join('\n'));
+    var image = function(t, x, mem) {
+      return func(
+          t, 0, x, 0.5, cv.mouse_x, cv.mouse_y,
+          window.stroke_buttons, mem);
+    };
+    audio_last_compile = image;
+    audio_function = image;
     audio_memory = cv.memory;
     audio_canvas = cv;
   } catch (e) {
