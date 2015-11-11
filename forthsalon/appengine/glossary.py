@@ -32,8 +32,9 @@ memory_text = (
 
 
 keyboard_text = (
+    'Mouse clicks and single or double touch on touch devices go button 0. '
     'Keyboard is also attached at: '
-    'Q -> 0 '
+    'Q (also mouse + touch) -> 0 '
     'A -> 1 '
     'W -> 2 '
     'S -> 3 '
@@ -113,6 +114,26 @@ core_words = [
     'description': [
         'Unique to Haiku Forth. Returns a floating point number. '
         'Midnight based to allow local time clocks. '
+        ,
+        floating_point_text
+    ],
+  },
+  {
+    'names': ['mx'],
+    'stack': '( -- x )',
+    'summary': 'Put the current x-coordinate of the mouse on the stack.',
+    'description': [
+        'Unique to Haiku Forth. Uses the same coordinate space as x. '
+        ,
+        floating_point_text
+    ],
+  },
+  {
+    'names': ['my'],
+    'stack': '( -- y )',
+    'summary': 'Put the current y-coordinate of the mouse on the stack.',
+    'description': [
+        'Unique to Haiku Forth. Uses the same coordinate space as y. '
         ,
         floating_point_text
     ],

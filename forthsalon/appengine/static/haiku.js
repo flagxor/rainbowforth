@@ -27,6 +27,8 @@ function core_words() {
   var dict = new Object();
   dict['x'] = ['dstack.push(xpos);'];
   dict['y'] = ['dstack.push(ypos);'];
+  dict['mx'] = ['dstack.push(mouse_x);'];
+  dict['my'] = ['dstack.push(mouse_y);'];
   dict['t'] = ['dstack.push(time_val);'];
   dict['dt'] = ['dstack.push(time_delta_val);'];
   dict['button'] = ['work1 = dstack.pop();',
@@ -183,7 +185,9 @@ function code_tags(src) {
   // Detect animation.
   for (var i = 0; i < words.length; i++) {
     var wl = words[i].toLowerCase();
-    if (wl === 't' || wl === 'dt' || wl === 'button' || wl === 'buttons') {
+    if (wl === 't' || wl === 'dt' ||
+        wl === 'button' || wl === 'buttons' ||
+        wl === 'mx' || wl === 'my') {
       tags.push('animated');
       break;
     }
@@ -213,7 +217,8 @@ function optimize(code, result_limit) {
   code = code.slice(0, code.length - 1);
   code[0] = 'var go = function( ' +
             '  time_val, time_delta_val, xpos, ypos, memory) { ' +
-            'var button_val = window.stroke_buttons; ' +
+            'var button_val = 0; ' +
+            'var mouse_x = 0; var mouse_y = 0; ' +
             'function store(v, addr) { ' +
             '  memory[mod(Math.floor(addr), 16)] = v; } ' +
             'function load(addr) { ' +
@@ -329,7 +334,8 @@ function optimize(code, result_limit) {
 function compile(src_code, result_limit) {
   var code = ['var go = function( ' +
               '  time_val, time_delta_val, xpos, ypos, memory) { ' +
-              'var button_val = window.stroke_buttons; ' +
+              'var button_val = 0; ' +
+              'var mouse_x = 0; var mouse_y = 0; ' +
               'function store(v, addr) { ' +
               '  memory[mod(Math.floor(addr), 16)] = v; } ' +
               'function load(addr) { ' +
@@ -559,6 +565,11 @@ function draw3d(cv, cv3) {
       cv.program3d, 'time_delta_val');
   gl.uniform1f(time_delta_val_loc, cv.time - cv.last_time);
 
+  var mouse_x_loc = gl.getUniformLocation(cv.program3d, 'mouse_x');
+  gl.uniform1f(mouse_x_loc, cv.mouse_x);
+  var mouse_y_loc = gl.getUniformLocation(cv.program3d, 'mouse_y');
+  gl.uniform1f(mouse_y_loc, cv.mouse_y);
+
   var button_loc = gl.getUniformLocation(cv.program3d, 'button_val');
   gl.uniform1f(button_loc, window.stroke_buttons);
 
@@ -586,6 +597,7 @@ function make_fragment_shader(input_code) {
       'uniform float time_val;',
       'uniform float time_delta_val;',
       'uniform float button_val;',
+      'uniform float mouse_x, mouse_y;',
       'uniform float memory_val[16];',
       'float memory[16];',
       'float PI = 3.1415926535897931;',
@@ -683,6 +695,8 @@ function render(cv, cv3, animated, code, next) {
         compiled_code_flat.search('time_delta_val') < 0 &&
         compiled_code_flat.search('button_val') < 0 &&
         compiled_code_flat.search('random') < 0 &&
+        compiled_code_flat.search('mouse_x') < 0 &&
+        compiled_code_flat.search('mouse_y') < 0 &&
         cv3.width <= 128) {
       throw 'only use for time_val and large';
     }
@@ -809,6 +823,8 @@ function update_haikus(next) {
       canvas2d.program3d = null;
       canvas2d.code = null;
       canvas2d.memory = new Float32Array(16);
+      canvas2d.mouse_x = 0;
+      canvas2d.mouse_y = 0;
     }
     // Keep first one for audio.
     if (i === 0 ) { first_haiku = canvas2d; }
@@ -832,6 +848,76 @@ function update_haikus(next) {
         canvas3d.code = null;
       }, false);
     }
+    // Update Mouse
+    var updateMouse = function(x, y) {
+      var xx = (x - canvas2d.getBoundingClientRect().left) /
+        canvas2d.clientWidth;
+      var yy = (y - canvas2d.getBoundingClientRect().top) /
+        canvas2d.clientHeight;
+      xx = xx * 2 - 1;
+      yy = 1 - yy * 2;
+      xx *= canvas3d.w;
+      yy *= canvas3d.h;
+      xx = (xx + 1) / 2;
+      yy = (yy + 1) / 2;
+      canvas2d.mouse_x = xx;
+      canvas2d.mouse_y = yy;
+    };
+    // Add mouse handling.
+    canvas2d.dragging = false;
+    window.addEventListener('mousemove', function(e) {
+      updateMouse(e.clientX, e.clientY);
+      if (canvas2d.dragging) {
+        e.preventDefault();
+      }
+    }, true);
+    canvas2d.addEventListener('mousedown', function(e) {
+      window.stroke_buttons |= 1;
+      e.preventDefault();
+      canvas2d.dragging = true;
+    }, true);
+    window.addEventListener('mouseup', function(e) {
+      if (!e.buttons) {
+        window.stroke_buttons &= (~1);
+        canvas2d.dragging = false;
+      }
+      e.preventDefault();
+    }, true);
+    // Handle touch events.
+    var multitouch = false;
+    if (navigator.msMaxTouchPoints !== undefined &&
+        navigator.msMaxTouchPoints > 1) {
+      multitouch = true;
+    }
+    if (navigator.maxTouchPoints !== undefined &&
+        navigator.maxTouchPoints > 1) {
+      multitouch = true;
+    }
+    canvas2d.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      if (multitouch) {
+        if (e.touches.length >= 2) {
+          window.stroke_buttons |= 1;
+        }
+      } else {
+        window.stroke_buttons |= 1;
+      }
+      updateMouse(e.touches.item(0).clientX, e.touches.item(0).clientY);
+    }, true);
+    canvas2d.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      if (multitouch) {
+        if (e.touches.length < 2) {
+          window.stroke_buttons &= (~1);
+        }
+      } else {
+        window.stroke_buttons &= (~1);
+      }
+    }, true);
+    canvas2d.addEventListener('touchmove', function(e) {
+      e.preventDefault();
+      updateMouse(e.touches.item(0).clientX, e.touches.item(0).clientY);
+    }, true);
     // Create animated tag.
     var animated = find_tag_name(haiku, 'a', 'animated');
     if (animated == null) {
@@ -962,6 +1048,8 @@ function audio_haiku(cv) {
     compiled_code[0] =
         'var go = function(time_val, xpos, memory) { ' +
         'var button_val = window.stroke_buttons; ' +
+        'var mouse_x = audio_canvas.mouse_x; ' +
+        'var mouse_y = audio_canvas.mouse_y; ' +
         'var time_delta_val = 0.0; ' +
         'var ypos = 0.5; ' +
         'function store(v, addr) { ' +
