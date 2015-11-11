@@ -715,7 +715,7 @@ function render(cv, cv3, animated, code, next) {
   try {
     var image = function(x, y) {
       var mem = new Float32Array(16);
-      return func(0, 0, x, y, 0, 0, 0, mem);
+      return func(0.3, 0, x, y, 0, 0, 0, mem);
     };
     var ctx = cv.getContext('2d');
     var w = cv.width;
