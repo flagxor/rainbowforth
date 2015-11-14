@@ -246,6 +246,13 @@ class HaikuAnimatedPage(webapp2.RequestHandler):
     }))
 
 
+class HaikuInteractivePage(webapp2.RequestHandler):
+  def get(self):
+    template = JINJA_ENVIRONMENT.get_template('haiku-interactive.html')
+    self.response.out.write(template.render({
+    }))
+
+
 class HaikuSoundPage(webapp2.RequestHandler):
   def get(self):
     template = JINJA_ENVIRONMENT.get_template('haiku-sound.html')

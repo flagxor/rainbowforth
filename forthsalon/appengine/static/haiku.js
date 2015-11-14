@@ -182,13 +182,14 @@ function code_tags(src) {
     // Anything else is long.
     tags.push('style:long');
   }
-  // Detect animation.
+  // Detect animation / interactive.
   for (var i = 0; i < words.length; i++) {
     var wl = words[i].toLowerCase();
-    if (wl === 't' || wl === 'dt' ||
-        wl === 'button' || wl === 'buttons' ||
-        wl === 'mx' || wl === 'my') {
+    if (wl === 't' || wl === 'dt') {
       tags.push('animated');
+    } else if (wl === 'button' || wl === 'buttons' ||
+               wl === 'mx' || wl === 'my') {
+      tags.push('interactive');
       break;
     }
   }
@@ -667,7 +668,15 @@ function code_animated(code) {
   return false;
 }
 
-function render(cv, cv3, animated, code, next) {
+function code_interactive(code) {
+  var tags = code_tags(code);
+  for (var i = 0; i < tags.length; i++) {
+    if (tags[i] == 'interactive') return true;
+  }
+  return false;
+}
+
+function render(cv, cv3, category, code, next) {
   if (cv.code === code) {
     if (cv.program3d !== null) draw3d(cv, cv3);
     next();
@@ -681,11 +690,17 @@ function render(cv, cv3, animated, code, next) {
   var code_joined = compiled_code.join('\n');
   var func = eval(code_joined);
 
-  // Set animated to visible or not.
-  if (code_animated(code)) {
-    animated.style.display = 'inline';
+  // Handle category label and visibility.
+  if (code_interactive(code)) {
+    category.style.display = 'inline';
+    category.innerText = ' int ';
+    category.href = '/haiku-interactive';
+  } else if (code_animated(code)) {
+    category.style.display = 'inline';
+    category.innerText = ' ani ';
+    category.href = '/haiku-animated';
   } else {
-    animated.style.display = 'none';
+    category.style.display = 'none';
   }
 
   try {
@@ -762,10 +777,10 @@ function update_haikus_one(work, next) {
   }
   var canvas2d = work[0][0];
   var canvas3d = work[0][1];
-  var animated = work[0][2];
+  var category = work[0][2];
   var code = work[0][3];
   work = work.slice(1);
-  render(canvas2d, canvas3d, animated, code, function() {
+  render(canvas2d, canvas3d, category, code, function() {
     update_haikus_one(work, next);
   });
 }
@@ -923,18 +938,16 @@ function update_haikus(next) {
       e.preventDefault();
       updateMouse(e.touches.item(0).clientX, e.touches.item(0).clientY);
     }, true);
-    // Create animated tag.
-    var animated = find_tag_name(haiku, 'a', 'animated');
-    if (animated == null) {
-      animated = document.createElement('a');
-      animated.appendChild(document.createTextNode(' a '));
-      animated.name = 'animated';
-      animated.href = '/haiku-animated';
-      animated.style.display = 'none';
-      haiku.insertBefore(animated, haiku.firstChild);
+    // Create category tag.
+    var category = find_tag_name(haiku, 'a', 'category');
+    if (category == null) {
+      category = document.createElement('a');
+      category.name = 'category';
+      category.style.display = 'none';
+      haiku.insertBefore(category, haiku.firstChild);
     }
     // Add to the work queue.
-    work.push([canvas2d, canvas3d, animated, code]);
+    work.push([canvas2d, canvas3d, category, code]);
   }
   // Do audio if there's only one.
   if (work.length === 1 && first_haiku !== null) {
