@@ -693,7 +693,7 @@ function render(cv, cv3, category, code, next) {
   // Handle category label and visibility.
   if (code_interactive(code)) {
     category.style.display = 'inline';
-    category.innerHTML = ' &#9758; ';
+    category.innerHTML = ' &#127918; ';
     category.href = '/haiku-interactive';
   } else if (code_animated(code)) {
     category.style.display = 'inline';
