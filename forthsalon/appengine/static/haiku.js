@@ -944,6 +944,7 @@ function update_haikus(next) {
       category = document.createElement('a');
       category.name = 'category';
       category.style.display = 'none';
+      category.style.backgroundColor = 'white';
       haiku.insertBefore(category, haiku.firstChild);
     }
     // Add to the work queue.
