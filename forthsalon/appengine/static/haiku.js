@@ -5,6 +5,7 @@ var NOTE_BASE = 10;
 var STEP = 2048;
 
 var all_haikus = {};
+var haiku_count = 0;
 
 function start_fetch() {
   var fetcher = new Worker('fetch.js');
@@ -383,6 +384,9 @@ function compile(src_code) {
         if (num.match(/^[-]?[0-9]+$/)) {
           num += '.0';
         }
+        if (num === 'NaN') {
+          num = '0.0';
+        }
         code.push('dstack.push(' + num + ');');
       }
     }
@@ -613,7 +617,6 @@ function make_fragment_shader(input_code) {
     code[i] = code[i].replace(/ypos/g, 'tpos.y');
     code[i] = code[i].replace(/Math\./g, '');
     code[i] = code[i].replace(/atan2/g, 'atan');
-    code[i] = code[i].replace(/NaN/g, '0.0');
     code[i] = code[i].replace(/random\(\)/g,
         '(seed=fract(sin(104053.0*seed+mod(time_val, 100003.0)+' +
         '101869.0*tpos.x+102533.0*tpos.y)*103723.0))');
@@ -687,8 +690,7 @@ function render(cv, cv3, category, code, next) {
   cv.memory = new Float32Array(16);
 
   var compiled_code = compile(code);
-  var code_joined = compiled_code.join('\n');
-  var func = eval(code_joined);
+  var func = eval(compiled_code.join('\n'));
 
   // Handle category label and visibility.
   if (code_interactive(code)) {
@@ -704,14 +706,8 @@ function render(cv, cv3, category, code, next) {
   }
 
   try {
-    if (code_joined.search('time_val') < 0 &&
-        code_joined.search('time_delta_val') < 0 &&
-        code_joined.search('button_val') < 0 &&
-        code_joined.search('random') < 0 &&
-        code_joined.search('mouse_x') < 0 &&
-        code_joined.search('mouse_y') < 0 &&
-        cv3.width <= 128) {
-      throw 'only use for time_val and large';
+    if (haiku_count > 1 && cv3.width <= 128) {
+      throw 'only use for large and single';
     }
     cv.image = function(t, dt, x, y) {
       return func(
@@ -822,6 +818,7 @@ var shared_canvas3d = [];
 function update_haikus(next) {
   update_haiku_lists();
   var haikus = document.getElementsByName('haiku');
+  haiku_count = haikus.length;
   var first_haiku = null;
   var work = [];
   for (var i = 0; i < haikus.length; i++) {
