@@ -29,10 +29,10 @@
 </div>
 {% endfor %}
 
-{% if more and cursor %}
+{% if cursor %}
 <br/>
 <h3>
-  <a href="/haiku-search?s={{ search|escape }}&cursor={{ cursor|escape }}&phase={{ phase|escape }}">Next</a>
+  <a href="/haiku-search?s={{ search|escape }}&cursor={{ cursor|escape }}">Next</a>
 </h3>
 {% endif %}
 

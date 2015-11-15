@@ -6,6 +6,8 @@ threadsafe: true
 
 default_expiration: "10m"
 
+builtins:
+- deferred: on
 
 handlers:
 - url: /static

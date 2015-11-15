@@ -11,13 +11,17 @@ import jinja2
 import webapp2
 
 from google.appengine.api import memcache
-from google.appengine.datastore.datastore_query import Cursor
-from google.appengine.ext import ndb
 from google.appengine.api import users
+from google.appengine.api import search
+from google.appengine.datastore.datastore_query import Cursor
+from google.appengine.ext import deferred
+from google.appengine.ext import ndb
+
 
 CACHE_TIMEOUT = 120
 SPAM_RE = re.compile('[A-Za-z0-9]{30}')
 NUMBER_RE = re.compile('^[0-9eE.+-]+$')
+SEARCH_INDEX = 'search'
 
 
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -109,6 +113,17 @@ class Haiku(ndb.Model):
         'parent': self.parent,
         'parent_recorded': self.parent_recorded,
     }
+
+  def ToDocument(self):
+    return search.Document(
+        doc_id = self.GetId(),
+        fields = [
+          search.DateField(name='when', value=self.when),
+          search.DateField(name='last_modified', value=self.last_modified),
+          search.TextField(name='title', value=self.title),
+          search.TextField(name='author', value=self.author),
+          search.TextField(name='code', value=self.code),
+        ])
 
 
 class HaikuViewPage(webapp2.RequestHandler):
@@ -314,35 +329,28 @@ class WordViewPage(webapp2.RequestHandler):
 
 class HaikuSearchPage(webapp2.RequestHandler):
   def get(self):
-    search = self.request.get('s', '')
+    searchv = self.request.get('s', '')
     cursorv = self.request.get('cursor', None)
-    phase = self.request.get('phase', '')
-    cursor = Cursor(urlsafe=cursorv)
-    if phase:
-      q = Haiku.query(ndb.AND(Haiku.author >= search,
-                      Haiku.author < (search + u'\ufffd')))
-    else:
-      q = Haiku.query(ndb.AND(Haiku.title >= search,
-                      Haiku.title < (search + u'\ufffd')))
-    haikus, next_cursor, more = q.fetch_page(40, start_cursor=cursor)
+    options = search.QueryOptions(
+        limit=40,
+        cursor=search.Cursor(web_safe_string=cursorv),
+        ids_only=True)
+    query = search.Query(query_string=searchv, options=options)
+    index = search.Index(name=SEARCH_INDEX)
+    results = index.search(query)
+  
+    results_keys = [ndb.Key(urlsafe=i.doc_id) for i in results.results]
+    haikus = ndb.get_multi(results_keys)
     haikus_list = [h.ToDict() for h in haikus]
-    if not phase and not more:
-      q = Haiku.query(ndb.AND(Haiku.author >= search,
-                      Haiku.author < (search + u'\ufffd')))
-      haikus, next_cursor, more = q.fetch_page(
-          40 - len(haikus_list), start_cursor=cursor)
-      haikus_list += [h.ToDict() for h in haikus]
-      phase = '1'
 
-    if next_cursor:
-      next_cursor = next_cursor.urlsafe()
+    next_cursor = None
+    if results.cursor:
+      next_cursor = results.cursor.web_safe_string
 
     template = JINJA_ENVIRONMENT.get_template('haiku-search.html')
     self.response.out.write(template.render({
-        'search': search,
+        'search': searchv,
         'haikus': haikus_list,
-        'more': more,
-        'phase': phase,
         'cursor': next_cursor,
     }))
 
@@ -364,12 +372,15 @@ class HaikuListPage(webapp2.RequestHandler):
     haikus, next_cursor, more = q.fetch_page(40, start_cursor=cursor)
     haikus = [h.ToDict() for h in haikus]
 
+    if next_cursor:
+      next_cursor = next_cursor.urlsafe()
+
     template = JINJA_ENVIRONMENT.get_template('haiku-list.html')
     self.response.out.write(template.render({
         'haikus': haikus,
         'order': order,
         'more': more,
-        'cursor': next_cursor.urlsafe(),
+        'cursor': next_cursor,
     }))
 
 
@@ -430,7 +441,32 @@ class HaikuSubmitPage(webapp2.RequestHandler):
     haiku.parent = parent
     haiku.parent_recorded = True
     haiku.put()
+    index = search.Index(name=SEARCH_INDEX)
+    index.put(haiku.ToDocument())
     self.redirect('/')
+
+
+def ReindexHaikus(cursor=None, num_updated=0):
+  query = Haiku.query()
+  to_index = []
+  items, next_cursor, more = query.fetch_page(50, start_cursor=cursor)
+  for p in items:
+    to_index.append(p.ToDocument())
+  if to_index:
+    num_updated += len(to_index)
+    index = search.Index(name=SEARCH_INDEX)
+    index.put(to_index)
+    logging.debug('Indexed %d for total of %d', len(to_index), num_updated)
+    deferred.defer(
+        ReindexHaikus, cursor=next_cursor, num_updated=num_updated)
+  else:
+    logging.debug('Indexing complete')
+
+
+class HaikuReindexPage(webapp2.RequestHandler):
+  def get(self):
+    deferred.defer(ReindexHaikus)
+    logging.debug('Starting reindexing')
 
 
 class MainPage(webapp2.RequestHandler):
@@ -472,6 +508,8 @@ app = webapp2.WSGIApplication([
     ('/haiku-sound', HaikuSoundPage),
     ('/haiku-slideshow', HaikuSlideshowPage),
     ('/haiku-dump', HaikuDumpPage),
+    # Enable to allow reindexing.
+    # ('/haiku-reindex', HaikuReindexPage),
     ('/word-list', WordListPage),
     ('/word-view/.*', WordViewPage),
 ], debug=False)
