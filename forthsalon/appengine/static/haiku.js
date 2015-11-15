@@ -108,10 +108,10 @@ function core_words() {
                  'work2 = dstack.pop();',
                  'dstack.push(mod(work2, work1));'];
   dict['pow'] = ['work1 = dstack.pop();',
-                 'dstack.push(Math.pow(Math.abs(dstack.pop()), work1));'];
+                 'dstack.push(pow(abs(dstack.pop()), work1));'];
   dict['**'] = dict['pow'];
   dict['atan2'] = ['work1 = dstack.pop();',
-                   'dstack.push(Math.atan2(dstack.pop(), work1));'];
+                   'dstack.push(atan2(dstack.pop(), work1));'];
 
   dict['and'] = ['work1 = dstack.pop();',
                  'dstack.push((dstack.pop()!=0.0 && work1!=0.0)?1.0:0.0);'];
@@ -119,23 +119,23 @@ function core_words() {
                 'dstack.push((dstack.pop()!=0.0 || work1!=0.0)?1.0:0.0);'];
   dict['not'] = ['dstack.push(dstack.pop()!=0.0?0.0:1.0);'];
 
-  dict['min'] = ['dstack.push(Math.min(dstack.pop(), dstack.pop()));'];
-  dict['max'] = ['dstack.push(Math.max(dstack.pop(), dstack.pop()));'];
+  dict['min'] = ['dstack.push(min(dstack.pop(), dstack.pop()));'];
+  dict['max'] = ['dstack.push(max(dstack.pop(), dstack.pop()));'];
 
   dict['negate'] = ['dstack.push(-dstack.pop());'];
-  dict['sin'] = ['dstack.push(Math.sin(dstack.pop()));'];
-  dict['cos'] = ['dstack.push(Math.cos(dstack.pop()));'];
-  dict['tan'] = ['dstack.push(Math.tan(dstack.pop()));'];
-  dict['log'] = ['dstack.push(Math.log(Math.abs(dstack.pop())));'];
-  dict['exp'] = ['dstack.push(Math.exp(dstack.pop()));'];
-  dict['sqrt'] = ['dstack.push(Math.sqrt(Math.abs(dstack.pop())));'];
-  dict['floor'] = ['dstack.push(Math.floor(dstack.pop()));'];
-  dict['ceil'] = ['dstack.push(Math.ceil(dstack.pop()));'];
-  dict['abs'] = ['dstack.push(Math.abs(dstack.pop()));'];
+  dict['sin'] = ['dstack.push(sin(dstack.pop()));'];
+  dict['cos'] = ['dstack.push(cos(dstack.pop()));'];
+  dict['tan'] = ['dstack.push(tan(dstack.pop()));'];
+  dict['log'] = ['dstack.push(log(abs(dstack.pop())));'];
+  dict['exp'] = ['dstack.push(exp(dstack.pop()));'];
+  dict['sqrt'] = ['dstack.push(sqrt(abs(dstack.pop())));'];
+  dict['floor'] = ['dstack.push(floor(dstack.pop()));'];
+  dict['ceil'] = ['dstack.push(ceil(dstack.pop()));'];
+  dict['abs'] = ['dstack.push(abs(dstack.pop()));'];
 
-  dict['pi'] = ['dstack.push(Math.PI);'];
+  dict['pi'] = ['dstack.push(PI);'];
 
-  dict['random'] = ['dstack.push(Math.random());'];
+  dict['random'] = ['dstack.push(random());'];
 
   dict['if'] = ['if(dstack.pop() != 0.0) {'];
   dict['else'] = ['} else {'];
@@ -215,10 +215,25 @@ var FUNC_SIGNATURE =
     '  mouse_x, mouse_y, ' +
     '  button_val, '+
     '  memory) { ' +
+    '  var PI = Math.PI; ' +
+    '  var random = Math.random; ' +
+    '  var floor = Math.floor; ' +
+    '  var ceil = Math.ceil; ' +
+    '  var min = Math.min; ' +
+    '  var max = Math.max; ' +
+    '  var log = Math.log; ' +
+    '  var sqrt = Math.sqrt; ' +
+    '  var pow = Math.pow; ' +
+    '  var abs = Math.abs; ' +
+    '  var sin = Math.sin; ' +
+    '  var cos = Math.cos; ' +
+    '  var tan = Math.tan; ' +
+    '  var atan2 = Math.atan2; ' +
+    '  var exp = Math.exp; ' +
     'function store(v, addr) { ' +
-    '  memory[mod(Math.floor(addr), 16)] = v; } ' +
+    '  memory[mod(floor(addr), 16)] = v; } ' +
     'function load(addr) { ' +
-    '  return memory[mod(Math.floor(addr), 16)]; } ';
+    '  return memory[mod(floor(addr), 16)]; } ';
 
 
 var BOGUS = [FUNC_SIGNATURE + 'return [1.0, 0.0, 0.7, 1.0, 0.0]; }; go'];
@@ -997,6 +1012,9 @@ var audio_play = false;
 if (audio_context) {
   var audio_src = audio_context.createScriptProcessor(8192, 0, 1);
   audio_src.onaudioprocess = function(e) {
+    var min = Math.min;
+    var min = Math.max;
+    var floor = Math.floor;
     try {
       var data = e.outputBuffer.getChannelData(0);
       var func = audio_function;
@@ -1020,12 +1038,12 @@ if (audio_context) {
         var t1 = ((j + STEP) / audio_context.sampleRate + offset) % (60*60*24);
         var func1 = function(t, x) {
           var val = func(t, x, memory)[0];
-          return Math.min(Math.max(val, 0.0), 1.0);
+          return min(max(val, 0.0), 1.0);
         };
         var amp0 = func1(t0, 1.0);
         var amp1 = func1(t1, 1.0);
-        var note0 = Math.floor(func1(t0, 0.0) * NOTES);
-        var note1 = Math.floor(func1(t1, 0.0) * NOTES);
+        var note0 = floor(func1(t0, 0.0) * NOTES);
+        var note1 = floor(func1(t1, 0.0) * NOTES);
         for (var i = 0; i < STEP; i++) {
           var t = ((i + j) / audio_context.sampleRate + offset) % (60*60*24);
           var frac = i / STEP;
