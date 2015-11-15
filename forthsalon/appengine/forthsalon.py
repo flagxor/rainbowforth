@@ -467,6 +467,7 @@ app = webapp2.WSGIApplication([
     ('/haiku-adjust', HaikuAdjustPage),
     ('/haiku-about', HaikuAboutPage),
     ('/haiku-animated', HaikuAnimatedPage),
+    ('/haiku-interactive', HaikuInteractivePage),
     ('/haiku-search', HaikuSearchPage),
     ('/haiku-sound', HaikuSoundPage),
     ('/haiku-slideshow', HaikuSlideshowPage),
