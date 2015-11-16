@@ -5,7 +5,7 @@ var NOTE_BASE = 10;
 var STEP = 2048;
 
 var all_haikus = {};
-var haiku_count = 0;
+var haiku_tag_count = 0;
 
 function start_fetch() {
   var fetcher = new Worker('fetch.js');
@@ -700,10 +700,10 @@ function make_fragment_shader(input_code) {
 function render(cv, next) {
   var cv3 = cv.cv3;
   if (cv.old_code === cv.code) {
-    if (cv.mouse_inside && haiku_count > 1 && cv.program3d === null) {
+    if (cv.mouse_inside && haiku_tag_count > 1 && cv.program3d === null) {
       // fall thru
     } else {
-      if (cv.program3d !== null && (haiku_count <= 1 || cv.mouse_inside)) {
+      if (cv.program3d !== null && (haiku_tag_count <= 1 || cv.mouse_inside)) {
         draw3d(cv, cv3);
       }
       next();
@@ -752,7 +752,7 @@ function render(cv, next) {
   }
 
   try {
-    if (!cv.mouse_inside && haiku_count > 1 && cv3.width <= 128) {
+    if (!cv.mouse_inside && haiku_tag_count > 1 && cv3.width <= 128) {
       throw 'use non-webgl for small and multiple';
     }
     cv.image = function(t, dt, x, y) {
@@ -960,7 +960,7 @@ function generate_haiku_canvas(haiku, code) {
     multitouch = true;
   }
   canvas2d.addEventListener('touchstart', function(e) {
-    if (haiku_count > 2) { return; }
+    if (haiku_tag_count > 1) { return; }
     e.preventDefault();
     if (multitouch) {
       if (e.touches.length >= 2) {
@@ -972,7 +972,7 @@ function generate_haiku_canvas(haiku, code) {
     updateMouse(e.touches.item(0).clientX, e.touches.item(0).clientY);
   }, true);
   canvas2d.addEventListener('touchend', function(e) {
-    if (haiku_count > 2) { return; }
+    if (haiku_tag_count > 1) { return; }
     e.preventDefault();
     if (multitouch) {
       if (e.touches.length < 2) {
@@ -983,7 +983,7 @@ function generate_haiku_canvas(haiku, code) {
     }
   }, true);
   canvas2d.addEventListener('touchmove', function(e) {
-    if (haiku_count > 2) { return; }
+    if (haiku_tag_count > 1) { return; }
     e.preventDefault();
     updateMouse(e.touches.item(0).clientX, e.touches.item(0).clientY);
   }, true);
@@ -1022,7 +1022,7 @@ function generate_haiku_canvas(haiku, code) {
 function update_haikus(next) {
   update_haiku_lists();
   var haikus = document.getElementsByName('haiku');
-  haiku_count = haikus.length;
+  haiku_tag_count = haikus.length;
   var first_haiku = null;
   var work = [];
   for (var i = 0; i < haikus.length; i++) {
