@@ -722,7 +722,7 @@ function render(cv, cv3, category, code, next) {
 
   try {
     if (haiku_count > 1 && cv3.width <= 128) {
-      throw 'only use for large and single';
+      throw 'use non-webgl for small and multiple';
     }
     cv.image = function(t, dt, x, y) {
       return func(
@@ -956,7 +956,7 @@ function update_haikus(next) {
       category = document.createElement('a');
       category.name = 'category';
       category.style.display = 'none';
-      category.style.backgroundColor = 'white';
+      category.style.textShadow = '0px 0px 5px white';
       haiku.insertBefore(category, haiku.firstChild);
     }
     // Add to the work queue.
