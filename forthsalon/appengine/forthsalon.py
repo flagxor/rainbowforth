@@ -280,8 +280,6 @@ class HaikuVotePage(webapp2.RequestHandler):
     id = self.request.path.split('/')[2]
     if self.request.get('good'):
       vote = 1
-    elif self.request.get('bad'):
-      vote = -1
     else:
       vote = 0
     if vote in [1, -1]:

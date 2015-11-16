@@ -1191,9 +1191,9 @@ function audio_toggle_play() {
   var mute_button = document.getElementById('audio_play');
   audio_play = !audio_play;
   if (audio_play) {
-    mute_button.innerText = 'Mute Audio';
+    mute_button.innerHTML = '&#9616;&nbsp;&#9612;';
   } else {
-    mute_button.innerText = 'Play Audio';
+    mute_button.innerHTML = '&nbsp;&#9654;&nbsp;';
   }
 }
 
