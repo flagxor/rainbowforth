@@ -13,6 +13,35 @@ a:hover {
   text-decoration: underline;
 }
 
+a:active {
+  color: white;
+  text-decoration: underline;
+}
+
+a.category:link {
+  color: white;
+  text-decoration: none;
+  text-shadow: 0px 0px 5px white;
+}
+
+a.category:visited {
+  color: white;
+  text-decoration: none;
+  text-shadow: 0px 0px 5px white;
+}
+
+a.category:hover {
+  color: white;
+  text-decoration: none;
+  text-shadow: 0px 0px 5px white;
+}
+
+a.category:active {
+  color: white;
+  text-decoration: none;
+  text-shadow: 0px 0px 5px white;
+}
+
 body {
   font-family: Verdana, Arial, Helvetica, sans-serif;
   font-size: 13px;

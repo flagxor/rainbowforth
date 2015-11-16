@@ -184,14 +184,18 @@ function code_tags(src) {
     tags.push('style:long');
   }
   // Detect animation / interactive.
+  var picked = {};
   for (var i = 0; i < words.length; i++) {
     var wl = words[i].toLowerCase();
-    if (wl === 't' || wl === 'dt') {
+    if (picked['animated'] === undefined &&
+        (wl === 't' || wl === 'dt')) {
       tags.push('animated');
-    } else if (wl === 'button' || wl === 'buttons' ||
-               wl === 'mx' || wl === 'my') {
+    } else if (picked['interactive'] === undefined &&
+               (wl === 'button' || wl === 'buttons' ||
+                wl === 'mx' || wl === 'my')) {
       tags.push('interactive');
-      break;
+    } else if (picked['audio'] === undefined && wl === 'audio') {
+      tags.push('audio');
     }
   }
   // Show counts.
@@ -199,6 +203,15 @@ function code_tags(src) {
   tags.push('words:' + words.length);
   tags.push('lines:' + line_counts.join(','));
   return tags;
+}
+
+function code_tags_dict(code) {
+  var tags = code_tags(code);
+  var ret = {};
+  for (var i = 0; i < tags.length; i++) {
+    ret[tags[i]] = 1;
+  }
+  return ret;
 }
 
 if (typeof String.prototype.trim != 'function') {
@@ -678,46 +691,45 @@ function make_fragment_shader(input_code) {
   return code;
 }
 
-function code_animated(code) {
-  var tags = code_tags(code);
-  for (var i = 0; i < tags.length; i++) {
-    if (tags[i] == 'animated') return true;
+function render(cv, next) {
+  var cv3 = cv.cv3;
+  if (cv.old_code === cv.code) {
+    if (cv.mouse_inside && haiku_count > 1 && cv.program3d === null) {
+      // fall thru
+    } else {
+      if (cv.program3d !== null) {
+        draw3d(cv, cv3);
+      }
+      next();
+      return;
+    }
   }
-  return false;
-}
-
-function code_interactive(code) {
-  var tags = code_tags(code);
-  for (var i = 0; i < tags.length; i++) {
-    if (tags[i] == 'interactive') return true;
-  }
-  return false;
-}
-
-function render(cv, cv3, category, code, next) {
-  if (cv.code === code) {
-    if (cv.program3d !== null) draw3d(cv, cv3);
-    next();
-    return;
-  }
-  cv.code = code;
+  cv.old_code = cv.code;
   cv.program3d = null;
   cv.memory = new Float32Array(16);
 
-  var compiled_code = compile(code);
+  var compiled_code = compile(cv.code);
   var func = eval(compiled_code.join('\n'));
 
   // Handle category label and visibility.
-  if (code_interactive(code)) {
-    category.style.display = 'inline';
-    category.innerHTML = ' &#127918; ';
-    category.href = '/haiku-interactive';
-  } else if (code_animated(code)) {
-    category.style.display = 'inline';
-    category.innerHTML = ' &#127909; ';
-    category.href = '/haiku-animated';
+  var tags = code_tags_dict(cv.code);
+  if (tags['interactive'] !== undefined) {
+    cv.category.style.display = 'inline';
+    cv.category.innerHTML = ' &#127918; ';
+    cv.category.href = '/haiku-interactive';
+  } else if (tags['animated'] !== undefined) {
+    cv.category.style.display = 'inline';
+    cv.category.innerHTML = ' &#127909; ';
+    cv.category.href = '/haiku-animated';
   } else {
-    category.style.display = 'none';
+    cv.category.style.display = 'none';
+  }
+  if (tags['audio'] !== undefined) {
+    cv.audio.style.display = 'inline';
+    cv.audio.innerHTML = ' &#128264; ';
+    cv.audio.href = '/haiku-audio';
+  } else {
+    cv.audio.style.display = 'none';
   }
 
   try {
@@ -786,12 +798,9 @@ function update_haikus_one(work, next) {
     setTimeout(next, 0);
     return;
   }
-  var canvas2d = work[0][0];
-  var canvas3d = work[0][1];
-  var category = work[0][2];
-  var code = work[0][3];
+  var job = work[0];
   work = work.slice(1);
-  render(canvas2d, canvas3d, category, code, function() {
+  render(job, function() {
     update_haikus_one(work, next);
   });
 }
@@ -840,32 +849,38 @@ function update_haikus(next) {
     var haiku = haikus[i];
     var code_tag = find_tag(haiku, 'textarea');
     var code = code_tag.value;
-    // Create 2d canvas.
     var canvas2d = find_tag_name(haiku, 'canvas', 'canvas2d');
-    if (canvas2d === null) {
-      canvas2d = document.createElement('canvas');
-      canvas2d.name = 'canvas2d';
-      canvas2d.style.display = 'block';
-      // have 2d canvas initially visible for layout.
-      haiku.appendChild(canvas2d);
-      canvas2d.setAttribute('width', haiku.getAttribute('width'));
-      canvas2d.setAttribute('height', haiku.getAttribute('height'));
-      canvas2d.time = 0;
-      canvas2d.last_time = 0;
-      canvas2d.program3d = null;
-      canvas2d.code = null;
-      canvas2d.memory = new Float32Array(16);
-      canvas2d.mouse_x = 0;
-      canvas2d.mouse_y = 0;
+    if (canvas2d !== null) {
+      canvas2d.code = code;
+      work.push(canvas2d);
+      if (i === 0 ) { first_haiku = canvas2d; }
+      continue;
     }
+    // Create 2d canvas.
+    canvas2d = document.createElement('canvas');
+    canvas2d.name = 'canvas2d';
+    canvas2d.style.display = 'block';
+    // have 2d canvas initially visible for layout.
+    haiku.appendChild(canvas2d);
+    canvas2d.setAttribute('width', haiku.getAttribute('width'));
+    canvas2d.setAttribute('height', haiku.getAttribute('height'));
+    canvas2d.time = 0;
+    canvas2d.last_time = 0;
+    canvas2d.program3d = null;
+    canvas2d.old_code = null;
+    canvas2d.code = code;
+    canvas2d.memory = new Float32Array(16);
+    canvas2d.mouse_x = 0;
+    canvas2d.mouse_y = 0;
+    canvas2d.mouse_inside = false;
     // Keep first one for audio.
     if (i === 0 ) { first_haiku = canvas2d; }
     // Create 3d canvas.
-    var canvas3d = find_tag_name(haiku, 'canvas', 'canvas3d');
-    if (canvas3d == null && shared_canvas3d.length >= 4) {
+    var canvas3d;
+    if (shared_canvas3d.length >= 4) {
       canvas3d = shared_canvas3d.pop();
       shared_canvas3d.splice(0, 0, canvas3d);
-    } else if (canvas3d == null) {
+    } else {
       canvas3d = document.createElement('canvas');
       shared_canvas3d.splice(0, 0, canvas3d);
       canvas3d.name = 'canvas3d';
@@ -877,9 +892,10 @@ function update_haikus(next) {
         e.preventDefault();
       }, false);
       canvas3d.addEventListener('webglcontextrestored', function(e) {
-        canvas3d.code = null;
+        canvas3d.old_code = null;
       }, false);
     }
+    canvas2d.cv3 = canvas3d;
     // Update Mouse
     var updateMouse = function(x, y) {
       var xx = (x - canvas2d.getBoundingClientRect().left) /
@@ -915,6 +931,13 @@ function update_haikus(next) {
       }
       e.preventDefault();
     }, true);
+    // Handle enter and leave.
+    canvas2d.addEventListener('mouseenter', function(e) {
+      canvas2d.mouse_inside = true;
+    });
+    canvas2d.addEventListener('mouseleave', function(e) {
+      canvas2d.mouse_inside = false;
+    });
     // Handle touch events.
     var multitouch = false;
     if (navigator.msMaxTouchPoints !== undefined &&
@@ -926,6 +949,7 @@ function update_haikus(next) {
       multitouch = true;
     }
     canvas2d.addEventListener('touchstart', function(e) {
+      if (haiku_count > 2) { return; }
       e.preventDefault();
       if (multitouch) {
         if (e.touches.length >= 2) {
@@ -937,6 +961,7 @@ function update_haikus(next) {
       updateMouse(e.touches.item(0).clientX, e.touches.item(0).clientY);
     }, true);
     canvas2d.addEventListener('touchend', function(e) {
+      if (haiku_count > 2) { return; }
       e.preventDefault();
       if (multitouch) {
         if (e.touches.length < 2) {
@@ -947,20 +972,26 @@ function update_haikus(next) {
       }
     }, true);
     canvas2d.addEventListener('touchmove', function(e) {
+      if (haiku_count > 2) { return; }
       e.preventDefault();
       updateMouse(e.touches.item(0).clientX, e.touches.item(0).clientY);
     }, true);
+    // Create audio tag.
+    var audio = document.createElement('a');
+    audio.name = 'audio';
+    audio.style.display = 'none';
+    audio.className = 'category';
+    haiku.insertBefore(audio, haiku.firstChild);
+    canvas2d.audio = audio;
     // Create category tag.
-    var category = find_tag_name(haiku, 'a', 'category');
-    if (category == null) {
-      category = document.createElement('a');
-      category.name = 'category';
-      category.style.display = 'none';
-      category.style.textShadow = '0px 0px 5px white';
-      haiku.insertBefore(category, haiku.firstChild);
-    }
+    var category = document.createElement('a');
+    category.name = 'category';
+    category.style.display = 'none';
+    category.className = 'category';
+    haiku.insertBefore(category, haiku.firstChild);
+    canvas2d.category = category;
     // Add to the work queue.
-    work.push([canvas2d, canvas3d, category, code]);
+    work.push(canvas2d);
   }
   // Do audio if there's only one.
   if (work.length === 1 && first_haiku !== null) {
