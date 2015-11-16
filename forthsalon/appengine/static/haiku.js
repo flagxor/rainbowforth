@@ -699,8 +699,6 @@ function render(cv, next) {
   if (cv.old_code === cv.code) {
     if (cv.mouse_inside && haiku_count > 1 && cv.program3d === null) {
       // fall thru
-    } else if (!cv.mouse_inside && haiku_count > 1 && cv.program3d !== null) {
-      // fall thru
     } else {
       if (cv.program3d !== null) {
         draw3d(cv, cv3);
