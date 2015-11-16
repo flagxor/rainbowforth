@@ -700,7 +700,7 @@ function render(cv, next) {
     if (cv.mouse_inside && haiku_count > 1 && cv.program3d === null) {
       // fall thru
     } else {
-      if (cv.program3d !== null) {
+      if (cv.program3d !== null && (haiku_count <= 1 || cv.mouse_inside)) {
         draw3d(cv, cv3);
       }
       next();
