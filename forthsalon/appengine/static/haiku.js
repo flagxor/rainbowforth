@@ -728,23 +728,27 @@ function render(cv, next) {
 
   // Handle category label and visibility.
   var tags = code_tags_dict(cv.code);
-  if (tags['interactive'] !== undefined) {
-    cv.category.style.display = 'inline';
-    cv.category.innerHTML = ' &#127918; ';
-    cv.category.href = '/haiku-interactive';
-  } else if (tags['animated'] !== undefined) {
-    cv.category.style.display = 'inline';
-    cv.category.innerHTML = ' &#127909; ';
-    cv.category.href = '/haiku-animated';
-  } else {
-    cv.category.style.display = 'none';
+  if (cv.category !== null) {
+    if (tags['interactive'] !== undefined) {
+      cv.category.style.display = 'inline';
+      cv.category.innerHTML = ' &#127918; ';
+      cv.category.href = '/haiku-interactive';
+    } else if (tags['animated'] !== undefined) {
+      cv.category.style.display = 'inline';
+      cv.category.innerHTML = ' &#127909; ';
+      cv.category.href = '/haiku-animated';
+    } else {
+      cv.category.style.display = 'none';
+    }
   }
-  if (tags['audio'] !== undefined) {
-    cv.audio.style.display = 'inline';
-    cv.audio.innerHTML = ' &#128264; ';
-    cv.audio.href = '/haiku-sound';
-  } else {
-    cv.audio.style.display = 'none';
+  if (cv.audio !== null) {
+    if (tags['audio'] !== undefined) {
+      cv.audio.style.display = 'inline';
+      cv.audio.innerHTML = ' &#128264; ';
+      cv.audio.href = '/haiku-sound';
+    } else {
+      cv.audio.style.display = 'none';
+    }
   }
 
   try {
@@ -992,8 +996,10 @@ function generate_haiku_canvas(haiku, code) {
     audio.style.textShadow = '0px 0px 5px white';
     var p = parent_div(haiku);
     p.insertBefore(audio, p.firstChild);
+    canvas2d.audio = audio;
+  } else {
+    canvas2d.audio = null;
   }
-  canvas2d.audio = audio;
   // Create category tag.
   var category = find_tag_name(haiku.parentNode, null, 'category');
   if (category === null) {
@@ -1003,8 +1009,10 @@ function generate_haiku_canvas(haiku, code) {
     category.style.textShadow = '0px 0px 5px white';
     var p = parent_div(haiku);
     p.insertBefore(category, p.firstChild);
+    canvas2d.category = category;
+  } else {
+    canvas2d.category = null;
   }
-  canvas2d.category = category;
 
   return canvas2d;
 }
