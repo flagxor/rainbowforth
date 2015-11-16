@@ -994,7 +994,7 @@ function generate_haiku_canvas(haiku, code) {
     audio.name = 'audio';
     audio.style.display = 'none';
     audio.style.color = 'white';
-    audio.style.textShadow = '0px 0px 5px white';
+    audio.style.textShadow = '0px 0px 5px #cff';
     var p = parent_div(haiku);
     p.insertBefore(audio, p.firstChild);
     canvas2d.audio = audio;
@@ -1008,7 +1008,7 @@ function generate_haiku_canvas(haiku, code) {
     category.name = 'category';
     category.style.display = 'none';
     category.style.color = 'white';
-    category.style.textShadow = '0px 0px 5px white';
+    category.style.textShadow = '0px 0px 5px #cff';
     var p = parent_div(haiku);
     p.insertBefore(category, p.firstChild);
     canvas2d.category = category;
