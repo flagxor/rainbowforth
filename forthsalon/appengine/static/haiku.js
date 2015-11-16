@@ -775,13 +775,23 @@ function render(cv, next) {
   });
 }
 
+function parent_div(element) {
+  element = element.parentNode;
+  while (element.parentNode && element.tagName != 'DIV') {
+    element = element.parentNode;
+  }
+  return element;
+}
+
 function find_tags_named(base, tag, name) {
-  tag = tag.toUpperCase();
+  if (tag !== null) {
+    tag = tag.toUpperCase();
+  }
   var found = [];
   for (var i = 0; i < base.childNodes.length; i++) {
     var child = base.childNodes[i];
-    if (child.tagName == tag &&
-        (name == null || name == child.name)) {
+    if ((tag === null || tag === child.tagName) &&
+        (name === null || name === child.name)) {
       found.push(child);
     }
   }
@@ -964,20 +974,26 @@ function generate_haiku_canvas(haiku, code) {
     updateMouse(e.touches.item(0).clientX, e.touches.item(0).clientY);
   }, true);
   // Create audio tag.
-  var audio = document.createElement('a');
-  audio.name = 'audio';
-  audio.style.display = 'none';
-  audio.className = 'category';
-  haiku.insertBefore(audio, haiku.firstChild);
+  var audio = find_tag_name(haiku.parentNode, null, 'audio');
+  if (audio === null) {
+    audio = document.createElement('a');
+    audio.name = 'audio';
+    audio.style.display = 'none';
+    var p = parent_div(haiku);
+    p.insertBefore(audio, p.firstChild);
+  }
   canvas2d.audio = audio;
   // Create category tag.
-  var category = document.createElement('a');
-  category.name = 'category';
-  category.style.display = 'none';
-  category.className = 'category';
-  haiku.insertBefore(category, haiku.firstChild);
+  var category = find_tag_name(haiku.parentNode, null, 'category');
+  if (category === null) {
+    category = document.createElement('a');
+    category.name = 'category';
+    category.style.display = 'none';
+    var p = parent_div(haiku);
+    p.insertBefore(category, p.firstChild);
+  }
   canvas2d.category = category;
-  
+
   return canvas2d;
 }
 

@@ -18,11 +18,12 @@ Top Haikus
 <a href="/haiku-list?order=rank" class="more">More...</a>
 </h2>
 {% for haiku in top_haikus %}
-<a href="/haiku-view/{{ haiku.id }}">
 <div class="haiku" style="cursor: pointer;">
+<a href="/haiku-view/{{ haiku.id }}">
 <span name="haiku" width="64" height="64">
 <textarea style="display: none">{{ haiku.code|escape }}</textarea>
-</span>
+</span></a>
+<a href="/haiku-view/{{ haiku.id }}">
 <b>{{ haiku.title|escape }}</b></a>
 <i>{{ haiku.author|escape }}</i>
 </div>

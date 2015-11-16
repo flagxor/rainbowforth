@@ -14,11 +14,12 @@
 <div class="section">
 
 {% for haiku in haikus %}
-<a href="/haiku-view/{{ haiku.id|escape }}">
 <div class="haiku" style="cursor: pointer;">
+<a href="/haiku-view/{{ haiku.id|escape }}">
 <span name="haiku" width="128" height="128">
 <textarea style="display: none">{{ haiku.code|escape }}</textarea>
-</span>
+</span></a>
+<a href="/haiku-view/{{ haiku.id|escape }}">
 <b>{{ haiku.title|escape }}</b></a>
 <i>{{ haiku.author|escape }}</i>
 </div>
