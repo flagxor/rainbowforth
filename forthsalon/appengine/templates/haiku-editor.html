@@ -17,18 +17,12 @@
     width="{{ haiku_width }}" height="{{ haiku_height }}">
 <textarea style="display: none" id="dst_code"></textarea>
 </span>
-<br>
-<button type="button" onclick="update()">Update</button>
+<div style="width: {{ haiku_width }}px">
 <button type="button" id="audio_play"
-        onclick="audio_toggle_play()">Play Audio</button>
+        onclick="audio_toggle_play()">&nbsp;&#9654;&nbsp;</button>
 <a href="/haiku-sound">*</a>
-<br>
-<div class="publish">
-<input type="submit" value="Publish">
-<br/>
-(No undo)
+<button type="button" onclick="update()" style="float:right">&#8648;</button>
 </div>
-Code:<br>
 <textarea style="width: 256; height:100; resize: none"
     onkeydown="update_tags()"
     onkeyup="update_tags()"
@@ -44,6 +38,10 @@ Author:<br>
 <input name="parent" type="hidden" value="{{ parent|escape }}">
 {% endif %}
 <br>
+<div class="publish">
+(No Undo!)
+<input type="submit" value="Publish">
+</div>
 </form>
 <div id="tag_area"></div>
 <p><a href="/word-list">Forth Haiku Glossary</a></p>
