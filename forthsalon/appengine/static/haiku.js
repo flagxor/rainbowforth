@@ -190,12 +190,15 @@ function code_tags(src) {
     if (picked['animated'] === undefined &&
         (wl === 't' || wl === 'dt')) {
       tags.push('animated');
+      picked['animated'] = 1;
     } else if (picked['interactive'] === undefined &&
                (wl === 'button' || wl === 'buttons' ||
                 wl === 'mx' || wl === 'my')) {
       tags.push('interactive');
+      picked['interactive'] = 1;
     } else if (picked['audio'] === undefined && wl === 'audio') {
       tags.push('audio');
+      picked['audio'] = 1;
     }
   }
   // Show counts.
@@ -696,6 +699,8 @@ function render(cv, next) {
   if (cv.old_code === cv.code) {
     if (cv.mouse_inside && haiku_count > 1 && cv.program3d === null) {
       // fall thru
+    } else if (!cv.mouse_inside && haiku_count > 1 && cv.program3d !== null) {
+      // fall thru
     } else {
       if (cv.program3d !== null) {
         draw3d(cv, cv3);
@@ -704,9 +709,11 @@ function render(cv, next) {
       return;
     }
   }
-  cv.old_code = cv.code;
+  if (cv.old_code !== cv.code) {
+    cv.old_code = cv.code;
+    cv.memory = new Float32Array(16);
+  }
   cv.program3d = null;
-  cv.memory = new Float32Array(16);
 
   var compiled_code = compile(cv.code);
   var func = eval(compiled_code.join('\n'));
@@ -727,13 +734,13 @@ function render(cv, next) {
   if (tags['audio'] !== undefined) {
     cv.audio.style.display = 'inline';
     cv.audio.innerHTML = ' &#128264; ';
-    cv.audio.href = '/haiku-audio';
+    cv.audio.href = '/haiku-sound';
   } else {
     cv.audio.style.display = 'none';
   }
 
   try {
-    if (haiku_count > 1 && cv3.width <= 128) {
+    if (!cv.mouse_inside && haiku_count > 1 && cv3.width <= 128) {
       throw 'use non-webgl for small and multiple';
     }
     cv.image = function(t, dt, x, y) {
@@ -839,6 +846,143 @@ function update_haiku_lists() {
 
 var shared_canvas3d = [];
 
+function generate_haiku_canvas(haiku, code) {
+  // Create 2d canvas.
+  var canvas2d = document.createElement('canvas');
+  canvas2d.name = 'canvas2d';
+  canvas2d.style.display = 'block';
+  // have 2d canvas initially visible for layout.
+  haiku.appendChild(canvas2d);
+  canvas2d.setAttribute('width', haiku.getAttribute('width'));
+  canvas2d.setAttribute('height', haiku.getAttribute('height'));
+  canvas2d.time = 0;
+  canvas2d.last_time = 0;
+  canvas2d.program3d = null;
+  canvas2d.old_code = null;
+  canvas2d.code = code;
+  canvas2d.memory = new Float32Array(16);
+  canvas2d.mouse_x = 0;
+  canvas2d.mouse_y = 0;
+  canvas2d.mouse_inside = false;
+  // Create 3d canvas.
+  var canvas3d;
+  if (shared_canvas3d.length >= 4) {
+    canvas3d = shared_canvas3d.pop();
+    shared_canvas3d.splice(0, 0, canvas3d);
+  } else {
+    canvas3d = document.createElement('canvas');
+    shared_canvas3d.splice(0, 0, canvas3d);
+    canvas3d.name = 'canvas3d';
+    canvas3d.style.display = 'none';
+    haiku.appendChild(canvas3d);
+    canvas3d.setAttribute('width', haiku.getAttribute('width'));
+    canvas3d.setAttribute('height', haiku.getAttribute('height'));
+    canvas3d.addEventListener('webglcontextlost', function(e) {
+      e.preventDefault();
+    }, false);
+    canvas3d.addEventListener('webglcontextrestored', function(e) {
+      canvas3d.old_code = null;
+    }, false);
+  }
+  canvas2d.cv3 = canvas3d;
+  // Update Mouse
+  var updateMouse = function(x, y) {
+    var xx = (x - canvas2d.getBoundingClientRect().left) /
+      canvas2d.clientWidth;
+    var yy = (y - canvas2d.getBoundingClientRect().top) /
+      canvas2d.clientHeight;
+    xx = xx * 2 - 1;
+    yy = 1 - yy * 2;
+    xx *= canvas3d.w;
+    yy *= canvas3d.h;
+    xx = (xx + 1) / 2;
+    yy = (yy + 1) / 2;
+    canvas2d.mouse_x = xx;
+    canvas2d.mouse_y = yy;
+  };
+  // Add mouse handling.
+  canvas2d.dragging = false;
+  window.addEventListener('mousemove', function(e) {
+    updateMouse(e.clientX, e.clientY);
+    if (canvas2d.dragging) {
+      e.preventDefault();
+    }
+  }, true);
+  canvas2d.addEventListener('mousedown', function(e) {
+    window.stroke_buttons |= 1;
+    e.preventDefault();
+    canvas2d.dragging = true;
+  }, true);
+  window.addEventListener('mouseup', function(e) {
+    if (!e.buttons) {
+      window.stroke_buttons &= (~1);
+      canvas2d.dragging = false;
+    }
+    e.preventDefault();
+  }, true);
+  // Handle enter and leave.
+  canvas2d.addEventListener('mouseenter', function(e) {
+    canvas2d.mouse_inside = true;
+  });
+  canvas2d.addEventListener('mouseleave', function(e) {
+    canvas2d.mouse_inside = false;
+  });
+  // Handle touch events.
+  var multitouch = false;
+  if (navigator.msMaxTouchPoints !== undefined &&
+      navigator.msMaxTouchPoints > 1) {
+    multitouch = true;
+  }
+  if (navigator.maxTouchPoints !== undefined &&
+      navigator.maxTouchPoints > 1) {
+    multitouch = true;
+  }
+  canvas2d.addEventListener('touchstart', function(e) {
+    if (haiku_count > 2) { return; }
+    e.preventDefault();
+    if (multitouch) {
+      if (e.touches.length >= 2) {
+        window.stroke_buttons |= 1;
+      }
+    } else {
+      window.stroke_buttons |= 1;
+    }
+    updateMouse(e.touches.item(0).clientX, e.touches.item(0).clientY);
+  }, true);
+  canvas2d.addEventListener('touchend', function(e) {
+    if (haiku_count > 2) { return; }
+    e.preventDefault();
+    if (multitouch) {
+      if (e.touches.length < 2) {
+        window.stroke_buttons &= (~1);
+      }
+    } else {
+      window.stroke_buttons &= (~1);
+    }
+  }, true);
+  canvas2d.addEventListener('touchmove', function(e) {
+    if (haiku_count > 2) { return; }
+    e.preventDefault();
+    updateMouse(e.touches.item(0).clientX, e.touches.item(0).clientY);
+  }, true);
+  // Create audio tag.
+  var audio = document.createElement('a');
+  audio.name = 'audio';
+  audio.style.display = 'none';
+  audio.className = 'category';
+  haiku.insertBefore(audio, haiku.firstChild);
+  canvas2d.audio = audio;
+  // Create category tag.
+  var category = document.createElement('a');
+  category.name = 'category';
+  category.style.display = 'none';
+  category.className = 'category';
+  haiku.insertBefore(category, haiku.firstChild);
+  canvas2d.category = category;
+  
+  return canvas2d;
+}
+
 function update_haikus(next) {
   update_haiku_lists();
   var haikus = document.getElementsByName('haiku');
@@ -850,146 +994,11 @@ function update_haikus(next) {
     var code_tag = find_tag(haiku, 'textarea');
     var code = code_tag.value;
     var canvas2d = find_tag_name(haiku, 'canvas', 'canvas2d');
-    if (canvas2d !== null) {
-      canvas2d.code = code;
-      work.push(canvas2d);
-      if (i === 0 ) { first_haiku = canvas2d; }
-      continue;
+    if (canvas2d === null) {
+      canvas2d = generate_haiku_canvas(haiku, code);
     }
-    // Create 2d canvas.
-    canvas2d = document.createElement('canvas');
-    canvas2d.name = 'canvas2d';
-    canvas2d.style.display = 'block';
-    // have 2d canvas initially visible for layout.
-    haiku.appendChild(canvas2d);
-    canvas2d.setAttribute('width', haiku.getAttribute('width'));
-    canvas2d.setAttribute('height', haiku.getAttribute('height'));
-    canvas2d.time = 0;
-    canvas2d.last_time = 0;
-    canvas2d.program3d = null;
-    canvas2d.old_code = null;
     canvas2d.code = code;
-    canvas2d.memory = new Float32Array(16);
-    canvas2d.mouse_x = 0;
-    canvas2d.mouse_y = 0;
-    canvas2d.mouse_inside = false;
-    // Keep first one for audio.
     if (i === 0 ) { first_haiku = canvas2d; }
-    // Create 3d canvas.
-    var canvas3d;
-    if (shared_canvas3d.length >= 4) {
-      canvas3d = shared_canvas3d.pop();
-      shared_canvas3d.splice(0, 0, canvas3d);
-    } else {
-      canvas3d = document.createElement('canvas');
-      shared_canvas3d.splice(0, 0, canvas3d);
-      canvas3d.name = 'canvas3d';
-      canvas3d.style.display = 'none';
-      haiku.appendChild(canvas3d);
-      canvas3d.setAttribute('width', haiku.getAttribute('width'));
-      canvas3d.setAttribute('height', haiku.getAttribute('height'));
-      canvas3d.addEventListener('webglcontextlost', function(e) {
-        e.preventDefault();
-      }, false);
-      canvas3d.addEventListener('webglcontextrestored', function(e) {
-        canvas3d.old_code = null;
-      }, false);
-    }
-    canvas2d.cv3 = canvas3d;
-    // Update Mouse
-    var updateMouse = function(x, y) {
-      var xx = (x - canvas2d.getBoundingClientRect().left) /
-        canvas2d.clientWidth;
-      var yy = (y - canvas2d.getBoundingClientRect().top) /
-        canvas2d.clientHeight;
-      xx = xx * 2 - 1;
-      yy = 1 - yy * 2;
-      xx *= canvas3d.w;
-      yy *= canvas3d.h;
-      xx = (xx + 1) / 2;
-      yy = (yy + 1) / 2;
-      canvas2d.mouse_x = xx;
-      canvas2d.mouse_y = yy;
-    };
-    // Add mouse handling.
-    canvas2d.dragging = false;
-    window.addEventListener('mousemove', function(e) {
-      updateMouse(e.clientX, e.clientY);
-      if (canvas2d.dragging) {
-        e.preventDefault();
-      }
-    }, true);
-    canvas2d.addEventListener('mousedown', function(e) {
-      window.stroke_buttons |= 1;
-      e.preventDefault();
-      canvas2d.dragging = true;
-    }, true);
-    window.addEventListener('mouseup', function(e) {
-      if (!e.buttons) {
-        window.stroke_buttons &= (~1);
-        canvas2d.dragging = false;
-      }
-      e.preventDefault();
-    }, true);
-    // Handle enter and leave.
-    canvas2d.addEventListener('mouseenter', function(e) {
-      canvas2d.mouse_inside = true;
-    });
-    canvas2d.addEventListener('mouseleave', function(e) {
-      canvas2d.mouse_inside = false;
-    });
-    // Handle touch events.
-    var multitouch = false;
-    if (navigator.msMaxTouchPoints !== undefined &&
-        navigator.msMaxTouchPoints > 1) {
-      multitouch = true;
-    }
-    if (navigator.maxTouchPoints !== undefined &&
-        navigator.maxTouchPoints > 1) {
-      multitouch = true;
-    }
-    canvas2d.addEventListener('touchstart', function(e) {
-      if (haiku_count > 2) { return; }
-      e.preventDefault();
-      if (multitouch) {
-        if (e.touches.length >= 2) {
-          window.stroke_buttons |= 1;
-        }
-      } else {
-        window.stroke_buttons |= 1;
-      }
-      updateMouse(e.touches.item(0).clientX, e.touches.item(0).clientY);
-    }, true);
-    canvas2d.addEventListener('touchend', function(e) {
-      if (haiku_count > 2) { return; }
-      e.preventDefault();
-      if (multitouch) {
-        if (e.touches.length < 2) {
-          window.stroke_buttons &= (~1);
-        }
-      } else {
-        window.stroke_buttons &= (~1);
-      }
-    }, true);
-    canvas2d.addEventListener('touchmove', function(e) {
-      if (haiku_count > 2) { return; }
-      e.preventDefault();
-      updateMouse(e.touches.item(0).clientX, e.touches.item(0).clientY);
-    }, true);
-    // Create audio tag.
-    var audio = document.createElement('a');
-    audio.name = 'audio';
-    audio.style.display = 'none';
-    audio.className = 'category';
-    haiku.insertBefore(audio, haiku.firstChild);
-    canvas2d.audio = audio;
-    // Create category tag.
-    var category = document.createElement('a');
-    category.name = 'category';
-    category.style.display = 'none';
-    category.className = 'category';
-    haiku.insertBefore(category, haiku.firstChild);
-    canvas2d.category = category;
     // Add to the work queue.
     work.push(canvas2d);
   }
