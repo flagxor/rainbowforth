@@ -1007,6 +1007,7 @@ function generate_haiku_canvas(haiku, code) {
     category = document.createElement('a');
     category.name = 'category';
     category.style.display = 'none';
+    audio.style.color = 'black';
     category.style.textShadow = '0px 0px 5px white';
     var p = parent_div(haiku);
     p.insertBefore(category, p.firstChild);
