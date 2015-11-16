@@ -35,6 +35,7 @@ function core_words() {
   dict['button'] = ['work1 = dstack.pop();',
                     'dstack.push(hasbit(button_val, work1));'];
   dict['buttons'] = ['dstack.push(button_val);'];
+  dict['audio'] = ['audio_sample = dstack.pop();']
 
   dict['push'] = ['rstack.push(dstack.pop());'];
   dict['pop'] = ['dstack.push(rstack.pop());'];
@@ -246,6 +247,7 @@ var FUNC_SIGNATURE =
     '  var tan = Math.tan; ' +
     '  var atan2 = Math.atan2; ' +
     '  var exp = Math.exp; ' +
+    '  var audio_sample = 0.0; ' +
     'function store(v, addr) { ' +
     '  memory[mod(floor(addr), 16)] = v; } ' +
     'function load(addr) { ' +
@@ -633,6 +635,7 @@ function make_fragment_shader(input_code) {
       'uniform float mouse_x, mouse_y;',
       'uniform float memory_val[16];',
       'float memory[16];',
+      'float audio_sample;',
       'float PI = 3.1415926535897931;',
       'float PI2 = PI * 2.0;',
   ];
@@ -714,7 +717,14 @@ function render(cv, next) {
   cv.program3d = null;
 
   var compiled_code = compile(cv.code);
-  var func = eval(compiled_code.join('\n'));
+  try {
+    var func = eval(compiled_code.join('\n'));
+  } catch(e) {
+    console.log(e);
+    // Go on to the next one.
+    setTimeout(next, 0);
+    return;
+  }
 
   // Handle category label and visibility.
   var tags = code_tags_dict(cv.code);
@@ -1062,6 +1072,7 @@ var audio_last_code = '';
 var audio_last_sync = new Date().getTime();
 var audio_time_offset = 0;
 var audio_time_base = GetTime();
+var audio_raw = false;
 var audio_play = false;
 if (audio_context) {
   var audio_src = audio_context.createScriptProcessor(8192, 0, 1);
@@ -1086,24 +1097,37 @@ if (audio_context) {
       var offset = audio_time_offset / audio_context.sampleRate +
                    audio_time_base;
       audio_time_offset += data.length;
-      // Fill left channel.
-      for (var j = 0; j < data.length; j+=STEP) {
-        var t0 = (j / audio_context.sampleRate + offset) % (60*60*24);
-        var t1 = ((j + STEP) / audio_context.sampleRate + offset) % (60*60*24);
-        var func1 = function(t, x) {
-          var val = func(t, x, memory)[0];
-          return min(max(val, 0.0), 1.0);
+      if (audio_raw) {
+        // Fill right channel.
+        var func1 = function(t) {
+          return func(t, memory);
         };
-        var amp0 = func1(t0, 1.0);
-        var amp1 = func1(t1, 1.0);
-        var note0 = floor(func1(t0, 0.0) * NOTES);
-        var note1 = floor(func1(t1, 0.0) * NOTES);
-        for (var i = 0; i < STEP; i++) {
-          var t = ((i + j) / audio_context.sampleRate + offset) % (60*60*24);
-          var frac = i / STEP;
-          var frac1 = 1 - frac;
-          data[i + j] = (synth(note0, t) * amp0 * frac1 +
-                         synth(note1, t) * amp1 * frac) * 0.5;
+        var t = offset % (60*60*24);
+        var step = 1.0 / audio_context.sampleRate;
+        for (var j = 0; j < data.length; j++) {
+          data[j] = func(t, memory);
+          t += step;
+        }
+      } else {
+        // Fill left channel.
+        for (var j = 0; j < data.length; j+=STEP) {
+          var t0 = (j / audio_context.sampleRate + offset) % (60*60*24);
+          var t1 = ((j + STEP) / audio_context.sampleRate + offset) % (60*60*24);
+          var func1 = function(t, x) {
+            var val = func(t, x, memory)[0];
+            return min(max(val, 0.0), 1.0);
+          };
+          var amp0 = func1(t0, 1.0);
+          var amp1 = func1(t1, 1.0);
+          var note0 = floor(func1(t0, 0.0) * NOTES);
+          var note1 = floor(func1(t1, 0.0) * NOTES);
+          for (var i = 0; i < STEP; i++) {
+            var t = ((i + j) / audio_context.sampleRate + offset) % (60*60*24);
+            var frac = i / STEP;
+            var frac1 = 1 - frac;
+            data[i + j] = (synth(note0, t) * amp0 * frac1 +
+                           synth(note1, t) * amp1 * frac) * 0.5;
+          }
         }
       }
       // Clone to other channels.
@@ -1133,12 +1157,25 @@ function audio_haiku(cv) {
     }
     audio_last_code = code;
     var compiled_code = compile(code);
-    var func = eval(compiled_code.join('\n'));
-    var image = function(t, x, mem) {
-      return func(
-          t, 0, x, 0.5, cv.mouse_x, cv.mouse_y,
-          window.stroke_buttons, mem);
-    };
+    var tags = code_tags_dict(code);
+    if (tags['audio'] === undefined) {
+      audio_raw = false;
+      var func = eval(compiled_code.join('\n'));
+      var image = function(t, x, mem) {
+        return func(
+            t, 0, x, 0.5, cv.mouse_x, cv.mouse_y,
+            window.stroke_buttons, mem);
+      };
+    } else {
+      audio_raw = true;
+      compiled_code[compiled_code.length - 1] = 'return audio_sample; }; go';
+      var func = eval(compiled_code.join('\n'));
+      var image = function(t, mem) {
+        return func(
+            t, 0, 0, 0, cv.mouse_x, cv.mouse_y,
+            window.stroke_buttons, mem);
+      };
+    }
     audio_last_compile = image;
     audio_function = image;
     audio_memory = cv.memory;

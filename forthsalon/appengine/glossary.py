@@ -168,6 +168,17 @@ core_words = [
     ],
   },
   {
+    'names': ['audio'],
+    'stack': '( n -- )',
+    'summary': 'Set the audio sample amplitude for the current time.',
+    'description': [
+        'Unique to Haiku Forth. Expects a value in -1 to 1. '
+        'Waveforms can be created using oscillating functions like sin. '
+        ,
+        floating_point_text
+    ],
+  },
+  {
     'names': ['@'],
     'stack': '( a -- n )',
     'summary': 'Read the value at a memory address.',

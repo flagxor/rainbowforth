@@ -23,12 +23,26 @@ This feature works on mainly in
 <a href="http://www.google.com/chrome">Google Chrome</a>.
 </p>
 <p>
+Audio is produced by one of two methods, depending on if the
+<a href="/word-view/617564696F">audio</a> word is used in the haiku.
+</p>
+<h3>Semi-Classic Pentatonic</h3>
+<p>
+When the <a href="/word-view/617564696F">audio</a>
+word is used, haiku use it to yield an audio sample.
+Audio is sampled at a much higher rate than visible animation.
+It currently is computed at x=0, y=0.
+Audio samples should be in the -1 to 1 range.
+</p>
+<h3>Semi-Classic Pentatonic</h3>
+<p>
+When the <a href="/word-view/617564696F">audio</a>
+word is not used an older experimental approach is engaged.
 Audio is produced by sampling the red component at (0, 0.5) to select amplitude,
 and the red component at (1, 0.5) to select pitch.
 Both are clipped to [0, 1]. Pitch is mapped to a ten note pentatonic scale.
 Fractional pitches produce a mix of neighboring tones on the scale.
 This general scheme was selected to produce non-cacophonous sounds.
-Prior attempts with arbitrary audio sounded horrible.
 </p>
 <p>
 This feature is a work in progress and may change.
