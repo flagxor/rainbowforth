@@ -508,6 +508,12 @@ function setup3d(cv, cv3, code) {
   }
   var force_gpu = gpu === '1';
 
+  if (!force_gpu &&
+      !cv.mouse_inside &&
+      haiku_tag_count > 1 && cv3.width <= 128) {
+    throw 'use non-webgl for small and multiple';
+  }
+
   // Decide aspect ratio.
   var size = getParam('size');
   if (size === undefined) { size = 256; } else { size = parseFloat(size); }
@@ -752,9 +758,6 @@ function render(cv, next) {
   }
 
   try {
-    if (!cv.mouse_inside && haiku_tag_count > 1 && cv3.width <= 128) {
-      throw 'use non-webgl for small and multiple';
-    }
     cv.image = function(t, dt, x, y) {
       return func(
           t, dt, x, y, cv.mouse_x, cv.mouse_y,
