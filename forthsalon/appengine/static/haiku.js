@@ -1090,7 +1090,7 @@ if (audio_context) {
   var audio_src = audio_context.createScriptProcessor(8192, 0, 1);
   audio_src.onaudioprocess = function(e) {
     var min = Math.min;
-    var min = Math.max;
+    var max = Math.max;
     var floor = Math.floor;
     try {
       var data = e.outputBuffer.getChannelData(0);
@@ -1110,7 +1110,7 @@ if (audio_context) {
                    audio_time_base;
       audio_time_offset += data.length;
       if (audio_raw) {
-        // Fill right channel.
+        // Fill left channel.
         var func1 = function(t) {
           return func(t, memory);
         };
@@ -1126,7 +1126,7 @@ if (audio_context) {
           var t0 = (j / audio_context.sampleRate + offset) % (60*60*24);
           var t1 = ((j + STEP) / audio_context.sampleRate + offset) % (60*60*24);
           var func1 = function(t, x) {
-            var val = func(t, x, memory)[0];
+            var val = func(t, x, memory);
             return min(max(val, 0.0), 1.0);
           };
           var amp0 = func1(t0, 1.0);
@@ -1177,7 +1177,7 @@ function audio_haiku(cv) {
       var image = function(t, x, mem) {
         return func(
             t, 0, x, 0.5, cv.mouse_x, cv.mouse_y,
-            window.stroke_buttons, mem);
+            window.stroke_buttons, mem)[0];
       };
     } else {
       audio_raw = true;
