@@ -1168,6 +1168,7 @@ function audio_haiku(cv) {
       return;
     }
     audio_last_code = code;
+    audio_function = audio_off;
     var compiled_code = compile(code);
     var tags = code_tags_dict(code);
     if (tags['audio'] === undefined) {
