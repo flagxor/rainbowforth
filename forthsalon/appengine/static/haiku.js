@@ -1202,9 +1202,9 @@ function audio_toggle_play() {
   var mute_button = document.getElementById('audio_play');
   audio_play = !audio_play;
   if (audio_play) {
-    mute_button.innerHTML = '&#9616;&nbsp;&#9612;';
+    mute_button.innerHTML = '&#10074;&#10074;';
   } else {
-    mute_button.innerHTML = '&nbsp;&#9654;&nbsp;';
+    mute_button.innerHTML = '&#9654;';
   }
 }
 
