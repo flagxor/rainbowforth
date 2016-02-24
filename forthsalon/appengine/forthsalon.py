@@ -447,6 +447,7 @@ class HaikuSubmitPage(webapp2.RequestHandler):
     haiku.put()
     index = search.Index(name=SEARCH_INDEX)
     index.put(haiku.ToDocument())
+    memcache.delete('main_items')
     self.redirect('/')
 
 
