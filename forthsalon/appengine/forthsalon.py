@@ -40,12 +40,16 @@ def FromDatetime(dt):
   return str((dt - epoch).total_seconds() * 1000.0)
 
 
+def IsGoodWord(word):
+  return glossary.IsHaikuWord(word) and word not in ('and', 'or', 'not', 'then')
+
+
 def HaikuWordCount(text):
   text = text.replace('\n', ' ')
   text = text.replace('\r', ' ')
   text = text.replace('\t', ' ')
   return len([i for i in text.split(' ')
-              if glossary.IsHaikuWord(i) or NUMBER_RE.match(i)])
+              if IsGoodWord(i) or NUMBER_RE.match(i)])
 
 
 class Password(ndb.Model):
