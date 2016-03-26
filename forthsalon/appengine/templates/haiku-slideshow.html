@@ -56,6 +56,7 @@ a:hover {
   <b id="showntitle" style="color:#ffffff; font-size:30px;"></b>
   <span> - </span>
   <i id="shownauthor" style="color:#ffffff; font-size:30px;"></i>
+  <i id="shownwhen" style="color:#999999; font-size:30px;"></i>
 </div>
 </center>
 <center>
@@ -82,6 +83,8 @@ a:hover {
  >{{ haiku.title|escape }}</textarea>
 <textarea id="author{{ loop.index }}" style="display: none"
  >{{ haiku.author|escape }}</textarea>
+<textarea id="when{{ loop.index }}" style="display: none"
+ >{{ haiku.when.strftime('\'%y %b %d')|escape }}</textarea>
 {% endfor %}
 
 <br/>
@@ -165,9 +168,11 @@ function pick_slide(index) {
   var code = document.getElementById('code' + (index + 1));
   var title = document.getElementById('title' + (index + 1));
   var author = document.getElementById('author' + (index + 1));
+  var when = document.getElementById('when' + (index + 1));
   showncode.value = code.value;
   showntitle.innerText = title.value;
   shownauthor.innerText = author.value;
+  shownwhen.innerText = when.value;
   var label = document.getElementById('status');
   label.innerText = '' + (index + 1) + ' of ' + haiku_count;
   var source = document.getElementById('source');
