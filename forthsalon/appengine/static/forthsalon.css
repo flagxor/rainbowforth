@@ -20,7 +20,7 @@ a:active {
 
 body {
   font-family: Verdana, Arial, Helvetica, sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   background-color: #000000;
   color: #cccccc;
   padding: 0;
@@ -32,7 +32,7 @@ body {
 }
 
 #wrapper h1 {
-  font-size: 20px;
+  font-size: 1.5em;
 }
 
 #header {
@@ -102,17 +102,23 @@ div.haiku {
 }
 
 .haiku b {
-  font-size: 8px;
-  display: block;
+  font-size: .66em;
+  display: inline-block;
 }
 
 .haiku i {
-  font-size: 8px;
+  font-size: .66em;
+  display: block;
+}
+
+.haiku i b {
+  font-size: .7em;
+  font-style: normal;
   display: block;
 }
 
 .more {
-  font-size: 12px;
+  font-size: .66em;
 }
 
 iframe {

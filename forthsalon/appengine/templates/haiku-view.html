@@ -9,6 +9,8 @@
 <div id="header">
   {% include 'search.html' %}
   <h1>{{ haiku.title|escape }} - <i>{{ haiku.author|escape }}</i></h1>
+  <h5>{{ haiku.when.strftime('\'%y %b %d')|escape }}</i>
+  </h1>
 </div>
 
 <div class="section">

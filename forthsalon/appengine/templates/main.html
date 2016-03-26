@@ -23,9 +23,9 @@ Top Haikus
 <span name="haiku" width="64" height="64">
 <textarea style="display: none">{{ haiku.code|escape }}</textarea>
 </span></a>
-<a href="/haiku-view/{{ haiku.id }}">
-<b>{{ haiku.title|escape }}</b></a>
-<i>{{ haiku.author|escape }}</i>
+<a href="/haiku-view/{{ haiku.id }}"><b>{{ haiku.title|escape }}</b></a>
+<i>{{ haiku.author|escape }}
+  <br/><b>{{ haiku.when.strftime('\'%y %b %d')|escape }}</b></i>
 </div>
 {% endfor %}
 
@@ -40,7 +40,8 @@ Recent Haikus
 <textarea style="display: none">{{ haiku.code|escape }}</textarea>
 </span>
 <b>{{ haiku.title|escape }}</b></a>
-<i>{{ haiku.author|escape }}</i>
+<i>{{ haiku.author|escape }}
+  <br/><b>{{ haiku.when.strftime('\'%y %b %d')|escape }}</b></i>
 </div>
 {% endfor %}
 </div>
