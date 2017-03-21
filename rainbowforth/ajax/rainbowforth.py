@@ -2,11 +2,17 @@ import re
 import os
 import sys
 import StringIO
+import jinja2
+import webapp2
+
 from google.appengine.api import users
-from google.appengine.ext import webapp
 from google.appengine.ext import db
-from google.appengine.ext.webapp import template
-from google.appengine.ext.webapp.util import run_wsgi_app
+
+
+JINJA_ENVIRONMENT = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+    extensions=['jinja2.ext.autoescape'],
+    autoescape=False)
 
 
 class Block(db.Model):
@@ -15,7 +21,7 @@ class Block(db.Model):
   data = db.BlobProperty()
 
 
-class ReadBlock(webapp.RequestHandler):
+class ReadBlock(webapp2.RequestHandler):
   def post(self):
     user = users.get_current_user()
     if user:
@@ -37,7 +43,7 @@ class ReadBlock(webapp.RequestHandler):
       self.redirect(users.create_login_url(self.request.uri))
 
 
-class WriteBlock(webapp.RequestHandler):
+class WriteBlock(webapp2.RequestHandler):
   def post(self):
     user = users.get_current_user()
     if user:
@@ -63,7 +69,7 @@ class WriteBlock(webapp.RequestHandler):
       self.redirect(users.create_login_url(self.request.uri))
 
 
-class DeleteBlock(webapp.RequestHandler):
+class DeleteBlock(webapp2.RequestHandler):
   def post(self):
     user = users.get_current_user()
     if user:
@@ -78,7 +84,7 @@ class DeleteBlock(webapp.RequestHandler):
       self.redirect(users.create_login_url(self.request.uri))
 
 
-class View(webapp.RequestHandler):
+class View(webapp2.RequestHandler):
   def get(self):
     COLOR_MAP = {
       u'\xff': '#ff0000',
@@ -127,7 +133,7 @@ class View(webapp.RequestHandler):
     self.response.out.write('</body></html>\n')
 
 
-class Export(webapp.RequestHandler):
+class Export(webapp2.RequestHandler):
   def get(self):
     COLOR_MAP = {
         u'\xff': ': %s ',
@@ -177,7 +183,7 @@ class Export(webapp.RequestHandler):
       self.response.out.write('\n\n')
 
 
-class Backup(webapp.RequestHandler):
+class Backup(webapp2.RequestHandler):
   def post(self):
     user = users.get_current_user()
     if not user:
@@ -200,7 +206,7 @@ class Backup(webapp.RequestHandler):
       self.response.out.write(b.data)
 
 
-class Restore(webapp.RequestHandler):
+class Restore(webapp2.RequestHandler):
   def post(self):
     user = users.get_current_user()
     if not user:
@@ -243,7 +249,7 @@ class Restore(webapp.RequestHandler):
     self.response.out.write('Done.')
 
 
-class Reflect(webapp.RequestHandler):
+class Reflect(webapp2.RequestHandler):
   def post(self):
     user = users.get_current_user()
     if user:
@@ -254,17 +260,17 @@ class Reflect(webapp.RequestHandler):
       self.redirect(users.create_login_url(self.request.uri))
 
 
-class AdminPage(webapp.RequestHandler):
+class AdminPage(webapp2.RequestHandler):
   def get(self):
     user = users.get_current_user()
     if user:
-      path = os.path.join(os.path.dirname(__file__), 'html/admin.html')
-      self.response.out.write(template.render(path, {}))
+      template = JINJA_ENVIRONMENT.get_template('html/admin.html')
+      self.response.out.write(template.render({}))
     else:
       self.redirect(users.create_login_url(self.request.uri))
 
 
-class BasicEditor(webapp.RequestHandler):
+class BasicEditor(webapp2.RequestHandler):
   def get(self):
     user = users.get_current_user()
     if user:
@@ -282,46 +288,40 @@ class BasicEditor(webapp.RequestHandler):
       # Add bootstrap into template.
       email = user.email()
       signout = users.create_logout_url(users.create_login_url('/'))
-      path = os.path.join(os.path.dirname(__file__), 'html/rainbowforth.html')
-      self.response.out.write(template.render(path, {'bootstrap': bootstrap,
-                                                     'email': email,
-                                                     'signout': signout}))
+      template = JINJA_ENVIRONMENT.get_template('html/rainbowforth.html')
+      self.response.out.write(template.render({'bootstrap': bootstrap,
+                                               'email': email,
+                                               'signout': signout}))
     else:
       self.redirect(users.create_login_url(self.request.uri))
 
 
-class MainPage(webapp.RequestHandler):
+class MainPage(webapp2.RequestHandler):
   def get(self):
     user = users.get_current_user()
     if user:
       email = user.email()
       signout = users.create_logout_url(users.create_login_url('/'))
       bootstrap = '" : startup 0 raw-read push raw-load ; [ startup ] "'
-      path = os.path.join(os.path.dirname(__file__), 'html/rainbowforth.html')
-      self.response.out.write(template.render(path, {'bootstrap': bootstrap,
-                                                     'email': email,
-                                                     'signout': signout}))
+      template = JINJA_ENVIRONMENT.get_template('html/rainbowforth.html')
+      self.response.out.write(template.render({'bootstrap': bootstrap,
+                                               'email': email,
+                                               'signout': signout}))
     else:
       self.redirect(users.create_login_url(self.request.uri))
 
 
-def main():
-  application = webapp.WSGIApplication(
-      [
-        ('/[0-9]*', MainPage),
-        ('/basic_editor', BasicEditor),
-        ('/read', ReadBlock),
-        ('/write', WriteBlock),
-        ('/delete', DeleteBlock),
-        ('/reflect/.*', Reflect),
-        ('/admin', AdminPage),
-        ('/view', View),
-        ('/export', Export),
-        ('/backup', Backup),
-        ('/restore', Restore),
-        ], debug=True)
-  run_wsgi_app(application)
-
-
-if __name__ == "__main__":
-  main()
+app = webapp2.WSGIApplication(
+    [
+      ('/[0-9]*', MainPage),
+      ('/basic_editor', BasicEditor),
+      ('/read', ReadBlock),
+      ('/write', WriteBlock),
+      ('/delete', DeleteBlock),
+      ('/reflect/.*', Reflect),
+      ('/admin', AdminPage),
+      ('/view', View),
+      ('/export', Export),
+      ('/backup', Backup),
+      ('/restore', Restore),
+      ])  #, debug=True)
