@@ -2,16 +2,21 @@ import datetime
 import os
 import pickle
 import pngcanvas
+import jinja2
 import random
 import re
 import sys
+import webapp2
 import zlib
 from google.appengine.api import memcache
 from google.appengine.api import users
 from google.appengine.ext import db
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp import template
-from google.appengine.ext.webapp.util import run_wsgi_app
+
+
+JINJA_ENVIRONMENT = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+    extensions=['jinja2.ext.autoescape'],
+    autoescape=False)
 
 
 class Word(db.Model):
@@ -124,14 +129,13 @@ def UpdateScore(key):
 def ChromeFrameMe(handler):
   agent = handler.request.headers.get('USER_AGENT', '')
   if agent.find('MSIE') >= 0 and agent.find('chromeframe') < 0:
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates/chrome_frame.html')
-    handler.response.out.write(template.render(path, {}))
+    template = JINJA_ENVIRONMENT.get_template('templates/chrome_frame.html')
+    handler.response.out.write(template.render({}))
     return True
   return False
 
 
-class ReadWord(webapp.RequestHandler):
+class ReadWord(webapp2.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
     id = self.request.get('id', '')
@@ -149,9 +153,8 @@ class ReadWord(webapp.RequestHandler):
                     (users.get_current_user() is not None and
                      users.get_current_user() == w.author))
       # Output info on word.
-      path = os.path.join(os.path.dirname(__file__),
-                          'templates/read.html')
-      self.response.out.write(template.render(path, {
+      template = JINJA_ENVIRONMENT.get_template('templates/read.html')
+      self.response.out.write(template.render({
           'id': id,
           'description': w.description,
           'definition': w.definition,
@@ -161,12 +164,11 @@ class ReadWord(webapp.RequestHandler):
           'can_delete': can_delete,
       }))
     else:
-      path = os.path.join(os.path.dirname(__file__),
-                          'templates/read_notfound.html')
-      self.response.out.write(template.render(path, {}))
+      template = JINJA_ENVIRONMENT.get_template('templates/read_notfound.html')
+      self.response.out.write(template.render({}))
 
 
-class ListWord(webapp.RequestHandler):
+class ListWord(webapp2.RequestHandler):
   def get(self):
     # Get the source.
     lookup_id = self.request.get('id', '')
@@ -213,14 +215,13 @@ class ListWord(webapp.RequestHandler):
           needed_ids.add(w)
           pending_ids.append(w)
     else:
-      path = os.path.join(os.path.dirname(__file__),
-                          'templates/list.html')
-      self.response.out.write(template.render(path, {
+      template = JINJA_ENVIRONMENT.get_template('templates/list.html')
+      self.response.out.write(template.render({
           'results': results,
       }))
 
 
-class RunWord(webapp.RequestHandler):
+class RunWord(webapp2.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
     id = self.request.get('id', '')
@@ -228,19 +229,17 @@ class RunWord(webapp.RequestHandler):
     query = db.GqlQuery('SELECT * FROM WordExecutable WHERE ANCESTOR is :1', id)
     exe = query.fetch(1)
     if exe:
-      path = os.path.join(os.path.dirname(__file__),
-                          'templates/run.html')
-      self.response.out.write(template.render(path, {
+      template = JINJA_ENVIRONMENT.get_template('templates/run.html')
+      self.response.out.write(template.render({
           'id': id,
           'exe': ',' + exe[0].executable,
       }))
     else:
-      path = os.path.join(os.path.dirname(__file__),
-                          'templates/read_notfound.html')
-      self.response.out.write(template.render(path, {}))
+      template = JINJA_ENVIRONMENT.get_template('templates/read_notfound.html')
+      self.response.out.write(template.render({}))
 
 
-class Results(webapp.RequestHandler):
+class Results(webapp2.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
     # Do a query.
@@ -290,15 +289,14 @@ class Results(webapp.RequestHandler):
       if w1:
         w += [i for i in w1 if i not in w]
     # Display results.
-    path = os.path.join(os.path.dirname(__file__),
-                        'templates/results.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template('templates/results.html')
+    self.response.out.write(template.render({
         'query': goal,
         'results': [str(i) for i in w],
     }))
 
 
-class ReadIcon(webapp.RequestHandler):
+class ReadIcon(webapp2.RequestHandler):
   def get(self):
     self.response.headers['Cache-Control'] = 'public, max-age=86400'
     self.response.headers['Content-Type'] = 'image/png'
@@ -436,7 +434,7 @@ def ClearUserCache(reqh):
   memcache.delete(mkey)
 
 
-class DeleteWord(webapp.RequestHandler):
+class DeleteWord(webapp2.RequestHandler):
   def post(self):
     # Clear cache for this user/remote_addr.
     ClearUserCache(self)
@@ -461,7 +459,7 @@ class DeleteWord(webapp.RequestHandler):
     db.run_in_transaction(DeleteFullWord, word, icon, source, exe)
 
 
-class WriteWord(webapp.RequestHandler):
+class WriteWord(webapp2.RequestHandler):
   def post(self):
     # Clear cache for this user/remote_addr.
     ClearUserCache(self)
@@ -512,7 +510,7 @@ class WriteWord(webapp.RequestHandler):
       UpdateScore(w)
 
 
-class EditorPage(webapp.RequestHandler):
+class EditorPage(webapp2.RequestHandler):
   def get(self):
     if ChromeFrameMe(self): return
     user = users.get_current_user()
@@ -522,25 +520,19 @@ class EditorPage(webapp.RequestHandler):
     else:
       greeting = ('<a href="%s">Sign in or register</a>.' %
                   users.create_login_url('/editor'))
-    path = os.path.join(os.path.dirname(__file__), 'templates/editor.html')
-    self.response.out.write(template.render(path, {
+    template = JINJA_ENVIRONMENT.get_template('templates/editor.html')
+    self.response.out.write(template.render({
         'greeting': greeting,
     }))
 
 
-def main():
-  application = webapp.WSGIApplication([
-      ('/delete', DeleteWord),
-      ('/list', ListWord),
-      ('/editor', EditorPage),
-      ('/icon', ReadIcon),
-      ('/read', ReadWord),
-      ('/results', Results),
-      ('/run', RunWord),
-      ('/write', WriteWord),
-  ], debug=True)
-  run_wsgi_app(application)
-
-
-if __name__ == "__main__":
-  main()
+app = webapp2.WSGIApplication([
+    ('/delete', DeleteWord),
+    ('/list', ListWord),
+    ('/editor', EditorPage),
+    ('/icon', ReadIcon),
+    ('/read', ReadWord),
+    ('/results', Results),
+    ('/run', RunWord),
+    ('/write', WriteWord),
+])  #, debug=True)
