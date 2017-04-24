@@ -2,6 +2,7 @@
 
 var BONUS_TIMEOUT = 50;
 var bonus_mode = false;
+var last_bonus = 0;
 var bonus_x = 0;
 var NOTES = 10;
 var NOTE_BASE = 10;
@@ -1321,6 +1322,7 @@ function GetText(url, callback) {
 }
 
 function UpdateBonus() {
+  last_bonus = (new Date()).getTime();
   var bonus = document.getElementById('bonus');
   if (bonus && bonus.value != '') {
     GetText('http://' + bonus.value + '/sample', function(data) {
@@ -1337,4 +1339,10 @@ function UpdateBonus() {
     setTimeout(UpdateBonus, BONUS_TIMEOUT);
   }
 }
+setInterval(function() {
+  // Restart if not alive for a while.
+  if ((new Date()).getTime() - last_bonus > 1000) {
+    UpdateBonus();
+  }
+}, 500);
 UpdateBonus();
