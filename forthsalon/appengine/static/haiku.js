@@ -1,5 +1,7 @@
 'use strict';
 
+var bonus_mode = false;
+var bonus_x = 0;
 var NOTES = 10;
 var NOTE_BASE = 10;
 var STEP = 2048;
@@ -607,7 +609,7 @@ function draw3d(cv, cv3) {
   gl.uniform1f(time_delta_val_loc, cv.time - cv.last_time);
 
   var mouse_x_loc = gl.getUniformLocation(cv.program3d, 'mouse_x');
-  gl.uniform1f(mouse_x_loc, cv.mouse_x);
+  gl.uniform1f(mouse_x_loc, bonus_mode ? bonus_x : cv.mouse_x);
   var mouse_y_loc = gl.getUniformLocation(cv.program3d, 'mouse_y');
   gl.uniform1f(mouse_y_loc, cv.mouse_y);
 
@@ -760,7 +762,7 @@ function render(cv, next) {
   try {
     cv.image = function(t, dt, x, y) {
       return func(
-          t, dt, x, y, cv.mouse_x, cv.mouse_y,
+          t, dt, x, y, bonus_mode ? bonus_x : cv.mouse_x, cv.mouse_y,
           window.stroke_buttons, cv.memory);
     };
     setup3d(cv, cv3, compiled_code);
@@ -1179,7 +1181,7 @@ function audio_haiku(cv) {
       var func = eval(compiled_code.join('\n'));
       var image = function(t, x, mem) {
         return func(
-            t, 0, x, 0.5, cv.mouse_x, cv.mouse_y,
+            t, 0, x, 0.5, bonus_mode ? bonus_x : cv.mouse_x, cv.mouse_y,
             window.stroke_buttons, mem)[0];
       };
     } else {
@@ -1188,7 +1190,7 @@ function audio_haiku(cv) {
       var func = eval(compiled_code.join('\n'));
       var image = function(t, mem) {
         return func(
-            t, 0, 0, 0, cv.mouse_x, cv.mouse_y,
+            t, 0, 0, 0, bonus_mode ? bonus_x : cv.mouse_x, cv.mouse_y,
             window.stroke_buttons, mem);
       };
     }
@@ -1301,3 +1303,34 @@ window.addEventListener('keyup', function(e) {
     window.stroke_buttons &= ~(1<<k);
   }
 });
+
+function GetText(url, callback) {
+  var request = new XMLHttpRequest();
+  request.onreadystatechange = function() {
+    if (request.readyState == 4) {
+      if (request.status == 200) {
+        callback(request.responseText);
+      } else {
+        callback(null);
+      }
+    }
+  }
+  request.open('GET', url);
+  request.send(null);
+}
+
+setInterval(function() {
+  var bonus = document.getElementById('bonus');
+  if (bonus && bonus.value != '') {
+    GetText('http://' + bonus.value + '/sample', function(data) {
+      if (data !== null) {
+        bonus_x = parseInt(data) / 962;
+        bonus_mode = true;
+      } else {
+        bonus_mode = false;
+      }
+    });
+  } else {
+    bonus_mode = false;
+  }
+}, 50);
