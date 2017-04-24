@@ -1,5 +1,6 @@
 'use strict';
 
+var BONUS_TIMEOUT = 50;
 var bonus_mode = false;
 var bonus_x = 0;
 var NOTES = 10;
@@ -1319,7 +1320,7 @@ function GetText(url, callback) {
   request.send(null);
 }
 
-setInterval(function() {
+function UpdateBonus() {
   var bonus = document.getElementById('bonus');
   if (bonus && bonus.value != '') {
     GetText('http://' + bonus.value + '/sample', function(data) {
@@ -1329,8 +1330,11 @@ setInterval(function() {
       } else {
         bonus_mode = false;
       }
+      setTimeout(UpdateBonus, BONUS_TIMEOUT);
     });
   } else {
     bonus_mode = false;
+    setTimeout(UpdateBonus, BONUS_TIMEOUT);
   }
-}, 50);
+}
+UpdateBonus();
