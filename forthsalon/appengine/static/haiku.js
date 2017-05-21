@@ -5,8 +5,10 @@ var BONUS_TIMEOUT = 50;
 var bonus_mode = false;
 var last_bonus = 0;
 var last_bonus2 = 0;
+var last_bonus3 = 0;
 var bonus_x = 0;
 var bonus_stroke = 0;
+var bonus_stroke2 = 0;
 
 var NOTES = 10;
 var NOTE_BASE = 10;
@@ -620,7 +622,8 @@ function draw3d(cv, cv3) {
   gl.uniform1f(mouse_y_loc, cv.mouse_y);
 
   var button_loc = gl.getUniformLocation(cv.program3d, 'button_val');
-  gl.uniform1f(button_loc, window.stroke_buttons | bonus_stroke);
+  gl.uniform1f(
+    button_loc, window.stroke_buttons | bonus_stroke | bonus_stroke2);
 
   var memory_loc = gl.getUniformLocation(cv.program3d, 'memory_val');
   gl.uniform1fv(memory_loc, cv.memory);
@@ -769,7 +772,7 @@ function render(cv, next) {
     cv.image = function(t, dt, x, y) {
       return func(
           t, dt, x, y, bonus_mode ? bonus_x : cv.mouse_x, cv.mouse_y,
-          window.stroke_buttons | bonus_stroke, cv.memory);
+          window.stroke_buttons | bonus_stroke | bonus_stroke2, cv.memory);
     };
     setup3d(cv, cv3, compiled_code);
     draw3d(cv, cv3);
@@ -1188,7 +1191,7 @@ function audio_haiku(cv) {
       var image = function(t, x, mem) {
         return func(
             t, 0, x, 0.5, bonus_mode ? bonus_x : cv.mouse_x, cv.mouse_y,
-            window.stroke_buttons | bonus_stroke, mem)[0];
+            window.stroke_buttons | bonus_stroke | bonus_stroke2, mem)[0];
       };
     } else {
       audio_raw = true;
@@ -1197,7 +1200,7 @@ function audio_haiku(cv) {
       var image = function(t, mem) {
         return func(
             t, 0, 0, 0, bonus_mode ? bonus_x : cv.mouse_x, cv.mouse_y,
-            window.stroke_buttons | bonus_stroke, mem);
+            window.stroke_buttons | bonus_stroke | bonus_stroke2, mem);
       };
     }
     audio_last_compile = image;
@@ -1348,7 +1351,7 @@ function UpdateBonus2() {
   last_bonus2 = (new Date()).getTime();
   var bonus = always_bonus || getParam('bonus') !== undefined;
   if (bonus !== undefined) {
-    GetText('http://w2/', function(data) {
+    GetText('http://w2/sample', function(data) {
       if (data !== null) {
         bonus_stroke = parseInt(data);
       } else {
@@ -1361,6 +1364,23 @@ function UpdateBonus2() {
   }
 }
 
+function UpdateBonus3() {
+  last_bonus3 = (new Date()).getTime();
+  var bonus = always_bonus || getParam('bonus') !== undefined;
+  if (bonus !== undefined) {
+    GetText('http://w1/sample', function(data) {
+      if (data !== null) {
+        bonus_stroke2 = parseInt(data);
+      } else {
+        bonus_stroke2 = 0;
+      }
+      setTimeout(UpdateBonus3, BONUS_TIMEOUT);
+    });
+  } else {
+    setTimeout(UpdateBonus3, BONUS_TIMEOUT);
+  }
+}
+
 setInterval(function() {
   // Restart if not alive for a while.
   if ((new Date()).getTime() - last_bonus > 1000) {
@@ -1368,6 +1388,9 @@ setInterval(function() {
   }
   if ((new Date()).getTime() - last_bonus2 > 1000) {
     UpdateBonus2();
+  }
+  if ((new Date()).getTime() - last_bonus3 > 1000) {
+    UpdateBonus3();
   }
 }, 500);
 UpdateBonus();
