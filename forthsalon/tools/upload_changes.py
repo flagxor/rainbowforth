@@ -16,7 +16,6 @@ for i in xrange(len(items)):
   req = {'passwd': passwd}
   req.update(item)
   params = urllib.urlencode(req)
-  urllib.urlopen("http://www.musi-cal.com/cgi-bin/query", params)
   f = urllib.urlopen(
       'https://forthsalon.appspot.com/haiku-adjust', params)
   f.read()
