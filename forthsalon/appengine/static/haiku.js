@@ -1323,9 +1323,9 @@ function GetText(url, callback) {
 
 function UpdateBonus() {
   last_bonus = (new Date()).getTime();
-  var bonus = document.getElementById('bonus');
-  if (bonus && bonus.value != '') {
-    GetText('http://' + bonus.value + '/sample', function(data) {
+  var bonus = getParam('bonus');
+  if (bonus !== undefined) {
+    GetText('http://' + bonus + '/sample', function(data) {
       if (data !== null) {
         bonus_x = parseInt(data) / 962;
         bonus_mode = true;

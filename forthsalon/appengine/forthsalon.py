@@ -146,7 +146,8 @@ class HaikuViewPage(webapp2.RequestHandler):
     id = self.request.path.split('/')[2]
     haiku = memcache.get('haiku_' + id)
     if haiku is None:
-      haiku = ndb.Key(urlsafe=id).get().ToDict()
+      key = ndb.Key(*ndb.Key(urlsafe=id).flat())
+      haiku = key.get().ToDict()
       memcache.add('haiku_' + id, haiku)
 
     parent_id = haiku.get('parent')
@@ -154,7 +155,8 @@ class HaikuViewPage(webapp2.RequestHandler):
     if parent_id:
       parent = memcache.get('haiku_' + parent_id)
       if parent is None:
-        parent = ndb.Key(urlsafe=parent_id).get().ToDict()
+        key = ndb.Key(*ndb.Key(urlsafe=parent_id).flat())
+        parent = key.get().ToDict()
         memcache.add('haiku_' + parent_id, parent)
     has_parent = parent is not None
 
@@ -213,7 +215,8 @@ class HaikuBarePage(webapp2.RequestHandler):
     id = self.request.path.split('/')[2]
     haiku = memcache.get('haiku_' + id)
     if haiku is None:
-      haiku = ndb.Key(urlsafe=id).get().ToDict()
+      key = ndb.Key(*ndb.Key(urlsafe=id).flat())
+      haiku = key.get().ToDict()
       memcache.add('haiku_' + id, haiku)
     template = JINJA_ENVIRONMENT.get_template('haiku-bare.html')
     haiku_size = self.request.get('size', 256)
@@ -231,7 +234,8 @@ class HaikuPrintPage(webapp2.RequestHandler):
     id = self.request.path.split('/')[2]
     haiku = memcache.get('haiku_' + id)
     if haiku is None:
-      haiku = ndb.Key(urlsafe=id).get().ToDict()
+      key = ndb.Key(*ndb.Key(urlsafe=id).flat())
+      haiku = key.get().ToDict()
       memcache.add('haiku_' + id, haiku)
     template = JINJA_ENVIRONMENT.get_template('haiku-print.html')
     haiku_size = self.request.get('size', 600)
@@ -300,7 +304,8 @@ class HaikuVotePage(webapp2.RequestHandler):
     else:
       vote = 0
     if vote in [1, -1]:
-      haiku = ndb.Key(urlsafe=id).get()
+      key = ndb.Key(*ndb.Key(urlsafe=id).flat())
+      haiku = key.get()
       haiku.score += vote
       haiku.rank += vote
       haiku.put()
@@ -313,8 +318,7 @@ class HaikuAdjustPage(webapp2.RequestHandler):
     if not CheckPassword(passwd):
       return
     id = self.request.get('id')
-    key = ndb.Key(urlsafe=id)
-    key = ndb.Key(*key.flat())
+    key = ndb.Key(*ndb.Key(urlsafe=id).flat())
     haiku = key.get()
     rank = self.request.get('rank', default_value=None)
     if rank is not None:
@@ -331,8 +335,7 @@ class HaikuUploadPage(webapp2.RequestHandler):
     if not CheckPassword(passwd):
       return
     id = self.request.get('id')
-    key = ndb.Key(urlsafe=id)
-    key = ndb.Key(*key.flat())
+    key = ndb.Key(*ndb.Key(urlsafe=id).flat())
     haiku = key.get()
     if haiku is None:
       haiku = Haiku(key=key)
@@ -371,7 +374,8 @@ class HaikuSearchPage(webapp2.RequestHandler):
     index = search.Index(name=SEARCH_INDEX)
     results = index.search(query)
   
-    results_keys = [ndb.Key(urlsafe=i.doc_id) for i in results.results]
+    results_keys = [ndb.Key(*ndb.Key(urlsafe=i.doc_id).flat())
+                    for i in results.results]
     haikus = ndb.get_multi(results_keys)
     haikus_list = [h.ToDict() for h in haikus]
 
@@ -420,7 +424,8 @@ class HaikuEditorPage(webapp2.RequestHandler):
   def get(self):
     id = self.request.get('id')
     if id:
-      haiku = ndb.Key(urlsafe=id).get()
+      key = ndb.Key(*ndb.Key(urlsafe=id).flat())
+      haiku = key.get()
       title = haiku.title + ' Redux'
       code = haiku.code
     else:
