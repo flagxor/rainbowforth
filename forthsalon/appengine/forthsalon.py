@@ -118,6 +118,17 @@ class Haiku(ndb.Model):
         'parent_recorded': self.parent_recorded,
     }
 
+  def FromRequest(self, src):
+    self.when = ToDatetime(src.get('when'))
+    self.last_modified = ToDatetime(src.get('last_modified'))
+    self.title = src.get('title')
+    self.author = src.get('author')
+    self.code = src.get('code')
+    self.score = int(src.get('score'))
+    self.rank = float(src.get('rank'))
+    self.parent = src.get('parent')
+    self.parent_recorded = bool(src.get('parent_recorded'))
+
   def ToDocument(self):
     return search.Document(
         doc_id = self.GetId(),
@@ -302,13 +313,30 @@ class HaikuAdjustPage(webapp2.RequestHandler):
     if not CheckPassword(passwd):
       return
     id = self.request.get('id')
-    haiku = ndb.Key(urlsafe=id).get()
+    key = ndb.Key(urlsafe=id)
+    key = ndb.Key(*key.flat())
+    haiku = key.get()
     rank = self.request.get('rank', default_value=None)
     if rank is not None:
       haiku.rank = float(rank)
     parent = self.request.get('parent', default_value=None)
     if parent is not None:
       haiku.parent = parent
+    haiku.put()
+
+
+class HaikuUploadPage(webapp2.RequestHandler):
+  def post(self):
+    passwd = self.request.get('passwd')
+    if not CheckPassword(passwd):
+      return
+    id = self.request.get('id')
+    key = ndb.Key(urlsafe=id)
+    key = ndb.Key(*key.flat())
+    haiku = key.get()
+    if haiku is None:
+      haiku = Haiku(key=key)
+    haiku.FromRequest(self.request)
     haiku.put()
 
 
@@ -506,6 +534,7 @@ app = webapp2.WSGIApplication([
     ('/haiku-print/.*', HaikuPrintPage),
     ('/haiku-vote/.*', HaikuVotePage),
     ('/haiku-adjust', HaikuAdjustPage),
+    ('/haiku-upload', HaikuUploadPage),
     ('/haiku-about', HaikuAboutPage),
     ('/haiku-animated', HaikuAnimatedPage),
     ('/haiku-interactive', HaikuInteractivePage),

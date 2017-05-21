@@ -17,4 +17,4 @@ while True:
 
 
 with open('dump.json', 'w') as fh:
-  fh.write(json.dumps(items, sort_keys=True, indent=2, separators=(',', ': ')))
+  fh.write(json.dumps(items, encoding='utf8', sort_keys=True, indent=2, separators=(',', ': ')))
