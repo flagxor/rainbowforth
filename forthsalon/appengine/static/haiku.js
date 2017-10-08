@@ -983,8 +983,9 @@ function generate_haiku_canvas(haiku, code) {
   if (shared_video === undefined) {
     shared_video = document.createElement('video');
     shared_video.style.display = 'none';
-    shared_video.setAttribute('src', '');
-    shared_video.setAttribute('autoplay', 'true');
+    shared_video.setAttribute('src', '/static/pyra1.mp4');
+    shared_video.setAttribute('autoplay', 'autoplay');
+    shared_video.setAttribute('loop', 'loop');
     shared_video.addEventListener('playing', function() {
        shared_video.state_playing = true;
     }, true);
