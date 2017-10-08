@@ -563,7 +563,9 @@ function setup3d(cv, cv3, code) {
   cv3.w = w;
   cv3.h = h;
 
-  var gl = cv3.getContext('webgl') || cv3.getContext('experimental-webgl');
+  var gl = cv3.getContext('webgl2') ||
+           cv3.getContext('webgl') ||
+           cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
   var renderer = gl.getParameter(gl.RENDERER);
   if (!force_gpu) {
@@ -644,7 +646,9 @@ function GetTime() {
 }
 
 function draw3d(cv, cv3) {
-  var gl = cv3.getContext('webgl') || cv3.getContext('experimental-webgl');
+  var gl = cv3.getContext('webgl2') ||
+           cv3.getContext('webgl') ||
+           cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
 
   gl.useProgram(cv.program3d);
