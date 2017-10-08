@@ -794,7 +794,7 @@ function render(cv, next) {
     } else {
       if (cv.program3d !== null && (haiku_tag_count <= 1 || cv.mouse_inside)) {
         draw3d(cv, cv3);
-      } else if (!cv.been_drawn_once && 
+      } else if (cv.program3d !== null && !cv.been_drawn_once && 
                  shared_video &&
                  shared_video.state_playing && shared_video.state_timeupdate) {
         draw3d(cv, cv3);
