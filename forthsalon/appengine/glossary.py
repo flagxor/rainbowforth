@@ -179,6 +179,28 @@ core_words = [
     ],
   },
   {
+    'names': ['sample'],
+    'stack': '( x y -- r g b )',
+    'summary': 'Sample an input video.',
+    'description': [
+        'Unique to Haiku Forth. Read the RGB value at a particular '
+        'video position given an x, y coordinate.'
+        ,
+        floating_point_text
+    ],
+  },
+  {
+    'names': ['bwsample'],
+    'stack': '( x y -- bw )',
+    'summary': 'Sample an input video.',
+    'description': [
+        'Unique to Haiku Forth. Read the B&W value at a particular '
+        'video position given an x, y coordinate. '
+        ,
+        floating_point_text
+    ],
+  },
+  {
     'names': ['@'],
     'stack': '( a -- n )',
     'summary': 'Read the value at a memory address.',
@@ -434,7 +456,7 @@ core_words = [
         'with a floating point data stack, logical operations are more useful '
         'in combining multiplicative masks, whereas bitwise operations are '
         'at best ambiguous. '
-        , 
+        ,
         boolean_text
         ,
         floating_point_text
@@ -456,7 +478,7 @@ core_words = [
         'with a floating point data stack, logical operations are more useful '
         'in combining multiplicative masks, whereas bitwise operations are '
         'at best ambiguous. '
-        , 
+        ,
         boolean_text
         ,
         floating_point_text
@@ -478,7 +500,7 @@ core_words = [
         'with a floating point data stack, logical operations are more useful '
         'in combining multiplicative masks, whereas bitwise operations are '
         'at best ambiguous. '
-        , 
+        ,
         boolean_text
         ,
         floating_point_text

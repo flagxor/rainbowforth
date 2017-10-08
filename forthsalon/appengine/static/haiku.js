@@ -45,7 +45,18 @@ function core_words() {
   dict['button'] = ['work1 = dstack.pop();',
                     'dstack.push(hasbit(button_val, work1));'];
   dict['buttons'] = ['dstack.push(button_val);'];
-  dict['audio'] = ['audio_sample = dstack.pop();']
+  dict['audio'] = ['audio_sample = dstack.pop();'];
+  dict['sample'] = ['work2 = dstack.pop();',
+                    'work1 = dstack.pop();',
+                    'sample(work1, work2);',
+                    'dstack.push(sample_r());',
+                    'dstack.push(sample_g());',
+                    'dstack.push(sample_b());'];
+  dict['bwsample'] = ['work2 = dstack.pop();',
+                      'work1 = dstack.pop();',
+                      'sample(work1, work2);',
+                      'dstack.push(sample_r() * 0.299 + ' +
+                      'sample_g() * 0.587 + sample_b() * 0.114);'];
 
   dict['push'] = ['rstack.push(dstack.pop());'];
   dict['pop'] = ['dstack.push(rstack.pop());'];
@@ -194,7 +205,7 @@ function code_tags(src) {
     // Anything else is long.
     tags.push('style:long');
   }
-  // Detect animation / interactive.
+  // Detect animation / interactive / audio / camera.
   var picked = {};
   for (var i = 0; i < words.length; i++) {
     var wl = words[i].toLowerCase();
@@ -202,6 +213,10 @@ function code_tags(src) {
         (wl === 't' || wl === 'dt')) {
       tags.push('animated');
       picked['animated'] = 1;
+    } else if (picked['camera'] === undefined &&
+               (wl === 'sample' || wl == 'bwsample')) {
+      tags.push('camera');
+      picked['camera'] = 1;
     } else if (picked['interactive'] === undefined &&
                (wl === 'button' || wl === 'buttons' ||
                 wl === 'mx' || wl === 'my')) {
@@ -258,10 +273,14 @@ var FUNC_SIGNATURE =
     '  var atan2 = Math.atan2; ' +
     '  var exp = Math.exp; ' +
     '  var audio_sample = 0.0; ' +
-    'function store(v, addr) { ' +
-    '  memory[mod(floor(addr), 16)] = v; } ' +
-    'function load(addr) { ' +
-    '  return memory[mod(floor(addr), 16)]; } ';
+    '  function sample(x, y) {} ' +
+    '  function sample_r() { return 0.0; } ' +
+    '  function sample_g() { return 0.9; } ' +
+    '  function sample_b() { return 0.7; } ' +
+    '  function store(v, addr) { ' +
+    '    memory[mod(floor(addr), 16)] = v; } ' +
+    '  function load(addr) { ' +
+    '    return memory[mod(floor(addr), 16)]; } ';
 
 
 var BOGUS = [FUNC_SIGNATURE + 'return [1.0, 0.0, 0.7, 1.0, 0.0]; }; go'];
@@ -549,6 +568,25 @@ function setup3d(cv, cv3, code) {
     if (renderer.search(' i9') >= 0) throw 'i9* too slow';
   }
 
+  var texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  const level = 0;
+  const internalFormat = gl.RGBA;
+  const width = 1;
+  const height = 1;
+  const border = 0;
+  const srcFormat = gl.RGBA;
+  const srcType = gl.UNSIGNED_BYTE;
+  const pixel = new Uint8Array([0, 179, 230, 255]);  // opaque blue
+  gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+                width, height, border, srcFormat, srcType,
+                pixel);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  cv.texture = texture;
+
   var fshader = gl.createShader(gl.FRAGMENT_SHADER);
   gl.shaderSource(fshader, make_fragment_shader(code));
   gl.compileShader(fshader);
@@ -608,6 +646,26 @@ function draw3d(cv, cv3) {
 
   gl.useProgram(cv.program3d);
 
+  if (cv.tags['camera']) {
+    if (shared_video !== undefined &&
+        shared_video.state_playing && shared_video.state_timeupdate) {
+      const level = 0;
+      const internalFormat = gl.RGBA;
+      const srcFormat = gl.RGBA;
+      const srcType = gl.UNSIGNED_BYTE;
+      gl.bindTexture(gl.TEXTURE_2D, cv.texture);
+      gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+                    srcFormat, srcType, shared_video);
+    } else if (shared_video !== undefined && !shared_video.state_requested) {
+      shared_video.state_requested = true;
+      navigator.getUserMedia({video: true}, function(stream) {
+        shared_video.src = window.URL.createObjectURL(stream);
+      }, function(err) {
+        console.log('got media error: ' + err);
+      });
+    }
+  }
+
   cv.last_time = cv.time;
   cv.time = GetTime();
   var time_val_loc = gl.getUniformLocation(cv.program3d, 'time_val');
@@ -631,6 +689,8 @@ function draw3d(cv, cv3) {
   var aspect_val_loc = gl.getUniformLocation(cv.program3d, 'aspect');
   gl.uniform2f(aspect_val_loc, cv3.w, cv3.h);
 
+  gl.uniform1i(gl.getUniformLocation(cv.program3d, 'uSampler'), 0);
+
   gl.clearColor(0.0, 0.0, 0.0, 0.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -646,11 +706,13 @@ function make_fragment_shader(input_code) {
   var prefix = [
       'precision highp float;',
       'varying vec2 tpos;',
+      'uniform sampler2D uSampler;',
       'uniform float time_val;',
       'uniform float time_delta_val;',
       'uniform float button_val;',
       'uniform float mouse_x, mouse_y;',
       'uniform float memory_val[16];',
+      'vec4 pix;',
       'float memory[16];',
       'float audio_sample;',
       'float PI = 3.1415926535897931;',
@@ -674,26 +736,32 @@ function make_fragment_shader(input_code) {
     code[i] = code[i].replace(/sin/g, 'gsin');
     code[i] = code[i].replace(/cos/g, 'gcos');
     code[i] = code[i].replace(/([^a])tan/g, '$1gtan');
+    code[i] = code[i].replace(/sample\((.*)\)/g,
+        'pix = texture2D(uSampler, vec2(work1, 1.0 - work2))');
+    code[i] = code[i].replace(/sample_r\(\)/g, 'pix.r');
+    code[i] = code[i].replace(/sample_g\(\)/g, 'pix.g');
+    code[i] = code[i].replace(/sample_b\(\)/g, 'pix.b');
   }
   code.splice(prefix.length, 0,
       'float gsin(float v) { return sin(mod(v, PI2)); }',
       'float gcos(float v) { return cos(mod(v, PI2)); }',
       'float gtan(float v) { return tan(mod(v, PI2)); }',
-      'float hasbit(float v, float b) { ' +
-      '  b = floor(b); ' +
-      '  return mod(v, pow(2.0, b + 1.0)) >= pow(2.0, b) ? 1.0 : 0.0; } ',
-      'float load(float a) { ' +
-      '  int ai = int(mod(floor(a), 16.0)); ' +
-      '  for (int i = 0; i < 16; ++i) { ' +
-      '    if (i == ai) return memory[i]; ' +
-      '  } ' +
-      '  return 0.0; ' +
+      'float hasbit(float v, float b) { ',
+      '  b = floor(b);',
+      '  return mod(v, pow(2.0, b + 1.0)) >= pow(2.0, b) ? 1.0 : 0.0;',
       '}',
-      'void store(float v, float a) { ' +
-      '  int ai = int(mod(floor(a), 16.0)); ' +
-      '  for (int i = 0; i < 16; ++i) { ' +
-      '    if (i == ai) memory[i] = v; ' +
-      '  } ' +
+      'float load(float a) {',
+      '  int ai = int(mod(floor(a), 16.0));',
+      '  for (int i = 0; i < 16; ++i) {',
+      '    if (i == ai) return memory[i];',
+      '  }',
+      '  return 0.0;',
+      '}',
+      'void store(float v, float a) {',
+      '  int ai = int(mod(floor(a), 16.0));',
+      '  for (int i = 0; i < 16; ++i) {',
+      '    if (i == ai) memory[i] = v;',
+      '  }',
       '}');
   code[code.length-1] = code[code.length-1].replace(
       ']; }; go', '); ' +
@@ -745,6 +813,7 @@ function render(cv, next) {
 
   // Handle category label and visibility.
   var tags = code_tags_dict(cv.code);
+  cv.tags = tags;
   if (cv.category !== null) {
     if (tags['interactive'] !== undefined) {
       cv.category.style.display = 'inline';
@@ -752,10 +821,19 @@ function render(cv, next) {
       cv.category.href = '/haiku-interactive';
     } else if (tags['animated'] !== undefined) {
       cv.category.style.display = 'inline';
-      cv.category.innerHTML = ' &#127909; ';
+      cv.category.innerHTML = ' &#127902; ';
       cv.category.href = '/haiku-animated';
     } else {
       cv.category.style.display = 'none';
+    }
+  }
+  if (cv.camera !== null) {
+    if (tags['camera'] !== undefined) {
+      cv.camera.style.display = 'inline';
+      cv.camera.innerHTML = ' &#128247; ';
+      cv.camera.href = '/haiku-sound';
+    } else {
+      cv.camera.style.display = 'none';
     }
   }
   if (cv.audio !== null) {
@@ -881,6 +959,7 @@ function update_haiku_lists() {
 }
 
 var shared_canvas3d = [];
+var shared_video;
 
 function generate_haiku_canvas(haiku, code) {
   // Create 2d canvas.
@@ -900,6 +979,20 @@ function generate_haiku_canvas(haiku, code) {
   canvas2d.mouse_x = 0;
   canvas2d.mouse_y = 0;
   canvas2d.mouse_inside = false;
+  // Create shared video tag.
+  if (shared_video === undefined) {
+    shared_video = document.createElement('video');
+    shared_video.style.display = 'none';
+    shared_video.setAttribute('src', '');
+    shared_video.setAttribute('autoplay', 'true');
+    shared_video.addEventListener('playing', function() {
+       shared_video.state_playing = true;
+    }, true);
+    shared_video.addEventListener('timeupdate', function() {
+       shared_video.state_timeupdate = true;
+    }, true);
+    haiku.appendChild(shared_video);
+  }
   // Create 3d canvas.
   var canvas3d;
   if (shared_canvas3d.length >= 4) {
@@ -1015,6 +1108,20 @@ function generate_haiku_canvas(haiku, code) {
   } else {
     canvas2d.audio = null;
   }
+  // Create camera tag.
+  var camera = find_tag_name(haiku.parentNode, null, 'camera');
+  if (camera === null) {
+    camera = document.createElement('a');
+    camera.name = 'camera';
+    camera.style.display = 'none';
+    camera.style.color = 'white';
+    camera.style.textShadow = '0px 0px 5px #cff';
+    var p = parent_div(haiku);
+    p.insertBefore(camera, p.firstChild);
+    canvas2d.camera = camera;
+  } else {
+    canvas2d.camera = null;
+  }
   // Create category tag.
   var category = find_tag_name(haiku.parentNode, null, 'category');
   if (category === null) {
@@ -1062,9 +1169,9 @@ function update_haikus(next) {
 function animate_haikus(tick) {
   update_haikus(function() {
     tick();
-    setTimeout(function() {
+    window.requestAnimationFrame(function() {
       animate_haikus(tick);
-    }, 30);
+    });
   });
 }
 
@@ -1381,6 +1488,8 @@ function UpdateBonus3() {
   }
 }
 
+/*
+// Experiment with wifiboy controls.
 setInterval(function() {
   // Restart if not alive for a while.
   if ((new Date()).getTime() - last_bonus > 1000) {
@@ -1394,3 +1503,4 @@ setInterval(function() {
   }
 }, 500);
 UpdateBonus();
+*/

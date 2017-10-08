@@ -105,6 +105,7 @@ var haiku_count = {{ haiku_count }};
 var current_slide = 0;
 var shadow = false;
 var last_slide = 0;
+var slide_random_on = false;
 
 function slide_prev() {
   current_slide = (current_slide + haiku_count - 1) % haiku_count;
@@ -116,6 +117,11 @@ function slide_next() {
   current_slide = (current_slide + 1) % haiku_count;
   pick_slide(current_slide);
   return false;
+}
+
+function slide_random() {
+  current_slide = Math.floor(Math.random() * haiku_count);
+  pick_slide(current_slide);
 }
 
 function slide_scroll() {
@@ -159,6 +165,8 @@ function init() {
     } else if (e.which == 65) {
       audio_toggle_play();
       return false;
+    } else if (e.which == 90) {
+      slide_random_on = !slide_random_on;
     }
     return true;
   };
@@ -181,6 +189,12 @@ function pick_slide(index) {
   source.innerText = code.value;
   window.stroke_print(title.value + '\n');
 }
+
+setInterval(function() {
+  if (slide_random_on) {
+    slide_random();
+  }
+}, 4000);
 </script>
 
 </body>
