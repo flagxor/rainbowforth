@@ -537,11 +537,14 @@ function setup3d(cv, cv3, code) {
   }
   var force_gpu = gpu === '1';
 
+/*
+  // Revisit? need webgl to render video frame.
   if (!force_gpu &&
       !cv.mouse_inside &&
       haiku_tag_count > 1 && cv3.width <= 128) {
     throw 'use non-webgl for small and multiple';
   }
+*/
 
   // Decide aspect ratio.
   var size = getParam('size');
@@ -647,6 +650,14 @@ function draw3d(cv, cv3) {
   gl.useProgram(cv.program3d);
 
   if (cv.tags['camera']) {
+    if (shared_video !== undefined && !shared_video.state_requested) {
+      shared_video.state_requested = true;
+      navigator.getUserMedia({video: true}, function(stream) {
+        shared_video.src = window.URL.createObjectURL(stream);
+      }, function(err) {
+        console.log('got media error: ' + err);
+      });
+    }
     if (shared_video !== undefined &&
         shared_video.state_playing && shared_video.state_timeupdate) {
       const level = 0;
@@ -656,13 +667,6 @@ function draw3d(cv, cv3) {
       gl.bindTexture(gl.TEXTURE_2D, cv.texture);
       gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
                     srcFormat, srcType, shared_video);
-    } else if (shared_video !== undefined && !shared_video.state_requested) {
-      shared_video.state_requested = true;
-      navigator.getUserMedia({video: true}, function(stream) {
-        shared_video.src = window.URL.createObjectURL(stream);
-      }, function(err) {
-        console.log('got media error: ' + err);
-      });
     }
   }
 
@@ -790,6 +794,11 @@ function render(cv, next) {
     } else {
       if (cv.program3d !== null && (haiku_tag_count <= 1 || cv.mouse_inside)) {
         draw3d(cv, cv3);
+      } else if (!cv.been_drawn_once && 
+                 shared_video &&
+                 shared_video.state_playing && shared_video.state_timeupdate) {
+        draw3d(cv, cv3);
+        cv.been_drawn_once = true;
       }
       next();
       return;
