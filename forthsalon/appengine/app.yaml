@@ -10,17 +10,21 @@ builtins:
 handlers:
 - url: /static
   static_dir: static
+  secure: always
 
 - url: /favicon(.*)
   static_files: static/favicon\1
   upload: static/favicon.*
+  secure: always
 
 - url: /admin/.*
   script: forthsalon.app
   login: admin
+  secure: always
 
 - url: /.*
   script: forthsalon.app
+  secure: always
 
 
 libraries:
