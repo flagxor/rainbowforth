@@ -658,19 +658,27 @@ function draw3d(cv, cv3) {
       shared_video.state_requested = true;
       navigator.getUserMedia({video: true}, function(stream) {
         shared_video.src = window.URL.createObjectURL(stream);
+        setTimeout(function() {
+          shared_video.state_loaded = true;
+        }, 500);
       }, function(err) {
         console.log('got media error: ' + err);
       });
     }
+    const level = 0;
+    const internalFormat = gl.RGBA;
+    const srcFormat = gl.RGBA;
+    const srcType = gl.UNSIGNED_BYTE;
     if (shared_video !== undefined &&
         shared_video.state_playing && shared_video.state_timeupdate) {
-      const level = 0;
-      const internalFormat = gl.RGBA;
-      const srcFormat = gl.RGBA;
-      const srcType = gl.UNSIGNED_BYTE;
       gl.bindTexture(gl.TEXTURE_2D, cv.texture);
       gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
                     srcFormat, srcType, shared_video);
+    } else if (shared_image !== undefined &&
+               shared_image.state_loaded) {
+      gl.bindTexture(gl.TEXTURE_2D, cv.texture);
+      gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+                    srcFormat, srcType, shared_image);
     }
   }
 
@@ -798,9 +806,15 @@ function render(cv, next) {
     } else {
       if (cv.program3d !== null && (haiku_tag_count <= 1 || cv.mouse_inside)) {
         draw3d(cv, cv3);
-      } else if (cv.program3d !== null && !cv.been_drawn_once && 
+      } else if (cv.program3d !== null && !cv.been_drawn_once_vid &&
                  shared_video &&
-                 shared_video.state_playing && shared_video.state_timeupdate) {
+                 shared_video.state_playing && shared_video.state_timeupdate &&
+		 shared_video.state_loaded) {
+        draw3d(cv, cv3);
+        cv.been_drawn_once_vid = true;
+      } else if (cv.program3d !== null && !cv.been_drawn_once &&
+                 shared_image &&
+                 shared_image.state_loaded) {
         draw3d(cv, cv3);
         cv.been_drawn_once = true;
       }
@@ -973,6 +987,7 @@ function update_haiku_lists() {
 
 var shared_canvas3d = [];
 var shared_video;
+var shared_image;
 
 function generate_haiku_canvas(haiku, code) {
   // Create 2d canvas.
@@ -992,11 +1007,20 @@ function generate_haiku_canvas(haiku, code) {
   canvas2d.mouse_x = 0;
   canvas2d.mouse_y = 0;
   canvas2d.mouse_inside = false;
+  // Create shared image tag.
+  if (shared_image === undefined) {
+    shared_image = document.createElement('img');
+    shared_image.style.display = 'none';
+    shared_image.setAttribute('src', '/static/svfig.png');
+    shared_image.addEventListener('load', function() {
+       shared_image.state_loaded = true;
+    }, true);
+    haiku.appendChild(shared_image);
+  }
   // Create shared video tag.
   if (shared_video === undefined) {
     shared_video = document.createElement('video');
     shared_video.style.display = 'none';
-    shared_video.setAttribute('src', '/static/pyra1.mp4');
     shared_video.setAttribute('autoplay', 'autoplay');
     shared_video.setAttribute('loop', 'loop');
     shared_video.addEventListener('playing', function() {
