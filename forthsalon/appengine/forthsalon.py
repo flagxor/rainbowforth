@@ -222,10 +222,12 @@ class HaikuBarePage(webapp2.RequestHandler):
     haiku_size = self.request.get('size', 256)
     haiku_width = self.request.get('width', haiku_size)
     haiku_height = self.request.get('height', haiku_size)
+    audio_button = int(self.request.get('audio', 0))
     self.response.out.write(template.render({
         'haiku': haiku,
         'haiku_width': haiku_width,
         'haiku_height': haiku_height,
+        'audio_button': audio_button,
     }))
 
 

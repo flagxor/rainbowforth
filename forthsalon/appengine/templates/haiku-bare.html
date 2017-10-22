@@ -36,6 +36,10 @@ canvas {
 
 <body onload="init();" bgcolor="transparent">
 <div class="haiku">
+{% if audio_button %}
+<button type="button" id="audio_play"
+        onclick="audio_toggle_play()">&#9654;</button>
+{% endif %}
 <span name="haiku" width="{{ haiku_width }}" height="{{ haiku_height }}">
 <textarea style="display: none">{{ haiku.code|escape }}</textarea>
 <a name="animated" style="display: none"></a>
