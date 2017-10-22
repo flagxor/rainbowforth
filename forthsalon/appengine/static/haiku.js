@@ -661,7 +661,7 @@ function draw3d(cv, cv3) {
         setTimeout(function() {
           shared_video.state_loaded = true;
         }, 500);
-      }, function(err) {
+      }).catch(function(err) {
         console.log('got media error: ' + err);
       });
     }
