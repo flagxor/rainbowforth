@@ -656,7 +656,7 @@ function draw3d(cv, cv3) {
   if (cv.tags['camera']) {
     if (shared_video !== undefined && !shared_video.state_requested) {
       shared_video.state_requested = true;
-      navigator.getUserMedia({video: true}, function(stream) {
+      navigator.mediaDevices.getUserMedia({video: true}).then(function(stream) {
         shared_video.src = window.URL.createObjectURL(stream);
         setTimeout(function() {
           shared_video.state_loaded = true;
