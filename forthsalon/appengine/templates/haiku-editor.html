@@ -13,16 +13,18 @@
 
 <div class="section">
 <form method="post" action="/haiku-submit">
-<div>
+<div style="display: flex">
+<div class="haiku">
 <span id="editimage" name="haiku">
 <textarea style="display: none" id="dst_code"></textarea>
 </span>
-</div>
 <div>
 <button type="button" id="audio_play"
         onclick="audio_toggle_play()">&#9654;</button>
 <a href="/haiku-sound">*</a>
 <button type="button" onclick="update()" style="float:right">&#8648;</button>
+</div>
+</div>
 </div>
 <textarea class="editarea"
     onkeydown="update_tags()"

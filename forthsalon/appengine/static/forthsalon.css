@@ -94,7 +94,7 @@ div.haiku_text {
 
 div.haiku {
   display: inline-table;
-  margin: 5px;
+  margin: 5px auto;
 }
 
 .haiku a {

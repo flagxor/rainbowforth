@@ -529,7 +529,7 @@ function getParam(name) {
   return undefined;
 }
 
-function setup3d(cv, cv3, code) {
+function rescale(cv, cv3) {
   // Decide aspect ratio.
   var winsize = Math.min(
     Math.floor(window.innerWidth * 3 / 4),
@@ -540,6 +540,12 @@ function setup3d(cv, cv3, code) {
   if (w === undefined) { w = size; } else { w = parseFloat(w); }
   var h = getParam('height');
   if (h === undefined) { h = size; } else { h = parseFloat(h); }
+  if (cv.lock_width) {
+    w = cv.lock_width;
+  }
+  if (cv.lock_height) {
+    h = cv.lock_height;
+  }
   cv.width = w;
   cv.height = h;
   cv.parentElement.width = w;
@@ -553,6 +559,10 @@ function setup3d(cv, cv3, code) {
   }
   cv3.w = w;
   cv3.h = h;
+}
+
+function setup3d(cv, cv3, code) {
+  rescale(cv, cv3);
 
   // Decide if how we use the gpu.
   var gpu = getParam('gpu');
@@ -653,13 +663,16 @@ function GetTime() {
 }
 
 function draw3d(cv, cv3) {
+  rescale(cv, cv3);
+
   var gl = cv3.getContext('webgl2') ||
            cv3.getContext('webgl') ||
            cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
 
-
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+  gl.canvas.width = cv.width;
+  gl.canvas.height = cv.height;
+  gl.viewport(0, 0, cv.width, cv.height);
 
   gl.useProgram(cv.program3d);
 
@@ -1006,6 +1019,8 @@ function generate_haiku_canvas(haiku, code) {
   canvas2d.style.display = 'block';
   // have 2d canvas initially visible for layout.
   haiku.appendChild(canvas2d);
+  canvas2d.lock_width = haiku.getAttribute('width');
+  canvas2d.lock_height = haiku.getAttribute('height');
   canvas2d.time = 0;
   canvas2d.last_time = 0;
   canvas2d.program3d = null;
