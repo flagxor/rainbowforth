@@ -1021,8 +1021,8 @@ function generate_haiku_canvas(haiku, code) {
   if (shared_video === undefined) {
     shared_video = document.createElement('video');
     //shared_video.style.display = 'none';
-    shared_video.width = 16;
-    shared_video.height = 16;
+    shared_video.width = 1;
+    shared_video.height = 1;
     shared_video.setAttribute('muted', 'muted');
     shared_video.setAttribute('autoplay', 'autoplay');
     shared_video.setAttribute('loop', 'loop');
