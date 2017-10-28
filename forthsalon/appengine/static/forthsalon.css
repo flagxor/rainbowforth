@@ -22,7 +22,7 @@ body {
   font-family: Verdana, Arial, Helvetica, sans-serif;
   font-size: 12px;
   background-color: #000000;
-  color: #cccccc;
+  color: #111;
   padding: 0;
   margin: 0;
 }
@@ -36,15 +36,15 @@ body {
 }
 
 #header {
-  background-color: #333333;
-  color: #cccccc;
+  background-color: #a79;
+  color: #fff;
   text-align: left;
   padding: 0.5em;
 }
 
 #footer {
-  background-color: #333333;
-  color: #cccccc;
+  background-color: #a79;
+  color: #fff;
   margin-top: 0px;
   padding: 0px;
   text-align: left;
@@ -71,7 +71,8 @@ div.links a {
 
 div.section {
   background-color: #777777;
-  background-image: url('/static/back.png');
+  background-image: url('/static/sakura_digital.jpg');
+  background-size: cover;
   border-style: solid;
   border-width: 0;
   border-color: #000000;
@@ -139,4 +140,9 @@ iframe {
                "Lucidatypewriter",
                monospace;
   font-size: 12px;
+}
+
+a.feature {
+  color: #777;
+  text-shadow: 0px 0px 5px #cff;
 }

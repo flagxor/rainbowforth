@@ -1163,9 +1163,8 @@ function generate_haiku_canvas(haiku, code) {
   if (audio === null) {
     audio = document.createElement('a');
     audio.name = 'audio';
+    audio.className = 'feature';
     audio.style.display = 'none';
-    audio.style.color = 'white';
-    audio.style.textShadow = '0px 0px 5px #cff';
     var p = parent_div(haiku);
     p.insertBefore(audio, p.firstChild);
     canvas2d.audio = audio;
@@ -1177,9 +1176,8 @@ function generate_haiku_canvas(haiku, code) {
   if (camera === null) {
     camera = document.createElement('a');
     camera.name = 'camera';
+    camera.className = 'feature';
     camera.style.display = 'none';
-    camera.style.color = 'white';
-    camera.style.textShadow = '0px 0px 5px #cff';
     var p = parent_div(haiku);
     p.insertBefore(camera, p.firstChild);
     canvas2d.camera = camera;
@@ -1191,9 +1189,8 @@ function generate_haiku_canvas(haiku, code) {
   if (category === null) {
     category = document.createElement('a');
     category.name = 'category';
+    category.className = 'feature';
     category.style.display = 'none';
-    category.style.color = 'white';
-    category.style.textShadow = '0px 0px 5px #cff';
     var p = parent_div(haiku);
     p.insertBefore(category, p.firstChild);
     canvas2d.category = category;
