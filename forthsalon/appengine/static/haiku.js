@@ -857,8 +857,8 @@ function render(cv, next) {
   if (cv.camera !== null) {
     if (tags['camera'] !== undefined) {
       cv.camera.style.display = 'inline';
-      cv.camera.innerHTML = ' &#128247; ';
-      cv.camera.href = '/haiku-sound';
+      cv.camera.innerHTML = ' &#128250; ';
+      cv.camera.href = '/haiku-camera';
     } else {
       cv.camera.style.display = 'none';
     }
@@ -1020,7 +1020,9 @@ function generate_haiku_canvas(haiku, code) {
   // Create shared video tag.
   if (shared_video === undefined) {
     shared_video = document.createElement('video');
-    shared_video.style.display = 'none';
+    //shared_video.style.display = 'none';
+    shared_video.width = 16;
+    shared_video.height = 16;
     shared_video.setAttribute('muted', 'muted');
     shared_video.setAttribute('autoplay', 'autoplay');
     shared_video.setAttribute('loop', 'loop');
