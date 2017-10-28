@@ -848,7 +848,7 @@ function render(cv, next) {
       cv.category.href = '/haiku-interactive';
     } else if (tags['animated'] !== undefined) {
       cv.category.style.display = 'inline';
-      cv.category.innerHTML = ' &#127902; ';
+      cv.category.innerHTML = ' &#128250; ';
       cv.category.href = '/haiku-animated';
     } else {
       cv.category.style.display = 'none';
@@ -857,7 +857,7 @@ function render(cv, next) {
   if (cv.camera !== null) {
     if (tags['camera'] !== undefined) {
       cv.camera.style.display = 'inline';
-      cv.camera.innerHTML = ' &#128250; ';
+      cv.camera.innerHTML = ' &#128247 ';
       cv.camera.href = '/haiku-camera';
     } else {
       cv.camera.style.display = 'none';
