@@ -530,6 +530,30 @@ function getParam(name) {
 }
 
 function setup3d(cv, cv3, code) {
+  // Decide aspect ratio.
+  var winsize = Math.min(
+    Math.floor(window.innerWidth * 3 / 4),
+    Math.floor(window.innerHeight * 3 / 4));
+  var size = getParam('size');
+  if (size === undefined) { size = winsize; } else { size = parseFloat(size); }
+  var w = getParam('width');
+  if (w === undefined) { w = size; } else { w = parseFloat(w); }
+  var h = getParam('height');
+  if (h === undefined) { h = size; } else { h = parseFloat(h); }
+  cv.width = w;
+  cv.height = h;
+  cv.parentElement.width = w;
+  cv.parentElement.height = h;
+  if (w > h ) {
+    w = w / h;
+    h = 1.0;
+  } else {
+    h = h / w;
+    w = 1.0;
+  }
+  cv3.w = w;
+  cv3.h = h;
+
   // Decide if how we use the gpu.
   var gpu = getParam('gpu');
   if (gpu === '0') {
@@ -545,23 +569,6 @@ function setup3d(cv, cv3, code) {
     throw 'use non-webgl for small and multiple';
   }
 */
-
-  // Decide aspect ratio.
-  var size = getParam('size');
-  if (size === undefined) { size = 256; } else { size = parseFloat(size); }
-  var w = getParam('width');
-  if (w === undefined) { w = size; } else { w = parseFloat(w); }
-  var h = getParam('height');
-  if (h === undefined) { h = size; } else { h = parseFloat(h); }
-  if (w > h ) {
-    w = w / h;
-    h = 1.0;
-  } else {
-    h = h / w;
-    w = 1.0;
-  }
-  cv3.w = w;
-  cv3.h = h;
 
   var gl = cv3.getContext('webgl2') ||
            cv3.getContext('webgl') ||
@@ -650,6 +657,9 @@ function draw3d(cv, cv3) {
            cv3.getContext('webgl') ||
            cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
+
+
+  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
   gl.useProgram(cv.program3d);
 
@@ -996,8 +1006,6 @@ function generate_haiku_canvas(haiku, code) {
   canvas2d.style.display = 'block';
   // have 2d canvas initially visible for layout.
   haiku.appendChild(canvas2d);
-  canvas2d.setAttribute('width', haiku.getAttribute('width'));
-  canvas2d.setAttribute('height', haiku.getAttribute('height'));
   canvas2d.time = 0;
   canvas2d.last_time = 0;
   canvas2d.program3d = null;

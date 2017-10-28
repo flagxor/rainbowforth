@@ -13,11 +13,12 @@
 
 <div class="section">
 <form method="post" action="/haiku-submit">
-<span id="editimage" name="haiku"
-    width="{{ haiku_width }}" height="{{ haiku_height }}">
+<div>
+<span id="editimage" name="haiku">
 <textarea style="display: none" id="dst_code"></textarea>
 </span>
-<div style="width: {{ haiku_width }}px">
+</div>
+<div>
 <button type="button" id="audio_play"
         onclick="audio_toggle_play()">&#9654;</button>
 <a href="/haiku-sound">*</a>
