@@ -15,11 +15,12 @@
 
 <div class="section">
 
+<div style="display: flex">
 <div class="haiku">
-<span name="haiku" width="{{ haiku_width }}" height="{{ haiku_height }}">
+<span name="haiku">
 <textarea style="display: none">{{ haiku.code|escape }}</textarea>
 </span>
-<div style="width: {{ haiku_width }}px">
+<div>
 <form action="/haiku-vote/{{ haiku.id|escape }}" method="post">
 <button type="button" id="audio_play"
         onclick="audio_toggle_play()">&#9654;</button>
@@ -28,9 +29,10 @@
 <input type="submit" name="good" value="&#128077;" style="float:right">
 </form>
 </div>
-<br>
+<br/>
 <div class="haiku_text">
 {{ haiku.code_formatted }}
+</div>
 </div>
 </div>
 {% if has_parent %}

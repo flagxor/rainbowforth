@@ -161,15 +161,10 @@ class HaikuViewPage(webapp2.RequestHandler):
     has_parent = parent is not None
 
     template = JINJA_ENVIRONMENT.get_template('haiku-view.html')
-    haiku_size = self.request.get('size', 256)
-    haiku_width = self.request.get('width', haiku_size)
-    haiku_height = self.request.get('height', haiku_size)
     self.response.out.write(template.render({
         'haiku': haiku,
         'parent': parent,
         'has_parent': has_parent,
-        'haiku_width': haiku_width,
-        'haiku_height': haiku_height,
     }))
 
 
@@ -219,14 +214,9 @@ class HaikuBarePage(webapp2.RequestHandler):
       haiku = key.get().ToDict()
       memcache.add('haiku_' + id, haiku)
     template = JINJA_ENVIRONMENT.get_template('haiku-bare.html')
-    haiku_size = self.request.get('size', 256)
-    haiku_width = self.request.get('width', haiku_size)
-    haiku_height = self.request.get('height', haiku_size)
     audio_button = int(self.request.get('audio', 0))
     self.response.out.write(template.render({
         'haiku': haiku,
-        'haiku_width': haiku_width,
-        'haiku_height': haiku_height,
         'audio_button': audio_button,
     }))
 
@@ -240,13 +230,8 @@ class HaikuPrintPage(webapp2.RequestHandler):
       haiku = key.get().ToDict()
       memcache.add('haiku_' + id, haiku)
     template = JINJA_ENVIRONMENT.get_template('haiku-print.html')
-    haiku_size = self.request.get('size', 600)
-    haiku_width = self.request.get('width', haiku_size)
-    haiku_height = self.request.get('height', haiku_size)
     self.response.out.write(template.render({
         'haiku': haiku,
-        'haiku_width': haiku_width,
-        'haiku_height': haiku_height,
     }))
 
 
@@ -434,14 +419,9 @@ class HaikuEditorPage(webapp2.RequestHandler):
       title = ''
       code = ''
     template = JINJA_ENVIRONMENT.get_template('haiku-editor.html')
-    haiku_size = self.request.get('size', 256)
-    haiku_width = self.request.get('width', haiku_size)
-    haiku_height = self.request.get('height', haiku_size)
     self.response.out.write(template.render({
         'code': code,
         'title': title,
-        'haiku_width': haiku_width,
-        'haiku_height': haiku_height,
         'parent': id,
     }))
 

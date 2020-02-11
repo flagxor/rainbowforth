@@ -529,7 +529,41 @@ function getParam(name) {
   return undefined;
 }
 
+function rescale(cv, cv3) {
+  // Decide aspect ratio.
+  var winsize = Math.min(
+    Math.floor(window.innerWidth * 3 / 4),
+    Math.floor(window.innerHeight * 3 / 4));
+  var size = getParam('size');
+  if (size === undefined) { size = winsize; } else { size = parseFloat(size); }
+  var w = getParam('width');
+  if (w === undefined) { w = size; } else { w = parseFloat(w); }
+  var h = getParam('height');
+  if (h === undefined) { h = size; } else { h = parseFloat(h); }
+  if (cv.lock_width) {
+    w = cv.lock_width;
+  }
+  if (cv.lock_height) {
+    h = cv.lock_height;
+  }
+  cv.width = w;
+  cv.height = h;
+  cv.parentElement.width = w;
+  cv.parentElement.height = h;
+  if (w > h ) {
+    w = w / h;
+    h = 1.0;
+  } else {
+    h = h / w;
+    w = 1.0;
+  }
+  cv3.w = w;
+  cv3.h = h;
+}
+
 function setup3d(cv, cv3, code) {
+  rescale(cv, cv3);
+
   // Decide if how we use the gpu.
   var gpu = getParam('gpu');
   if (gpu === '0') {
@@ -545,23 +579,6 @@ function setup3d(cv, cv3, code) {
     throw 'use non-webgl for small and multiple';
   }
 */
-
-  // Decide aspect ratio.
-  var size = getParam('size');
-  if (size === undefined) { size = 256; } else { size = parseFloat(size); }
-  var w = getParam('width');
-  if (w === undefined) { w = size; } else { w = parseFloat(w); }
-  var h = getParam('height');
-  if (h === undefined) { h = size; } else { h = parseFloat(h); }
-  if (w > h ) {
-    w = w / h;
-    h = 1.0;
-  } else {
-    h = h / w;
-    w = 1.0;
-  }
-  cv3.w = w;
-  cv3.h = h;
 
   var gl = cv3.getContext('webgl2') ||
            cv3.getContext('webgl') ||
@@ -646,10 +663,16 @@ function GetTime() {
 }
 
 function draw3d(cv, cv3) {
+  rescale(cv, cv3);
+
   var gl = cv3.getContext('webgl2') ||
            cv3.getContext('webgl') ||
            cv3.getContext('experimental-webgl');
   if (!gl) throw 'no gl context';
+
+  gl.canvas.width = cv.width;
+  gl.canvas.height = cv.height;
+  gl.viewport(0, 0, cv.width, cv.height);
 
   gl.useProgram(cv.program3d);
 
@@ -996,8 +1019,8 @@ function generate_haiku_canvas(haiku, code) {
   canvas2d.style.display = 'block';
   // have 2d canvas initially visible for layout.
   haiku.appendChild(canvas2d);
-  canvas2d.setAttribute('width', haiku.getAttribute('width'));
-  canvas2d.setAttribute('height', haiku.getAttribute('height'));
+  canvas2d.lock_width = haiku.getAttribute('width');
+  canvas2d.lock_height = haiku.getAttribute('height');
   canvas2d.time = 0;
   canvas2d.last_time = 0;
   canvas2d.program3d = null;
@@ -1021,8 +1044,8 @@ function generate_haiku_canvas(haiku, code) {
   if (shared_video === undefined) {
     shared_video = document.createElement('video');
     //shared_video.style.display = 'none';
-    shared_video.width = 16;
-    shared_video.height = 16;
+    shared_video.width = 1;
+    shared_video.height = 1;
     shared_video.setAttribute('muted', 'muted');
     shared_video.setAttribute('autoplay', 'autoplay');
     shared_video.setAttribute('loop', 'loop');
@@ -1140,9 +1163,8 @@ function generate_haiku_canvas(haiku, code) {
   if (audio === null) {
     audio = document.createElement('a');
     audio.name = 'audio';
+    audio.className = 'feature';
     audio.style.display = 'none';
-    audio.style.color = 'white';
-    audio.style.textShadow = '0px 0px 5px #cff';
     var p = parent_div(haiku);
     p.insertBefore(audio, p.firstChild);
     canvas2d.audio = audio;
@@ -1154,9 +1176,8 @@ function generate_haiku_canvas(haiku, code) {
   if (camera === null) {
     camera = document.createElement('a');
     camera.name = 'camera';
+    camera.className = 'feature';
     camera.style.display = 'none';
-    camera.style.color = 'white';
-    camera.style.textShadow = '0px 0px 5px #cff';
     var p = parent_div(haiku);
     p.insertBefore(camera, p.firstChild);
     canvas2d.camera = camera;
@@ -1168,9 +1189,8 @@ function generate_haiku_canvas(haiku, code) {
   if (category === null) {
     category = document.createElement('a');
     category.name = 'category';
+    category.className = 'feature';
     category.style.display = 'none';
-    category.style.color = 'white';
-    category.style.textShadow = '0px 0px 5px #cff';
     var p = parent_div(haiku);
     p.insertBefore(category, p.firstChild);
     canvas2d.category = category;
