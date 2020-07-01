@@ -1395,37 +1395,6 @@ var haiku_touch_port = null;
 var haiku_touch_buffer = '';
 window.stroke_buttons = 0;
 
-function connect_touch() {
-  try {
-    haiku_touch_port = chrome.runtime.connect(
-        'gjpkfjbomndhibbiiakfjpgjcaeggbic');
-    haiku_touch_port.onMessage.addListener(function(m) {
-      haiku_touch_buffer += m.data.replace(/[\r]/g, '');
-      var parts = haiku_touch_buffer.split('\n');
-      if (parts.length > 1) {
-        for (var i = 0; i < parts.length - 1; i++) {
-          if (parts[i].length === 0) continue;
-          if (parts[i].substr(0, 1) === '~') {
-            window.stroke_buttons |= 1 << (parseInt(parts[i].substr(1)));
-          } else if (parts[i].substr(0, 1) === '^') {
-            window.stroke_buttons &= ~(1 << (parseInt(parts[i].substr(1))));
-          } else {
-            console.log('stroke: ' + parts[i]);
-          }
-          if (window.onstroke !== 'undefined') {
-            try {
-              window.onstroke(parts[i]);
-            } catch(e) {
-            }
-          }
-        }
-        haiku_touch_buffer = parts[parts.length - 1];
-      }
-    });
-  } catch(e) {
-  }
-}
-
 window.stroke_print = function(s) {
   if (haiku_touch_port === null) {
     return;
@@ -1465,8 +1434,6 @@ function decodeKey(code) {
   return null;
 }
 
-window.addEventListener('load', connect_touch);
-
 window.addEventListener('keydown', function(e) {
   var k = decodeKey(e.keyCode);
   if (k !== null) {
@@ -1481,87 +1448,3 @@ window.addEventListener('keyup', function(e) {
   }
 });
 
-function GetText(url, callback) {
-  var request = new XMLHttpRequest();
-  request.onreadystatechange = function() {
-    if (request.readyState == 4) {
-      if (request.status == 200) {
-        callback(request.responseText);
-      } else {
-        callback(null);
-      }
-    }
-  }
-  request.open('GET', url);
-  request.send(null);
-}
-
-function UpdateBonus() {
-  last_bonus = (new Date()).getTime();
-  var bonus = always_bonus || getParam('bonus') !== undefined;
-  if (bonus !== undefined) {
-    GetText('http://pot/sample', function(data) {
-      if (data !== null) {
-        bonus_x = parseInt(data) / 962;
-        bonus_mode = true;
-      } else {
-        bonus_mode = false;
-      }
-      setTimeout(UpdateBonus, BONUS_TIMEOUT);
-    });
-  } else {
-    bonus_mode = false;
-    setTimeout(UpdateBonus, BONUS_TIMEOUT);
-  }
-}
-
-function UpdateBonus2() {
-  last_bonus2 = (new Date()).getTime();
-  var bonus = always_bonus || getParam('bonus') !== undefined;
-  if (bonus !== undefined) {
-    GetText('http://w2/sample', function(data) {
-      if (data !== null) {
-        bonus_stroke = parseInt(data);
-      } else {
-        bonus_stroke = 0;
-      }
-      setTimeout(UpdateBonus2, BONUS_TIMEOUT);
-    });
-  } else {
-    setTimeout(UpdateBonus2, BONUS_TIMEOUT);
-  }
-}
-
-function UpdateBonus3() {
-  last_bonus3 = (new Date()).getTime();
-  var bonus = always_bonus || getParam('bonus') !== undefined;
-  if (bonus !== undefined) {
-    GetText('http://w1/sample', function(data) {
-      if (data !== null) {
-        bonus_stroke2 = parseInt(data);
-      } else {
-        bonus_stroke2 = 0;
-      }
-      setTimeout(UpdateBonus3, BONUS_TIMEOUT);
-    });
-  } else {
-    setTimeout(UpdateBonus3, BONUS_TIMEOUT);
-  }
-}
-
-/*
-// Experiment with wifiboy controls.
-setInterval(function() {
-  // Restart if not alive for a while.
-  if ((new Date()).getTime() - last_bonus > 1000) {
-    UpdateBonus();
-  }
-  if ((new Date()).getTime() - last_bonus2 > 1000) {
-    UpdateBonus2();
-  }
-  if ((new Date()).getTime() - last_bonus3 > 1000) {
-    UpdateBonus3();
-  }
-}, 500);
-UpdateBonus();
-*/
