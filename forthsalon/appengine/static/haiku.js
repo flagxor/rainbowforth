@@ -1255,6 +1255,7 @@ function synth(n, t) {
 var audio_context;
 try {
   audio_context = new AudioContext();
+  audio_context.suspend();
 } catch (e) {
 }
 var audio_off = function(t, x, memory) { return [0, 0, 0, 1]; };
@@ -1343,14 +1344,17 @@ function audio_haiku(cv) {
   try {
     if (!audio_play) {
       audio_function = audio_off;
+      audio_context.suspend();
       return;
     }
     if (audio_last_code === code) {
       audio_function = audio_last_compile;
+      audio_context.resume();
       return;
     }
     audio_last_code = code;
     audio_function = audio_off;
+    audio_context.resume();
     var compiled_code = compile(code);
     var tags = code_tags_dict(code);
     if (tags['audio'] === undefined) {
@@ -1377,6 +1381,7 @@ function audio_haiku(cv) {
     audio_canvas = cv;
   } catch (e) {
     audio_function = audio_off;
+    audio_context.suspend();
   }
 }
 
