@@ -1,0 +1,48 @@
+<html>
+<head>
+<title>Video Haiku</title>
+{% include 'header.html' %}
+
+<body bgcolor="#000000">
+<div id="wrapper">
+
+<div id="header">
+  {% include 'search.html' %}
+  <h1>Video Haiku</h1>
+</div>
+
+<div class="section">
+
+<p>
+Some haiku are now textured using a video feed
+<a href="/word-view/73616D706C65">sample</a> and
+<a href="/word-view/627773616D706C65">bwsample</a> words
+to get image samples from a camera in rgb and greyscale.
+</p>
+<p>
+If video hardware is unavailable, the SVFIG logo is used
+in place of the video feed.
+</p>
+<p>
+These haiku can only be seen in animated form using
+<a href="http://en.wikipedia.org/wiki/WebGL>WebGL</a>.
+WebGL is available in the very latest versions of
+<a href="http://www.google.com/chrome">Google Chrome</a>,
+<a href="http://www.firefox.com/">Firefox</a>,
+<a href="https://www.microsoft.com/en-us/windows/microsoft-edge">Edge</a>,
+and <a href="http://www.apple.com/safari">Safari</a>.
+</p>
+<p>
+The haiku is converted on the fly to a GLSL fragment shader.
+</p>
+</div>
+
+<div id="footer">
+<a href="/">Home</a>
+<a href="/haiku-editor">Haiku Editor</a>
+</div>
+
+</div>
+
+</body>
+</html>
