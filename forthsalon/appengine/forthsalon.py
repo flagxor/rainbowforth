@@ -267,9 +267,9 @@ class HaikuAnimatedPage(webapp2.RequestHandler):
     }))
 
 
-class HaikuVideoPage(webapp2.RequestHandler):
+class HaikuCameraPage(webapp2.RequestHandler):
   def get(self):
-    template = JINJA_ENVIRONMENT.get_template('haiku-video.html')
+    template = JINJA_ENVIRONMENT.get_template('haiku-camera.html')
     self.response.out.write(template.render({
     }))
 
@@ -531,7 +531,7 @@ app = webapp2.WSGIApplication([
     ('/haiku-upload', HaikuUploadPage),
     ('/haiku-about', HaikuAboutPage),
     ('/haiku-animated', HaikuAnimatedPage),
-    ('/haiku-video', HaikuVideoPage),
+    ('/haiku-camera', HaikuCameraPage),
     ('/haiku-interactive', HaikuInteractivePage),
     ('/haiku-search', HaikuSearchPage),
     ('/haiku-sound', HaikuSoundPage),
