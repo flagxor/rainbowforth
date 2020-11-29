@@ -12,6 +12,11 @@ handlers:
   static_dir: static
   secure: always
 
+- url: /robots.txt
+  static_files: static/robots.txt
+  upload: static/robots.txt
+  secure: always
+
 - url: /favicon(.*)
   static_files: static/favicon\1
   upload: static/favicon.*
