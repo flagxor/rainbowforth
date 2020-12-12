@@ -371,7 +371,7 @@ class HaikuSearchPage(webapp2.RequestHandler):
     results_keys = [ndb.Key(*ndb.Key(urlsafe=i.doc_id).flat())
                     for i in results.results]
     haikus = ndb.get_multi(results_keys)
-    haikus_list = [h.ToDict() for h in haikus]
+    haikus_list = [h.ToDict() for h in haikus if h is not None]
 
     next_cursor = None
     if results.cursor:
