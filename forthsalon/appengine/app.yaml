@@ -1,4 +1,4 @@
-runtime: python27
+runtime: python38
 api_version: 1
 threadsafe: true
 
@@ -23,17 +23,10 @@ handlers:
   secure: always
 
 - url: /admin/.*
-  script: forthsalon.app
+  script: main.app
   login: admin
   secure: always
 
 - url: /.*
-  script: forthsalon.app
+  script: main.app
   secure: always
-
-
-libraries:
-- name: webapp2
-  version: latest
-- name: jinja2
-  version: latest

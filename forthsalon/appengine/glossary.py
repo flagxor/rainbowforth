@@ -916,7 +916,7 @@ entry_map = {}
 for entry in core_words:
   ids = []
   for name in entry['names']:
-    id = base64.b16encode(name)
+    id = str(base64.b16encode(bytes(name, 'ascii')), 'ascii')
     word_ids[name] = id
     entry_map[id] = entry
     ids.append(id)

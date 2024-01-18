@@ -1,7 +1,7 @@
 import re
 import os
 import sys
-import StringIO
+import io
 import jinja2
 import webapp2
 
@@ -217,7 +217,7 @@ class Restore(webapp2.RequestHandler):
       return
 
     data = self.request.get('datafile')
-    fh = StringIO.StringIO(data)
+    fh = io.StringIO(data)
 
     self.response.headers['Content-Type'] = 'text/plain'
 

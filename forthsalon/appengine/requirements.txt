@@ -1,0 +1,3 @@
+jinja2
+flask
+google-cloud-datastore
