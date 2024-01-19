@@ -20,11 +20,6 @@ handlers:
   upload: static/favicon.*
   secure: always
 
-- url: /admin/.*
-  script: main.app
-  login: admin
-  secure: always
-
 - url: /.*
   script: main.app
   secure: always
