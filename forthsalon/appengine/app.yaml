@@ -1,6 +1,4 @@
 runtime: python38
-api_version: 1
-threadsafe: true
 
 default_expiration: "1m"
 
