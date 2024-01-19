@@ -127,7 +127,7 @@ def ToBaseDict(haiku):
   return {
       'id': GetId(haiku),
       'title': haiku.get('title', 'Untitled'),
-      'author': haiku.get('author', 'Unknown'),
+      'author': haiku.get('author', 'Anonymous'),
       'code': haiku.get('code', ''),
       'score': haiku.get('score', 0),
       'rank': haiku.get('rank', 0),
@@ -306,9 +306,9 @@ def HaikuSoundPage():
 
 @app.route("/haiku-vote/<path:id>", methods=["POST"])
 def HaikuVotePage(id):
-  if request.args.get('good'):
+  if request.form.get('good'):
     vote = 1
-  elif request.args.get('bad'):
+  elif request.form.get('bad'):
     vote = -1
   else:
     vote = 0
@@ -324,17 +324,17 @@ def HaikuVotePage(id):
 
 @app.route("/haiku-adjust", methods=["POST"])
 def HaikuAdjustPage():
-  passwd = request.args.get('passwd')
+  passwd = request.form.get('passwd')
   if not CheckPassword(passwd):
     return
-  id = request.args.get('id')
+  id = request.form.get('id')
   key = datastore.Key.from_legacy_urlsafe(id)
   haiku = client.get(key)
-  rank = request.args.get('rank', default_value=None)
+  rank = request.form.get('rank', default_value=None)
   if rank is not None:
     haiku['rank'] = float(rank)
     haiku['last_modified'] = Now()
-  parent = request.args.get('parent', default_value=None)
+  parent = request.form.get('parent', default_value=None)
   if parent is not None:
     haiku['parent'] = parent
     haiku['last_modified'] = Now()
@@ -343,10 +343,10 @@ def HaikuAdjustPage():
 
 @app.route("/haiku-upload", methods=["POST"])
 def HaikuUploadPage():
-  passwd = request.args.get('passwd')
+  passwd = request.form.get('passwd')
   if not CheckPassword(passwd):
     return
-  id = request.args.get('id')
+  id = request.form.get('id')
   key = datastore.Key.from_legacy_urlsafe(id)
   haiku = client.get(key)
   if haiku is None:
@@ -441,14 +441,14 @@ def HaikuEditorPage():
 
 @app.route("/haiku-submit", methods=["POST"])
 def HaikuSubmitPage():
-  title = request.args.get('title')
+  title = request.form.get('title')
   if not title:
     title = 'Untitled'
-  author = request.args.get('author')
+  author = request.form.get('author')
   if not author:
     author = 'Anonymous'
-  parent = request.args.get('parent', '')
-  code = request.args.get('code', '')
+  parent = request.form.get('parent', '')
+  code = request.form.get('code', '')
   if ('href=' in code or
       'http://' in code or
       'https://' in code or
@@ -463,7 +463,7 @@ def HaikuSubmitPage():
         'Rejected [%s] by [%s] as spam. Code: %s' % (title, author, code))
     return redirect('/')
 
-  p = datastore.Entity(client.key('Haiku'))
+  haiku = datastore.Entity(client.key('Haiku'))
   haiku['title'] = title
   haiku['author'] = author
   haiku['code'] = code
