@@ -1,14 +1,6 @@
-runtime: python27
-api_version: 1
-threadsafe: true
+runtime: python38
 
 default_expiration: "1h"
-
-libraries:
-- name: webapp2
-  version: latest
-- name: jinja2
-  version: latest
 
 handlers:
 - url: /
@@ -26,4 +18,4 @@ handlers:
 - url: /images
   static_dir: images
 - url: /.*
-  script: iconforth.app
+  script: main.app

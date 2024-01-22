@@ -1,0 +1,4 @@
+jinja2
+flask
+Pillow
+google-cloud-datastore
