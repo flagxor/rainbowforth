@@ -1,4 +1,7 @@
-runtime: python38
+runtime: python313
+
+automatic_scaling:
+  max_instances: 2
 
 default_expiration: "1m"
 

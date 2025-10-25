@@ -58,12 +58,12 @@ app = Flask(__name__)
 
 def ToDatetime(s):
   # From a Date in JS do: new String(dt.getTime()).
-  return datetime.datetime.utcfromtimestamp(float(s) / 1000.0)
+  return datetime.datetime.fromtimestamp(float(s) / 1000.0, datetime.timezone.utc)
 
 
 def FromDatetime(dt):
   # To get a JS data do: new Date(s).
-  epoch = datetime.datetime.utcfromtimestamp(0)
+  epoch = datetime.datetime.fromtimestamp(0, datetime.timezone.utc)
   return str((dt - epoch).total_seconds() * 1000.0)
 
 
@@ -115,8 +115,7 @@ def CheckPassword(secret):
 
 
 def Now():
-  #return datetime.datetime.now(tz=datetime.timezone.utc)
-  return datetime.datetime.utcnow()
+  return datetime.datetime.now(tz=datetime.timezone.utc)
 
 
 def GetId(haiku):
@@ -143,6 +142,7 @@ def ToDict(haiku):
       'code_formatted': glossary.FormatHtml(haiku.get('code', '')),
       'code_formatted_print': glossary.FormatHtmlPrint(haiku.get('code', '')),
   })
+  print('AAAA', haiku.get('when'))
   return haiku
 
 
@@ -257,18 +257,18 @@ def HaikuPrintPage(id):
 @app.route("/haiku-dump", methods=["GET"])
 def HaikuDumpPage():
   cursorv = request.args.get('cursor', None)
-  cursor = Cursor(urlsafe=cursorv)
-  q = Haiku.query()
-  haikus, next_cursor, more = q.fetch_page(40, start_cursor=cursor)
-  if next_cursor:
-    next_cursor = next_cursor.urlsafe()
+  q = client.query(kind='Haiku')
+  qiter = q.fetch(start_cursor=cursorv, limit=40)
+  haikus = list(next(qiter.pages))
+  next_cursor = qiter.next_page_token
+  if next_cursor is not None:
+    next_cursor = str(next_cursor, 'ascii')
   haikus = [ToJSDict(h) for h in haikus]
   return (
       json.dumps({
         'items': haikus,
         'cursor': next_cursor,
-        'more': more,
-        }, sort_keys=True, indent=2, separators=(',', ':')),
+      }, sort_keys=True, indent=2, separators=(',', ':')),
       200, {'Content-type': 'text/plain'})
 
 
@@ -494,9 +494,12 @@ def MainPage():
     memcache.add('main_items', main_items, CACHE_TIMEOUT)
   else:
     top_haikus, recent_haikus = main_items
-
   template = JINJA_ENVIRONMENT.get_template('main.html')
   return template.render({
       'top_haikus': top_haikus,
       'recent_haikus': recent_haikus,
   })
+
+
+if __name__ == '__main__':
+  app.run(host='127.0.0.1', port=9999, debug=True)

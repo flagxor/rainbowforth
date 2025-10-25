@@ -1,8 +1,12 @@
+all:
+	./run.sh
+
 deploy:
-	gcloud app deploy --project forthsalon-hrd
+	gcloud app deploy -q --project forthsalon-hrd *.yaml
 
-deps:
-	pip install -t lib -r requirements.txt
+setup:
+	python3 -m venv env
+	env/bin/pip install -r requirements.txt
 
-server:
-	GOOGLE_CLOUD_PROJECT=forthsalon-hrd python3 /usr/lib/google-cloud-sdk/bin/dev_appserver.py --log_level debug .
+datastore:
+	echo "Run: . dstore.sh"
