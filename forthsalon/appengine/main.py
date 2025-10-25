@@ -136,23 +136,22 @@ def ToBaseDict(haiku):
 
 
 def ToDict(haiku):
-  haiku = ToBaseDict(haiku)
-  haiku.update({
+  h = ToBaseDict(haiku)
+  h.update({
       'when': haiku.get('when', Now()),
       'code_formatted': glossary.FormatHtml(haiku.get('code', '')),
       'code_formatted_print': glossary.FormatHtmlPrint(haiku.get('code', '')),
   })
-  print('AAAA', haiku.get('when'))
-  return haiku
+  return h
 
 
 def ToJSDict(haiku):
-  haiku = ToBaseDict(haiku)
-  haiku.update({
+  h = ToBaseDict(haiku)
+  h.update({
       'when': FromDatetime(haiku.get('when', Now())),
       'last_modified': FromDatetime(haiku.get('last_modified', Now())),
   })
-  return haiku
+  return h
 
 
 def FromRequest(src):
