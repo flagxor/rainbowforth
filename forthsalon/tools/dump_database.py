@@ -1,20 +1,18 @@
-#!/usr/bin/python
+#! /usr/bin/env python3
 
 import json
-import urllib
+import requests
 
 
 items = []
 cursor = ''
 
 while True:
-  data = json.loads(urllib.urlopen(
-      'https://forthsalon.appspot.com/haiku-dump?cursor=' + cursor).read())
+  data = requests.get('https://forthsalon.appspot.com/haiku-dump?cursor=' + cursor).json()
   items.extend(data['items'])
-  if not data['more']:
-    break
   cursor = data['cursor']
-
+  if cursor is None:
+    break
 
 with open('dump.json', 'w') as fh:
-  fh.write(json.dumps(items, encoding='utf8', sort_keys=True, indent=2, separators=(',', ': ')))
+  fh.write(json.dumps(items, sort_keys=True, indent=2, separators=(',', ': ')))
